@@ -9,7 +9,15 @@ export default function NexraVisionStatus() {
 
   const checkVisionStatus = async () => {
     try {
-      const response = await fetch('/api/vision/link');
+      // Call Nexra Vision directly on localhost (client-side)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+      const response = await fetch('http://127.0.0.1:45678/status', {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
       const data = await response.json();
       setIsRunning(data.running === true);
     } catch {
