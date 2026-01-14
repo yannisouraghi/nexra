@@ -125,7 +125,7 @@ export default function NexraVisionStatus({ puuid }: NexraVisionStatusProps) {
       </div>
       <button
         onClick={() => {
-          window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.3/Nexra-Vision-Setup-1-0-3.exe', '_blank');
+          window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.4/Nexra-Vision-Setup-1-0-4.exe', '_blank');
         }}
         style={{
           width: '100%',

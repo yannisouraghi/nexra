@@ -359,7 +359,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         <div style={styles.visionActions}>
           {!visionStatus.running && !visionStatus.checking && (
             <button
-              onClick={() => window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.3/Nexra-Vision-Setup-1-0-3.exe', '_blank')}
+              onClick={() => window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.4/Nexra-Vision-Setup-1-0-4.exe', '_blank')}
               style={styles.downloadButton}
             >
               <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
