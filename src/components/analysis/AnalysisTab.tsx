@@ -38,17 +38,28 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     error: null,
   });
 
-  // Check Nexra Vision status
+  // Check Nexra Vision status via heartbeat API
   const checkVisionStatus = useCallback(async () => {
+    if (!puuid) {
+      setVisionStatus(prev => ({ ...prev, running: false, linked: false, checking: false }));
+      return;
+    }
+
     setVisionStatus(prev => ({ ...prev, checking: true, error: null }));
     try {
-      const response = await fetch('/api/vision/link');
+      const response = await fetch(
+        `https://nexra-api.nexra-api.workers.dev/vision/status/${encodeURIComponent(puuid)}`,
+        { cache: 'no-store' }
+      );
       const data = await response.json();
+
+      // If heartbeat is recent, Vision is running and linked
+      const isOnline = data.online === true;
       setVisionStatus(prev => ({
         ...prev,
-        running: data.running ?? false,
-        linked: data.linked ?? false,
-        account: data.account ?? null,
+        running: isOnline,
+        linked: isOnline,
+        account: isOnline && gameName && tagLine ? `${gameName}#${tagLine}` : null,
         checking: false,
       }));
     } catch {
@@ -58,44 +69,8 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         checking: false,
       }));
     }
-  }, []);
+  }, [puuid, gameName, tagLine]);
 
-  // Link account to Nexra Vision
-  const linkToVision = useCallback(async () => {
-    if (!gameName || !tagLine || !puuid) return;
-
-    setVisionStatus(prev => ({ ...prev, linking: true, error: null }));
-    try {
-      const response = await fetch('/api/vision/link', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ puuid, gameName, tagLine, region, profileIconId }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setVisionStatus(prev => ({
-          ...prev,
-          linked: true,
-          account: `${gameName}#${tagLine}`,
-          linking: false,
-        }));
-      } else {
-        setVisionStatus(prev => ({
-          ...prev,
-          linking: false,
-          error: data.error || 'Failed to link account',
-        }));
-      }
-    } catch {
-      setVisionStatus(prev => ({
-        ...prev,
-        linking: false,
-        error: 'Could not connect to Nexra Vision',
-      }));
-    }
-  }, [puuid, gameName, tagLine, region, profileIconId]);
 
   // Check Vision status on mount with fast polling
   useEffect(() => {
@@ -382,48 +357,16 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
 
         {/* Actions */}
         <div style={styles.visionActions}>
-          {visionStatus.running && !visionStatus.linked && gameName && tagLine && (
-            <button
-              onClick={linkToVision}
-              disabled={visionStatus.linking}
-              style={{
-                ...styles.linkButton,
-                opacity: visionStatus.linking ? 0.6 : 1,
-              }}
-            >
-              {visionStatus.linking ? (
-                <>
-                  <span style={styles.miniSpinner} />
-                  Linking...
-                </>
-              ) : (
-                <>
-                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                  Link Account
-                </>
-              )}
-            </button>
-          )}
-
           {!visionStatus.running && !visionStatus.checking && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-              <div style={{
-                width: 6,
-                height: 6,
-                borderRadius: '50%',
-                backgroundColor: '#00d4ff',
-                animation: 'pulse 2s ease-in-out infinite',
-              }} />
-              <p style={styles.visionHelp}>
-                Auto-detecting... Launch Nexra Vision to connect.
-              </p>
-            </div>
-          )}
-
-          {visionStatus.error && (
-            <p style={styles.visionError}>{visionStatus.error}</p>
+            <button
+              onClick={() => window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.3/Nexra-Vision-Setup-1-0-3.exe', '_blank')}
+              style={styles.downloadButton}
+            >
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Nexra Vision
+            </button>
           )}
 
           <button onClick={checkVisionStatus} style={styles.refreshButton}>
@@ -627,38 +570,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     gap: 12,
   },
-  linkButton: {
+  downloadButton: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
     padding: '10px 18px',
     borderRadius: 8,
-    background: 'linear-gradient(135deg, #a855f7 0%, #6366f1 100%)',
+    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
     border: 'none',
     color: 'white',
     fontSize: 14,
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.2s',
-  },
-  miniSpinner: {
-    width: 14,
-    height: 14,
-    border: '2px solid rgba(255,255,255,0.3)',
-    borderTopColor: 'white',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  visionHelp: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.4)',
-    margin: 0,
-    flex: 1,
-  },
-  visionError: {
-    fontSize: 13,
-    color: '#ef4444',
-    margin: 0,
   },
   refreshButton: {
     width: 32,
