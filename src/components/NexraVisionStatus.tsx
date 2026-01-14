@@ -3,23 +3,35 @@
 import { useState, useEffect } from 'react';
 import { Download, CheckCircle, Monitor } from 'lucide-react';
 
-export default function NexraVisionStatus() {
+interface NexraVisionStatusProps {
+  puuid?: string;
+}
+
+export default function NexraVisionStatus({ puuid }: NexraVisionStatusProps) {
   const [isRunning, setIsRunning] = useState<boolean | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
   const checkVisionStatus = async () => {
+    // If no puuid, we can't check heartbeat - show download option
+    if (!puuid) {
+      setIsRunning(false);
+      setIsChecking(false);
+      return;
+    }
+
     try {
-      // Call Nexra Vision directly on localhost (client-side)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      // Check heartbeat via backend API (no localhost popup!)
+      const response = await fetch(
+        `https://nexra-api.nexra-api.workers.dev/vision/status/${encodeURIComponent(puuid)}`,
+        { cache: 'no-store' }
+      );
 
-      const response = await fetch('http://127.0.0.1:45678/status', {
-        signal: controller.signal,
-      });
-      clearTimeout(timeoutId);
-
-      const data = await response.json();
-      setIsRunning(data.running === true);
+      if (response.ok) {
+        const data = await response.json();
+        setIsRunning(data.online === true);
+      } else {
+        setIsRunning(false);
+      }
     } catch {
       setIsRunning(false);
     } finally {
@@ -33,7 +45,7 @@ export default function NexraVisionStatus() {
     // Check status every 30 seconds
     const interval = setInterval(checkVisionStatus, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [puuid]);
 
   if (isChecking) {
     return (
@@ -113,7 +125,7 @@ export default function NexraVisionStatus() {
       </div>
       <button
         onClick={() => {
-          window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.2/Nexra-Vision-Setup-1-0-2.exe', '_blank');
+          window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.3/Nexra-Vision-Setup-1-0-3.exe', '_blank');
         }}
         style={{
           width: '100%',

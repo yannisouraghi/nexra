@@ -347,7 +347,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus />
+                    <NexraVisionStatus puuid={summonerData?.puuid} />
                   </div>
                 </aside>
 
@@ -492,7 +492,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus />
+                    <NexraVisionStatus puuid={summonerData?.puuid} />
                   </div>
                 </aside>
 
@@ -609,7 +609,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus />
+                    <NexraVisionStatus puuid={summonerData?.puuid} />
                   </div>
                 </aside>
 
