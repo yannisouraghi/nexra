@@ -13,20 +13,31 @@ Application Next.js 15 de statistiques League of Legends avec intégration compl
 │  nexra          │────►│  nexra-api      │◄────│  nexra-vision   │
 │  (Next.js)      │     │  (CF Workers)   │     │  (Electron)     │
 │  Frontend       │     │  Backend        │     │  Recorder       │
+│  Vercel         │     │  Cloudflare     │     │  Windows App    │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-                               │
-                    ┌──────────┴──────────┐
-                    ▼                     ▼
-             ┌─────────────┐       ┌─────────────┐
-             │ Claude AI   │       │ Cloudflare  │
-             │ (Vision)    │       │ R2/D1/Queue │
-             └─────────────┘       └─────────────┘
+        │                       │                       │
+        │                       │                       │
+        ▼                       ▼                       ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│ GitHub          │     │ Claude AI       │     │ GitHub Releases │
+│ nexra repo      │     │ (Vision)        │     │ Installer .exe  │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
 ```
 
+### URLs de Production
+- **Frontend**: https://nexra-jet.vercel.app/
+- **Backend API**: https://nexra-api.nexra-api.workers.dev
+- **Vision Releases**: https://github.com/yannisouraghi/nexra-vision/releases
+
+### Repositories GitHub
+- **nexra** (Frontend): https://github.com/yannisouraghi/nexra
+- **nexra-api** (Backend): https://github.com/yannisouraghi/nexra-api
+- **nexra-vision** (Recorder): https://github.com/yannisouraghi/nexra-vision
+
 ### Technologies
-- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- **Backend**: Cloudflare Workers (Hono) + D1 (SQLite) + R2 (Storage) + Queues
-- **Recorder**: Electron + FFmpeg + Node.js
+- **Frontend**: Next.js 15 (App Router) + TypeScript + Tailwind CSS + Vercel
+- **Backend**: Cloudflare Workers (Hono) + D1 (SQLite) + R2 (Storage) + Queues + KV
+- **Recorder**: Electron + FFmpeg + Node.js + Windows Installer (NSIS)
 - **IA**: Claude AI (Sonnet 4) avec Vision pour analyse vidéo
 - **APIs**: Riot Games API + Data Dragon CDN + Anthropic API
 
@@ -55,63 +66,84 @@ Application Next.js 15 de statistiques League of Legends avec intégration compl
 - Win probability badge sur chaque match
 
 ### 3. **Onglet Champions (Statistiques détaillées)**
-- En-tête professionnel avec statistiques globales :
-  - Champion le plus joué
-  - Meilleur winrate
-  - Meilleur KDA
-  - Total dégâts
-  - CS moyen
+- En-tête professionnel avec statistiques globales
 - Liste de tous les champions joués (triable par Games/Winrate/KDA)
-- Cartes de champions extensibles avec :
-  - Badge de classement (#1, #2, #3...)
-  - Statistiques détaillées (games, W-L, KDA, CS, Or, Dégâts, Vision)
-  - **Top 3 meilleurs matchups** (contre qui vous gagnez le plus en lane)
-  - **Top 3 pires matchups** (contre qui vous perdez le plus en lane)
-- Animation fluide lors du changement d'onglet
-- Design épuré et moderne
+- Top 3 meilleurs/pires matchups par champion
 
 ### 4. **Système d'Images Dynamiques**
 - Fetch automatique de la dernière version Data Dragon
-- Mise à jour dynamique de toutes les images :
-  - Champions (y compris les nouveaux comme Mel)
-  - Items
-  - Sorts d'invocateur
-  - Icônes de profil
-- Centralisation dans `/src/utils/ddragon.ts`
-- Gestion des cas spéciaux de noms de champions
+- URLs dynamiques pour champions/items/spells/icônes
 
-### 5. **Analyse IA des Parties** ✨ NOUVEAU ✨
+### 5. **Analyse IA des Parties** ✨
 **Onglet Analysis avec coaching IA personnalisé**
 
+#### Workflow
+1. **Nexra Vision** enregistre automatiquement les parties
+2. **Upload vidéo** vers le backend (pas d'analyse automatique)
+3. **L'utilisateur** lance l'analyse manuellement depuis le dashboard
+4. **Claude Vision** analyse les clips et génère des conseils
+
 #### Fonctionnalités
-- **Enregistrement automatique** des parties avec Nexra Vision (Electron)
-- **Upload vidéo** vers Cloudflare R2 (~100 MB max, format WebM)
-- **Extraction de clips** aux moments clés (morts, kills, objectifs)
-- **Analyse Vision IA** des clips avec Claude (frames extraites)
-- **Score de performance** global (0-100) avec breakdown par catégorie
-- **Détection d'erreurs** classées par sévérité (critical/high/medium/low)
-- **Conseils personnalisés** basés sur le champion et le rôle joués
-- **Plan d'amélioration** immédiat, court terme et long terme
+- Score de performance global (0-100)
+- Détection d'erreurs classées par sévérité
+- Conseils personnalisés basés sur le champion/rôle
+- Plan d'amélioration immédiat, court et long terme
 
-#### Composants Frontend (`/src/components/analysis/`)
-- `AnalysisTab.tsx` - Onglet principal avec liste des analyses
-- `AnalysisOverview.tsx` - Vue d'ensemble des performances
-- `GameAnalysisModal.tsx` - Modal détaillé d'une analyse
-- `DeathClipsSection.tsx` - Section morts avec vidéo + analyse IA
-- `ErrorsList.tsx` - Liste des erreurs détectées
-- `CoachingTips.tsx` - Conseils de coaching
-- `VideoClipPlayer.tsx` - Lecteur vidéo avec seeking
-- `StatsComparison.tsx` - Comparaison avec la moyenne du rang
+### 6. **Nexra Vision - Desktop App** ✨ NOUVEAU ✨
 
-#### Types d'erreurs détectées
-- Objectifs mal gérés (Dragon/Baron)
-- Morts avant objectifs
-- Power spikes ignorés
-- Mauvaise macro/positionnement
-- Vision insuffisante
-- Mauvais teamfights
-- Back timings incorrects
-- Wave management
+#### Fonctionnalités
+- **Détection automatique** des parties League of Legends
+- **Enregistrement écran** avec overlay in-game
+- **Auto-start** au démarrage de Windows
+- **Heartbeat system** pour détection depuis le dashboard
+- **Upload automatique** de l'enregistrement après la partie
+
+#### Versions
+| Version | Changements |
+|---------|-------------|
+| v1.0.0 | Release initiale |
+| v1.0.1 | Auto-start au boot Windows |
+| v1.0.2 | URL production Vercel |
+| v1.0.3 | Système heartbeat pour détection dashboard |
+| v1.0.4 | Analyse manuelle uniquement (plus d'auto-start analyse) |
+
+#### Distribution
+- **Installer Windows**: NSIS (.exe)
+- **Hébergement**: GitHub Releases
+- **Téléchargement**: Bouton sur le dashboard quand Vision non détecté
+
+---
+
+## 🔄 Système de Heartbeat
+
+### Architecture
+```
+┌─────────────────┐                    ┌─────────────────┐
+│  Nexra Vision   │ ──── heartbeat ───►│  nexra-api      │
+│  (toutes 20s)   │     POST /vision/  │  (Cloudflare KV)│
+└─────────────────┘     heartbeat      └─────────────────┘
+                                              │
+                                              ▼
+┌─────────────────┐                    ┌─────────────────┐
+│  Dashboard      │◄─── status ────────│  KV Storage     │
+│  (vérifie 30s)  │     GET /vision/   │  (TTL 30s)      │
+└─────────────────┘     status/:puuid  └─────────────────┘
+```
+
+### Endpoints API
+- `POST /vision/heartbeat` - Nexra Vision envoie son PUUID + version
+- `GET /vision/status/:puuid` - Dashboard vérifie si Vision est online
+
+### Timing
+- Vision envoie heartbeat: **toutes les 20 secondes**
+- TTL du heartbeat: **30 secondes**
+- Dashboard vérifie: **toutes les 30 secondes**
+- Délai max détection offline: **~30-60 secondes**
+
+### Avantages
+- Pas de popup "accès réseau local" dans le navigateur
+- Détection fiable même derrière firewall
+- Fonctionne avec Vercel (pas besoin de localhost)
 
 ---
 
@@ -124,38 +156,21 @@ Application Next.js 15 de statistiques League of Legends avec intégration compl
 │   ├── RecentGames.tsx           # Conteneur principal avec tabs
 │   ├── MatchCard.tsx             # Carte de match détaillée
 │   ├── ChampionsStats.tsx        # Statistiques par champion
+│   ├── NexraVisionStatus.tsx     # ✨ Détection Vision + Download
 │   ├── NavigationTabs.tsx        # Menu (Summary/Champions/Analysis)
-│   ├── GameModeFilter.tsx        # Filtres de mode de jeu
-│   ├── WinProbabilityBadge.tsx   # Badge probabilité de victoire
-│   └── analysis/                 # ✨ Composants d'analyse IA
-│       ├── AnalysisTab.tsx
-│       ├── GameAnalysisModal.tsx
+│   ├── skeletons/                # Composants skeleton loading
+│   └── analysis/                 # Composants d'analyse IA
+│       ├── AnalysisTab.tsx       # ✨ Avec détection Vision heartbeat
+│       ├── GameAnalysisCard.tsx
 │       ├── DeathClipsSection.tsx
-│       ├── ErrorsList.tsx
-│       ├── CoachingTips.tsx
-│       ├── VideoClipPlayer.tsx
-│       └── StatsComparison.tsx
+│       └── ...
 ├── app/api/
 │   ├── riot/                     # Routes Riot Games API
-│   │   ├── summoner/route.ts
-│   │   ├── rank/route.ts
-│   │   ├── matches/route.ts
-│   │   ├── match-timeline/route.ts
-│   │   ├── champion-details/route.ts
-│   │   ├── player-stats/route.ts
-│   │   └── enrich-player/route.ts
-│   └── analysis/                 # ✨ Routes d'analyse (mock)
-│       ├── games/route.ts
-│       ├── [id]/route.ts
-│       └── generate/route.ts
-├── types/
-│   └── analysis.ts               # ✨ Types pour l'analyse IA
+│   └── vision/                   # ✨ Route legacy (non utilisée)
 └── utils/
     ├── ddragon.ts                # Gestion Data Dragon
-    ├── nexraApi.ts               # ✨ Client API Nexra
-    ├── winProbabilityCalculator.ts
-    ├── roleDetection.ts
-    └── matchDataAdapter.ts
+    ├── nexraApi.ts               # Client API Nexra
+    └── ...
 ```
 
 ### Projet Backend - nexra-api (Cloudflare Workers)
@@ -165,133 +180,86 @@ nexra-api/
 │   ├── index.ts              # Point d'entrée + Queue consumer
 │   ├── routes/
 │   │   ├── analysis.ts       # CRUD analyses + queue send
-│   │   └── recordings.ts     # Upload vidéo + clips + streaming
+│   │   ├── recordings.ts     # Upload vidéo + clips + streaming
+│   │   └── vision.ts         # ✨ Heartbeat endpoints
 │   ├── services/
 │   │   └── analyzer.ts       # Logique d'analyse IA (Claude Vision)
-│   ├── types/
-│   │   └── index.ts          # Types partagés
-│   └── utils/
-│       └── helpers.ts        # Utilitaires
+│   └── types/
+│       └── index.ts          # Types partagés
 ├── wrangler.toml             # Configuration Cloudflare
-└── schema.sql                # Schema D1 (recordings, analyses)
+└── schema.sql                # Schema D1
 ```
 
 ### Projet Recorder - nexra-vision (Electron)
 ```
 nexra-vision/
 ├── src/
-│   └── main.js               # App Electron principale
-│       ├── Détection de partie LoL
-│       ├── Enregistrement écran (MediaRecorder)
-│       ├── Extraction clips (FFmpeg)
-│       ├── Upload vers nexra-api
-│       └── Overlay in-game
-├── config.json               # Configuration utilisateur
-└── package.json
+│   ├── main.js               # App Electron principale
+│   │   ├── Détection de partie LoL
+│   │   ├── Enregistrement écran (MediaRecorder)
+│   │   ├── Extraction clips (FFmpeg)
+│   │   ├── Upload vers nexra-api (sans analyse auto)
+│   │   ├── Heartbeat toutes les 20s
+│   │   └── Overlay in-game
+│   └── windows/
+│       ├── recorder.html
+│       ├── overlay.html
+│       └── settings.html
+├── assets/
+│   └── nexra-vision-ico.ico
+├── package.json              # Version 1.0.4
+└── dist/                     # Build output
+    └── Nexra-Vision-Setup-1-0-4.exe
 ```
-
----
-
-## 🎨 Design & UX
-
-### Système de Design
-- **Glass morphism** avec cartes translucides
-- **Animations** progressives avec delays (30ms entre éléments)
-- **Couleurs dynamiques** selon le rang (cyan pour élevé, rouge pour bas)
-- **Responsive** : layouts différents mobile/desktop
-- **Police principale** : Rajdhani (moderne et tech)
-
-### Animations
-- Fade-in au chargement des sections
-- Transitions douces lors du changement d'onglet
-- Hover effects sur tous les éléments interactifs
-- Pas de flickering grâce à la simplification des animations
-
-### Palette de Couleurs
-- **Victoire** : Cyan (#00d4ff) / Bleu
-- **Défaite** : Rouge (#ef4444)
-- **Rang élevé** : Cyan / Or
-- **Rang bas** : Rouge / Gris
-- **Background** : Noir (#0a0a0a) avec gradients subtils
 
 ---
 
 ## 🔧 Dernières Modifications
 
-### 14/01/2026 - Analyse IA Complete
+### 14/01/2026 - Session 2 : Heartbeat & Manual Analysis
 
-#### Backend nexra-api (Cloudflare Workers)
-1. **Déploiement sur Cloudflare Workers**
-   - URL: `https://nexra-api.nexra-api.workers.dev`
-   - D1 Database: `nexra-db`
-   - R2 Bucket: `nexra-videos`
-   - Queue: `nexra-analysis-queue`
+#### Système Heartbeat (nexra-api)
+1. **Nouveaux endpoints**
+   - `POST /vision/heartbeat` - Reçoit heartbeat avec PUUID
+   - `GET /vision/status/:puuid` - Vérifie si Vision online
+2. **Stockage KV** avec TTL 30 secondes
+3. **Pas de popup** navigateur (plus de call localhost)
 
-2. **Routes implémentées**
-   - `POST /recordings/upload-url` - Créer un enregistrement
-   - `PUT /recordings/:id/upload` - Upload vidéo (max 100MB)
-   - `POST /recordings/:id/clips` - Upload clips avec frames
-   - `GET /recordings/:matchId/video` - Streaming vidéo avec Range support
-   - `POST /analysis` - Créer une analyse
-   - `POST /analysis/:id/reanalyze` - Relancer une analyse
-   - `GET /analysis/:id` - Récupérer une analyse
-   - `GET /analysis?puuid=X` - Lister les analyses d'un joueur
+#### Nexra Vision v1.0.4
+1. **Heartbeat** envoyé toutes les 20 secondes
+2. **Plus d'analyse automatique** - upload seulement
+3. **Notification** "Recording Ready - Go to dashboard to start AI analysis"
+4. **Auto-start** Windows conservé
 
-3. **Analyse IA avec Claude Vision**
-   - Extraction de 3 frames par clip
-   - Envoi à Claude Sonnet 4 avec contexte de jeu
-   - Analyse de position, minimap, erreurs
-   - Génération de conseils personnalisés par champion/rôle
+#### Frontend Updates
+1. **NexraVisionStatus.tsx** - Utilise heartbeat API
+2. **AnalysisTab.tsx** - Utilise heartbeat API + bouton download
+3. **Bouton "Download Nexra Vision"** quand non détecté
+4. **Supprimé** boutons retry/re-analyze
+5. **Navigation** "Back to Dashboard" → onglet Recent Games
 
-4. **Fix snake_case → camelCase**
-   - API retourne maintenant `matchId`, `createdAt`, etc.
-   - Transformation dans toutes les routes GET
+#### Déploiements
+- **Vercel**: https://nexra-jet.vercel.app/
+- **Cloudflare Workers**: https://nexra-api.nexra-api.workers.dev
+- **GitHub Release**: v1.0.4
 
-#### Recorder nexra-vision (Electron)
-1. **Enregistrement automatique**
-   - Détection du processus League of Legends
-   - Hotkey F9 pour démarrer/arrêter
-   - Overlay in-game avec statut
+### 14/01/2026 - Session 1 : Analyse IA Complete
 
-2. **Extraction de clips optimisée**
-   - Traitement parallèle par batches de 4
-   - Tous les clips uploadés (pas de limite)
-   - FFmpeg avec settings rapides (VP8, CRF 35)
-   - ~5 secondes par clip au lieu de 20
+#### Backend nexra-api
+- Déploiement Cloudflare Workers
+- Routes recordings + analysis
+- Analyse IA Claude Vision
+- Fix snake_case → camelCase
 
-3. **Upload vers l'API**
-   - Vidéo compressée (<100 MB)
-   - Clips avec 3 frames chacun
-   - Données de match Riot intégrées
-
-4. **Re-analyse**
-   - Fonction `reanalyzeLastRecording()` pour relancer sans rejouer
+#### Recorder nexra-vision
+- Enregistrement automatique
+- Extraction clips parallélisée
+- Upload vers API
 
 #### Frontend nexra
-1. **Onglet Analysis**
-   - Tab "Morts" avec vidéo + analyse IA
-   - Tri par sévérité (critical first)
-   - Vidéo player avec seeking aux timestamps
-   - Cause de mort, erreurs, suggestions
-
-2. **Composants créés**
-   - `DeathClipsSection.tsx` - Affichage des morts analysées
-   - `GameAnalysisModal.tsx` - Modal avec tous les onglets
-   - Types dans `analysis.ts`
-
-### 13/01/2026 - Images Dynamiques
-
-1. **Création de `/src/utils/ddragon.ts`**
-   - Fetch et cache de la version Data Dragon
-   - URLs dynamiques pour champions/items/spells
-
-2. **Amélioration des Matchups**
-   - Top 3 best/worst matchups par champion
-   - Filtrage par lane opponents uniquement
-
-3. **Navigation & Animations**
-   - Suppression des tabs non utilisés
-   - Fix du flickering au chargement
+- Onglet Analysis complet
+- Vidéo player avec seeking
+- UI traduite en anglais
 
 ---
 
@@ -303,6 +271,7 @@ Node.js 18+
 npm ou pnpm
 FFmpeg (pour nexra-vision)
 Compte Cloudflare (pour nexra-api)
+Compte Vercel (pour nexra)
 ```
 
 ### 1. Frontend (nexra)
@@ -310,9 +279,8 @@ Compte Cloudflare (pour nexra-api)
 cd nexra
 npm install
 
-# Configuration
-# Créer .env.local :
-RIOT_API_KEY=RGAPI-votre-clé-ici
+# Configuration .env.local :
+RIOT_API_KEY=RGAPI-xxx
 NEXT_PUBLIC_NEXRA_API_URL=https://nexra-api.nexra-api.workers.dev
 
 npm run dev   # http://localhost:3000
@@ -323,12 +291,9 @@ npm run dev   # http://localhost:3000
 cd nexra-api
 npm install
 
-# Configuration secrets Cloudflare
+# Secrets Cloudflare
 npx wrangler secret put ANTHROPIC_API_KEY
 npx wrangler secret put RIOT_API_KEY
-
-# Développement local
-npm run dev   # http://localhost:8787
 
 # Déploiement
 npx wrangler deploy
@@ -339,133 +304,81 @@ npx wrangler deploy
 cd nexra-vision
 npm install
 
-# Configuration (config.json)
-{
-  "riotId": "VotreNom#TAG",
-  "apiKey": "votre-clé-riot",
-  "hotkey": "F9"
-}
+# Build Windows installer
+npm run build:win
 
-npm start   # Lance l'app Electron
+# Output: dist/Nexra-Vision-Setup-1-0-4.exe
 ```
+
+### 4. Créer une Release GitHub
+1. Tag: `v1.0.X`
+2. Upload: `Nexra-Vision-Setup-1-0-X.exe`
+3. Mettre à jour lien dans `NexraVisionStatus.tsx` et `AnalysisTab.tsx`
 
 ---
 
 ## 🐛 Problèmes Connus & Solutions
 
+### Nexra Vision non détecté
+- **Cause**: Ancienne version sans heartbeat
+- **Solution**: Désinstaller et installer v1.0.4+
+
+### Analyse se lance automatiquement
+- **Cause**: Ancienne version < v1.0.4
+- **Solution**: Installer v1.0.4 (analyse manuelle)
+
 ### Rate Limiting Riot API
-- **Problème**: 429 Too Many Requests
-- **Solution actuelle**:
-  - Délais de 200ms entre requêtes
-  - Retry avec backoff exponentiel (2s, 4s, 5s)
-  - Limitation à 30 matchs pour champion-details
-  - Délai initial de 2s avant de fetch les matchs
+- **Solution**: Délais de 200ms entre requêtes + retry backoff
 
-### Performance
-- **MatchCard.tsx très lourd** (2700+ lignes)
-  - Considérer un refactoring en sous-composants
-  - Actuellement fonctionnel mais difficile à maintenir
-
-### Images de Runes
-- Les runes utilisent encore l'API OPGG
-- Data Dragon ne fournit pas les images de runes
-- Solution actuelle : Garder OPGG pour les perks uniquement
+### Windows SmartScreen Warning
+- **Cause**: Installer non signé
+- **Solution**: Certificat de signature de code ($300-500/an)
+- **Workaround**: Cliquer "Plus d'infos" → "Exécuter quand même"
 
 ---
 
 ## 📝 TODO / Améliorations Futures
 
 ### Court Terme
-- [ ] Ajouter un loading skeleton lors du chargement initial
-- [ ] Améliorer le cache des requêtes API
-- [ ] Ajouter pagination pour les matchs (actuellement limité aux 20 derniers)
+- [x] ~~Heartbeat system pour détection Vision~~
+- [x] ~~Analyse manuelle (pas automatique)~~
+- [ ] Loading skeletons améliorés
+- [ ] Cache API Riot (Next.js revalidation)
+- [ ] Infinite scroll pour les matchs
 
 ### Moyen Terme
-- [ ] Implémenter l'onglet "Mastery" (mastery points par champion)
-- [ ] Ajouter des graphiques de progression sur plusieurs jours
-- [ ] Système de favoris pour suivre plusieurs joueurs
-- [ ] Mode comparaison de joueurs
+- [ ] Certificat de signature Windows
+- [ ] Version Mac de Nexra Vision
+- [ ] Système de favoris joueurs
+- [ ] Mode comparaison
 
 ### Long Terme
-- [ ] Refactoring de MatchCard.tsx en composants plus petits
-- [ ] Backend avec base de données pour historique
 - [ ] Authentification utilisateur
-- [ ] Notifications pour les matchs des joueurs suivis
-
-### Optimisations
-- [ ] Implémenter ISR (Incremental Static Regeneration)
-- [ ] Service Worker pour cache offline
-- [ ] Lazy loading des onglets MatchCard
-- [ ] Virtualisation de la liste de matchs
-
----
-
-## 🎯 Points Clés pour Reprendre
-
-### Si vous voulez modifier les stats affichées :
-1. **API Route** : Modifier `/src/app/api/riot/champion-details/route.ts`
-2. **Interface** : Mettre à jour l'interface `ChampionDetail`
-3. **Composant** : Modifier `ChampionsStats.tsx` pour afficher les nouvelles données
-
-### Si vous voulez ajouter un nouvel onglet :
-1. **NavigationTabs.tsx** : Ajouter le tab dans l'array `tabs`
-2. **RecentGames.tsx** : Ajouter la condition dans le rendu du contenu
-
-### Si vous voulez modifier le design :
-- La plupart des styles sont inline dans les composants
-- Couleurs globales dans `globals.css`
-- Variables CSS disponibles : `--text-primary`, `--text-secondary`, `--text-tertiary`
-
-### Si les images ne s'affichent pas :
-1. Vérifier que Data Dragon API est accessible
-2. Vérifier la console pour les erreurs 404
-3. Vérifier `ddragon.ts` et les fonctions `normalize*Name`
-
----
-
-## 📞 Support & Ressources
-
-### Documentation Riot API
-- [Riot Developer Portal](https://developer.riotgames.com/)
-- [Data Dragon Documentation](https://developer.riotgames.com/docs/lol#data-dragon)
-
-### Technologies
-- [Next.js 15 Docs](https://nextjs.org/docs)
-- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
-- [Tailwind CSS](https://tailwindcss.com/docs)
+- [ ] Historique de progression
+- [ ] Notifications matchs
 
 ---
 
 ## 🏆 État Actuel
 
 ### Frontend (nexra)
-✅ Build réussi
-✅ Toutes les images Data Dragon dynamiques
-✅ Onglet Analysis avec affichage des clips de morts
-✅ Vidéo player avec seeking
-✅ UI complète et polie
+✅ Déployé sur Vercel
+✅ Détection Vision via heartbeat
+✅ UI complète en anglais
+✅ Bouton download Vision
 
 ### Backend (nexra-api)
 ✅ Déployé sur Cloudflare Workers
-✅ Upload vidéo vers R2 (max 100MB)
-✅ Extraction et analyse de clips avec Claude Vision
-✅ Queue async pour traitement des analyses
-✅ Streaming vidéo avec Range support
-✅ API retourne camelCase (fix du 14/01)
+✅ Heartbeat endpoints fonctionnels
+✅ Analyse IA Claude Vision
+✅ Upload vidéo R2
 
 ### Recorder (nexra-vision)
-✅ Détection automatique des parties LoL
-✅ Enregistrement avec overlay in-game
-✅ Extraction de clips parallélisée
-✅ Upload de tous les clips
-✅ Re-analyse sans rejouer
-
-### Dernière Analyse Testée
-- **Champion**: Mel MID
-- **Score**: 45/100
-- **Clips analysés**: 14
-- **Morts avec analyse IA**: 2 (avec aiAnalysis complet)
+✅ v1.0.4 avec heartbeat
+✅ Analyse manuelle uniquement
+✅ Auto-start Windows
+✅ Distribué via GitHub Releases
 
 ---
 
-*Dernière mise à jour : 14 Janvier 2026*
+*Dernière mise à jour : 14 Janvier 2026 - Session 2*
