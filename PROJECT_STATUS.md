@@ -352,10 +352,193 @@ npm run build:win
 - [ ] Système de favoris joueurs
 - [ ] Mode comparaison
 
-### Long Terme
-- [ ] Authentification utilisateur
-- [ ] Historique de progression
-- [ ] Notifications matchs
+---
+
+## 🔐 Système Utilisateur & Monétisation (Priorité Haute)
+
+### 1. Authentification & Gestion Utilisateur
+
+#### Inscription / Connexion
+- [ ] Page d'inscription (email + mot de passe)
+- [ ] Page de connexion
+- [ ] OAuth providers (Google, Discord)
+- [ ] Vérification email
+- [ ] Mot de passe oublié / Reset
+- [ ] Session management (JWT tokens)
+
+#### Liaison Compte Riot
+- [ ] OAuth Riot Sign-On (RSO)
+- [ ] Vérification de propriété du compte
+- [ ] Support multi-comptes Riot par utilisateur
+- [ ] Sync automatique des données de profil
+
+#### Profil Utilisateur
+- [ ] Page profil avec infos personnelles
+- [ ] Avatar personnalisable
+- [ ] Préférences (langue, notifications)
+- [ ] Historique des analyses
+- [ ] Comptes Riot liés
+
+### 2. Système de Crédits
+
+#### Crédits de Base
+- [ ] Crédits offerts à l'inscription (ex: 3 analyses gratuites)
+- [ ] Crédits bonus première liaison Riot
+- [ ] Affichage solde crédits dans header/dashboard
+
+#### Consommation
+- [ ] 1 crédit = 1 analyse IA complète
+- [ ] Blocage si solde insuffisant
+- [ ] Confirmation avant consommation
+- [ ] Historique des consommations
+
+#### Recharges (Achat de crédits)
+| Pack | Crédits | Prix | Bonus |
+|------|---------|------|-------|
+| Starter | 5 | 4.99€ | - |
+| Standard | 15 | 9.99€ | +2 gratuits |
+| Pro | 50 | 24.99€ | +10 gratuits |
+| Ultimate | 150 | 49.99€ | +50 gratuits |
+
+### 3. Abonnements (Alternative/Complément)
+
+| Plan | Prix/mois | Analyses | Avantages |
+|------|-----------|----------|-----------|
+| **Free** | 0€ | 2/mois | Fonctionnalités de base |
+| **Plus** | 9.99€ | 20/mois | Analyses prioritaires |
+| **Pro** | 19.99€ | Illimité | Support prioritaire, features avancées |
+
+#### Fonctionnalités par tier
+- **Free**: Stats de base, 2 analyses/mois, pub
+- **Plus**: Stats avancées, 20 analyses/mois, sans pub
+- **Pro**: Tout illimité, coaching tips avancés, export PDF
+
+### 4. Paiement & Facturation
+
+#### Intégration Stripe
+- [ ] Checkout sécurisé
+- [ ] Paiement CB (Visa, Mastercard)
+- [ ] Apple Pay / Google Pay
+- [ ] Gestion des abonnements récurrents
+- [ ] Webhooks pour confirmation paiement
+
+#### Facturation
+- [ ] Historique des achats
+- [ ] Factures téléchargeables (PDF)
+- [ ] Gestion TVA par pays
+
+### 5. Base de Données Utilisateurs
+
+#### Tables à créer (D1/PostgreSQL)
+```sql
+-- Utilisateurs
+users (id, email, password_hash, created_at, email_verified)
+
+-- Comptes Riot liés
+riot_accounts (id, user_id, puuid, game_name, tag_line, region, is_primary)
+
+-- Crédits
+credit_balances (user_id, balance, updated_at)
+credit_transactions (id, user_id, amount, type, description, created_at)
+
+-- Abonnements
+subscriptions (id, user_id, plan, status, stripe_subscription_id, expires_at)
+
+-- Achats
+purchases (id, user_id, amount, credits, stripe_payment_id, created_at)
+```
+
+### 6. Fonctionnalités Additionnelles
+
+#### Gamification
+- [ ] Badges/Achievements (première analyse, 10 analyses, etc.)
+- [ ] Streak de connexion quotidienne
+- [ ] Classement amélioration (progression du score)
+
+#### Social
+- [ ] Partage d'analyse (lien public/privé)
+- [ ] Comparaison avec amis
+- [ ] Leaderboard communautaire
+
+#### Programme de Parrainage
+- [ ] Code parrain unique par utilisateur
+- [ ] Bonus parrain: +1 crédit par filleul inscrit
+- [ ] Bonus filleul: +1 crédit bonus à l'inscription
+- [ ] Dashboard parrainage (stats, gains)
+
+#### Notifications
+- [ ] Email récap hebdomadaire
+- [ ] Push notifications (analyse terminée)
+- [ ] Alertes solde crédits bas
+
+### 7. Admin Dashboard
+
+- [ ] Gestion utilisateurs (ban, crédits manuels)
+- [ ] Stats globales (revenus, utilisateurs, analyses)
+- [ ] Logs d'activité
+- [ ] Gestion des codes promo
+
+---
+
+## 🛠️ Stack Technique Recommandée
+
+### Authentification
+- **NextAuth.js** ou **Clerk** pour auth
+- **Riot RSO** pour liaison compte LoL
+- **JWT** pour sessions
+
+### Paiement
+- **Stripe** pour paiements et abonnements
+- **Stripe Checkout** pour UI de paiement
+- **Webhooks** pour events (payment_succeeded, subscription_updated)
+
+### Base de Données
+- **Cloudflare D1** (actuel) ou **PlanetScale/Supabase** pour scale
+- **Drizzle ORM** ou **Prisma** pour requêtes
+
+### Email
+- **Resend** ou **SendGrid** pour emails transactionnels
+- Templates pour: vérification, reset password, récap hebdo
+
+---
+
+## 📊 Métriques Business à Tracker
+
+- **MRR** (Monthly Recurring Revenue)
+- **Taux de conversion** Free → Paid
+- **ARPU** (Average Revenue Per User)
+- **Churn rate** (taux de désabonnement)
+- **CAC** (Customer Acquisition Cost)
+- **LTV** (Lifetime Value)
+
+---
+
+## 🚀 Roadmap Suggérée
+
+### Phase 1 - MVP Auth (2-3 semaines)
+1. Inscription/Connexion email
+2. Liaison compte Riot basique
+3. Table users dans D1
+
+### Phase 2 - Crédits (1-2 semaines)
+1. Système de crédits
+2. Crédits gratuits à l'inscription
+3. Blocage si pas de crédits
+
+### Phase 3 - Paiement (2 semaines)
+1. Intégration Stripe
+2. Achat de packs de crédits
+3. Historique achats
+
+### Phase 4 - Abonnements (2 semaines)
+1. Plans Free/Plus/Pro
+2. Gestion abonnements Stripe
+3. Features par tier
+
+### Phase 5 - Polish (1-2 semaines)
+1. Programme parrainage
+2. Badges/Gamification
+3. Admin dashboard
 
 ---
 
