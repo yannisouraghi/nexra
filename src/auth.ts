@@ -15,36 +15,40 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, account, trigger }) {
-      // First time login or session update
+      // First time login - set basic user info
       if (user && account) {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
+      }
 
-        // Sync user with backend database
+      // Always fetch latest user data from backend (on login and session refresh)
+      const userId = token.id || user?.id;
+      if (userId) {
         try {
+          // Use POST /users/auth to sync and get latest data
           const response = await fetch(`${NEXRA_API_URL}/users/auth`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              image: user.image,
+              id: userId,
+              email: token.email || user?.email,
+              name: token.name || user?.name,
+              image: token.image || user?.image,
             }),
           });
 
           if (response.ok) {
             const data = await response.json();
-            // Store additional user data in token
+            // Update token with latest user data from database
             if (data.user) {
-              token.riotPuuid = data.user.riot_puuid;
-              token.riotGameName = data.user.riot_game_name;
-              token.riotTagLine = data.user.riot_tag_line;
-              token.riotRegion = data.user.riot_region;
-              token.credits = data.user.credits;
-              token.subscriptionTier = data.user.subscription_tier;
+              token.riotPuuid = data.user.riot_puuid || null;
+              token.riotGameName = data.user.riot_game_name || null;
+              token.riotTagLine = data.user.riot_tag_line || null;
+              token.riotRegion = data.user.riot_region || null;
+              token.credits = data.user.credits ?? 0;
+              token.subscriptionTier = data.user.subscription_tier || 'free';
             }
           }
         } catch (error) {
