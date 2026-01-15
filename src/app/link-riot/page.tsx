@@ -68,8 +68,17 @@ export default function LinkRiotPage() {
     setError('');
     setIsLoading(true);
 
+    // Check if we have a user session
+    const userId = session?.user?.id;
+    if (!userId) {
+      setError('Session expired. Please sign in again.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       // Step 1: Validate the Riot account exists via Riot API
+      console.log('Validating Riot account...', { gameName, tagLine, region });
       const validateResponse = await fetch(
         `/api/riot/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${region}`
       );
@@ -80,27 +89,28 @@ export default function LinkRiotPage() {
       }
 
       const summonerData = await validateResponse.json();
+      console.log('Riot account validated:', summonerData.puuid);
 
       // Step 2: Link the Riot account to the user in the database
-      if (session?.user?.id) {
-        const linkResponse = await fetch(`${NEXRA_API_URL}/users/${session.user.id}/link-riot`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            puuid: summonerData.puuid,
-            gameName,
-            tagLine,
-            region,
-          }),
-        });
+      console.log('Linking to user:', userId);
+      const linkResponse = await fetch(`${NEXRA_API_URL}/users/${userId}/link-riot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          puuid: summonerData.puuid,
+          gameName,
+          tagLine,
+          region,
+        }),
+      });
 
-        if (!linkResponse.ok) {
-          const linkData = await linkResponse.json();
-          throw new Error(linkData.error || 'Failed to link account');
-        }
+      if (!linkResponse.ok) {
+        const linkData = await linkResponse.json();
+        throw new Error(linkData.error || 'Failed to link account');
       }
+      console.log('Account linked successfully');
 
-      // Step 3: Store in localStorage as backup (for offline access)
+      // Step 3: Store in localStorage as backup
       localStorage.setItem('nexra_riot_account', JSON.stringify({
         gameName,
         tagLine,
@@ -109,10 +119,10 @@ export default function LinkRiotPage() {
         profileIconId: summonerData.profileIconId,
       }));
 
-      // Step 4: Redirect to dashboard immediately (session will refresh on page load)
-      const params = new URLSearchParams({ gameName, tagLine, region });
-      window.location.replace(`/dashboard?${params.toString()}`);
-      return; // Prevent further execution
+      // Step 4: Redirect to dashboard
+      console.log('Redirecting to dashboard...');
+      const redirectUrl = `/dashboard?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${region}`;
+      window.location.href = redirectUrl;
     } catch (err) {
       console.error('Link account error:', err);
       setError(err instanceof Error ? err.message : 'Failed to link account');
