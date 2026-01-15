@@ -2449,32 +2449,100 @@ body {
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: linear-gradient(135deg, #030308 0%, #0a0a15 50%, #050510 100%);
+  overflow: hidden;
 }
 
-.nexra-hero-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: saturate(0.8) brightness(0.5);
+/* Animated Gradient Orbs */
+.nexra-bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation: orbFloat 20s ease-in-out infinite;
 }
 
-.nexra-hero-overlay {
+.nexra-bg-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 150, 255, 0.4) 0%, transparent 70%);
+  top: -20%;
+  left: -10%;
+  animation-delay: 0s;
+}
+
+.nexra-bg-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(100, 0, 255, 0.3) 0%, transparent 70%);
+  bottom: -15%;
+  right: -10%;
+  animation-delay: -7s;
+  animation-duration: 25s;
+}
+
+.nexra-bg-orb-3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(0, 220, 255, 0.25) 0%, transparent 70%);
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: -14s;
+  animation-duration: 30s;
+}
+
+@keyframes orbFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -40px) scale(1.1);
+  }
+  50% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+  75% {
+    transform: translate(40px, 30px) scale(1.05);
+  }
+}
+
+/* Grid Pattern */
+.nexra-bg-grid {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(180deg,
-      rgba(3, 3, 8, 0.3) 0%,
-      rgba(3, 3, 8, 0.5) 30%,
-      rgba(3, 3, 8, 0.85) 70%,
-      rgba(3, 3, 8, 1) 100%
-    ),
-    linear-gradient(135deg,
-      rgba(0, 180, 255, 0.08) 0%,
-      transparent 50%,
-      rgba(100, 50, 255, 0.05) 100%
-    );
+  background-image:
+    linear-gradient(rgba(0, 180, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 255, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%);
 }
 
+/* Noise Texture */
+.nexra-bg-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Scan Lines */
+.nexra-bg-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* Particles */
 .nexra-particles {
   position: absolute;
   inset: 0;
@@ -2484,14 +2552,21 @@ body {
 
 .nexra-particle {
   position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 220, 255, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 220, 255, 0.6), 0 0 12px rgba(0, 220, 255, 0.3);
+  bottom: 5%;
+  animation: particleRise 8s ease-out infinite;
+  opacity: 0;
+}
+
+.nexra-particle-slow {
   width: 4px;
   height: 4px;
-  background: radial-gradient(circle, rgba(0, 220, 255, 0.8), transparent);
-  border-radius: 50%;
-  box-shadow: 0 0 10px rgba(0, 220, 255, 0.5);
-  bottom: 10%;
-  animation: particleRise 6s ease-out infinite;
-  opacity: 0;
+  animation-duration: 12s;
+  box-shadow: 0 0 8px rgba(100, 150, 255, 0.6), 0 0 16px rgba(100, 150, 255, 0.3);
 }
 
 @keyframes particleRise {
@@ -2499,15 +2574,15 @@ body {
     opacity: 0;
     transform: translateY(0) translateX(0);
   }
-  10% {
-    opacity: 0.6;
+  5% {
+    opacity: 0.8;
   }
-  90% {
-    opacity: 0.3;
+  95% {
+    opacity: 0.2;
   }
   100% {
     opacity: 0;
-    transform: translateY(-300px) translateX(20px);
+    transform: translateY(-500px) translateX(30px);
   }
 }
 
@@ -2538,19 +2613,17 @@ body {
   text-decoration: none;
 }
 
-.nexra-logo-icon {
-  width: 36px;
-  height: 36px;
-  transition: transform 0.3s ease;
+.nexra-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 8px rgba(0, 220, 255, 0.4));
 }
 
-.nexra-logo:hover .nexra-logo-icon {
+.nexra-logo:hover .nexra-logo-img {
   transform: scale(1.05);
-}
-
-.nexra-logo-icon svg {
-  width: 100%;
-  height: 100%;
+  filter: drop-shadow(0 0 12px rgba(0, 220, 255, 0.6));
 }
 
 .nexra-logo-text {
