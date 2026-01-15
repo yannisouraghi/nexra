@@ -11,6 +11,8 @@ import ChampionsStats from './ChampionsStats';
 import AnalysisTab from './analysis/AnalysisTab';
 import PlayerHeaderSkeleton from './skeletons/PlayerHeaderSkeleton';
 import { MatchCardSkeletonList } from './skeletons/MatchCardSkeleton';
+import StatsGridSkeleton from './skeletons/StatsGridSkeleton';
+import NavigationTabsSkeleton from './skeletons/NavigationTabsSkeleton';
 import NexraVisionStatus from './NexraVisionStatus';
 
 interface RiotAccount {
@@ -250,11 +252,39 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
               </div>
             </div>
 
+            {/* Main content with sidebar skeleton */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-6xl">
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                  {/* Sidebar Navigation Skeleton - Desktop only */}
+                  <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
+                    <NavigationTabsSkeleton />
+                    {/* Vision Status Skeleton */}
+                    <div className="glass-card" style={{ padding: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div className="skeleton-pulse" style={{ width: '40px', height: '40px', borderRadius: '0.5rem' }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                          <div className="skeleton-pulse" style={{ width: '100px', height: '0.875rem' }} />
+                          <div className="skeleton-pulse" style={{ width: '70px', height: '0.75rem' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </aside>
+
+                  {/* Stats Grid Skeleton */}
+                  <div className="flex-1">
+                    <StatsGridSkeleton />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Match History Skeleton */}
             <div className="flex justify-center">
               <div className="w-full max-w-6xl">
-                <div style={{ marginBottom: '1.5rem' }}>
-                  <div className="skeleton-pulse" style={{ width: '200px', height: '2rem', borderRadius: '0.5rem' }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                  <div className="skeleton-pulse" style={{ width: '180px', height: '2rem', borderRadius: '0.5rem' }} />
+                  <div className="skeleton-pulse" style={{ width: '200px', height: '2.5rem', borderRadius: '0.5rem' }} />
                 </div>
                 <MatchCardSkeletonList count={5} />
               </div>

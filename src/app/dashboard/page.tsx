@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import RecentGames from '@/components/RecentGames';
+import AnimatedBackground from '@/components/AnimatedBackground';
 
 function DashboardContent() {
   const router = useRouter();
@@ -57,9 +58,44 @@ function DashboardContent() {
   // Show loading while checking session
   if (status === 'loading' || !riotAccount) {
     return (
-      <div className="dashboard-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <div className="glass-card" style={{ padding: '2rem' }}>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading...</p>
+      <div className="dashboard-page">
+        <AnimatedBackground />
+        <div className="relative z-10 flex justify-center items-center" style={{ minHeight: '100vh' }}>
+          <div className="glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
+            <div className="flex flex-col items-center" style={{ gap: '1.25rem' }}>
+              {/* Animated loader */}
+              <div style={{ position: 'relative', width: '48px', height: '48px' }}>
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    border: '3px solid rgba(0, 212, 255, 0.1)',
+                    borderTopColor: 'rgba(0, 212, 255, 0.8)',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: '6px',
+                    border: '3px solid rgba(0, 102, 255, 0.1)',
+                    borderTopColor: 'rgba(0, 102, 255, 0.6)',
+                    borderRadius: '50%',
+                    animation: 'spin 1.5s linear infinite reverse',
+                  }}
+                />
+              </div>
+              <div>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontWeight: '500', marginBottom: '0.25rem' }}>
+                  Loading Dashboard
+                </p>
+                <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.875rem' }}>
+                  Fetching your data...
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -68,15 +104,53 @@ function DashboardContent() {
   return <RecentGames riotAccount={riotAccount} />;
 }
 
-export default function DashboardPage() {
+function DashboardLoader() {
   return (
-    <Suspense fallback={
-      <div className="dashboard-page" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <div className="glass-card" style={{ padding: '2rem' }}>
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Loading...</p>
+    <div className="dashboard-page">
+      <AnimatedBackground />
+      <div className="relative z-10 flex justify-center items-center" style={{ minHeight: '100vh' }}>
+        <div className="glass-card" style={{ padding: '3rem', textAlign: 'center' }}>
+          <div className="flex flex-col items-center" style={{ gap: '1.25rem' }}>
+            <div style={{ position: 'relative', width: '48px', height: '48px' }}>
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  border: '3px solid rgba(0, 212, 255, 0.1)',
+                  borderTopColor: 'rgba(0, 212, 255, 0.8)',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: '6px',
+                  border: '3px solid rgba(0, 102, 255, 0.1)',
+                  borderTopColor: 'rgba(0, 102, 255, 0.6)',
+                  borderRadius: '50%',
+                  animation: 'spin 1.5s linear infinite reverse',
+                }}
+              />
+            </div>
+            <div>
+              <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontWeight: '500', marginBottom: '0.25rem' }}>
+                Loading Dashboard
+              </p>
+              <p style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.875rem' }}>
+                Preparing your experience...
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    }>
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoader />}>
       <DashboardContent />
     </Suspense>
   );

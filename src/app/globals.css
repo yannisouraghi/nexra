@@ -1267,26 +1267,45 @@ body {
    SKELETON LOADING ANIMATION
    ============================================= */
 
-@keyframes skeleton-pulse {
+@keyframes skeleton-shimmer {
   0% {
-    background-position: 200% 0;
+    background-position: -200% 0;
   }
   100% {
-    background-position: -200% 0;
+    background-position: 200% 0;
   }
 }
 
 .skeleton-pulse {
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  animation: skeleton-shimmer 2s ease-in-out infinite;
   background: linear-gradient(
     90deg,
-    rgba(30, 41, 59, 0.5) 0%,
-    rgba(51, 65, 85, 0.6) 25%,
-    rgba(71, 85, 105, 0.5) 50%,
-    rgba(51, 65, 85, 0.6) 75%,
-    rgba(30, 41, 59, 0.5) 100%
+    rgba(15, 23, 42, 0.6) 0%,
+    rgba(30, 41, 59, 0.8) 20%,
+    rgba(51, 65, 85, 0.6) 40%,
+    rgba(0, 212, 255, 0.08) 50%,
+    rgba(51, 65, 85, 0.6) 60%,
+    rgba(30, 41, 59, 0.8) 80%,
+    rgba(15, 23, 42, 0.6) 100%
   );
   background-size: 200% 100%;
+  border-radius: 4px;
+}
+
+/* Skeleton with stronger glow effect */
+.skeleton-glow {
+  animation: skeleton-shimmer 2s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.6) 0%,
+    rgba(30, 41, 59, 0.8) 20%,
+    rgba(0, 212, 255, 0.15) 50%,
+    rgba(30, 41, 59, 0.8) 80%,
+    rgba(15, 23, 42, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.05);
 }
 
 /* =============================================
