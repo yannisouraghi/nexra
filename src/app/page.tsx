@@ -16,6 +16,14 @@ export default function LandingPage() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoaded, setIsLoaded] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Skip first 2 seconds of video
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 2;
+    }
+  };
 
   const { scrollY } = useScroll();
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
@@ -168,40 +176,36 @@ export default function LandingPage() {
           HERO SECTION
           ============================================ */}
       <section ref={heroRef} className="nexra-hero">
-        {/* Animated Background - Premium Gaming Aesthetic */}
+        {/* Video Background - LoL Cinematic */}
         <motion.div
           className="nexra-hero-bg"
           style={{ scale: heroScale, y: heroY }}
         >
-          {/* Animated Gradient Orbs */}
-          <div className="nexra-bg-orb nexra-bg-orb-1" />
-          <div className="nexra-bg-orb nexra-bg-orb-2" />
-          <div className="nexra-bg-orb nexra-bg-orb-3" />
+          {/* Video Background - Place your cinematic in /public/hero-cinematic.mp4 */}
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="nexra-hero-video"
+            onLoadedMetadata={handleVideoLoaded}
+          >
+            <source src="/hero-cinematic.mp4" type="video/mp4" />
+          </video>
 
-          {/* Grid Pattern */}
-          <div className="nexra-bg-grid" />
+          {/* Dark Overlay */}
+          <div className="nexra-hero-overlay" />
 
-          {/* Noise Texture Overlay */}
-          <div className="nexra-bg-noise" />
-
-          {/* Animated Particles */}
+          {/* Subtle Particles on top */}
           <div className="nexra-particles">
-            <div className="nexra-particle" style={{ left: '10%', animationDelay: '0s' }} />
-            <div className="nexra-particle" style={{ left: '20%', animationDelay: '0.7s' }} />
-            <div className="nexra-particle" style={{ left: '30%', animationDelay: '1.4s' }} />
-            <div className="nexra-particle" style={{ left: '40%', animationDelay: '2.1s' }} />
-            <div className="nexra-particle" style={{ left: '50%', animationDelay: '2.8s' }} />
-            <div className="nexra-particle" style={{ left: '60%', animationDelay: '3.5s' }} />
-            <div className="nexra-particle" style={{ left: '70%', animationDelay: '4.2s' }} />
-            <div className="nexra-particle" style={{ left: '80%', animationDelay: '4.9s' }} />
-            <div className="nexra-particle" style={{ left: '90%', animationDelay: '5.6s' }} />
-            <div className="nexra-particle nexra-particle-slow" style={{ left: '15%', animationDelay: '1s' }} />
-            <div className="nexra-particle nexra-particle-slow" style={{ left: '45%', animationDelay: '2.5s' }} />
-            <div className="nexra-particle nexra-particle-slow" style={{ left: '75%', animationDelay: '4s' }} />
+            <div className="nexra-particle" style={{ left: '15%', animationDelay: '0s' }} />
+            <div className="nexra-particle" style={{ left: '35%', animationDelay: '1.5s' }} />
+            <div className="nexra-particle" style={{ left: '55%', animationDelay: '3s' }} />
+            <div className="nexra-particle" style={{ left: '75%', animationDelay: '4.5s' }} />
+            <div className="nexra-particle" style={{ left: '25%', animationDelay: '2s' }} />
+            <div className="nexra-particle" style={{ left: '65%', animationDelay: '3.5s' }} />
           </div>
-
-          {/* Scan Lines Effect */}
-          <div className="nexra-bg-scanlines" />
         </motion.div>
 
         {/* Navigation */}
