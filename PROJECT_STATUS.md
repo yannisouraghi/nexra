@@ -1,5 +1,5 @@
 # Nexra - League of Legends Dashboard
-## État du Projet - 14 Janvier 2026 (Mise à jour Session 3)
+## État du Projet - 15 Janvier 2026 (Mise à jour Session 4)
 
 ---
 
@@ -432,8 +432,8 @@ npm run build:win
 - [x] ~~Authentification Google OAuth~~
 - [x] ~~Gestion utilisateur en DB~~
 - [x] ~~Système de crédits de base~~
-- [ ] Loading skeletons améliorés
-- [ ] Infinite scroll pour les matchs
+- [x] ~~Loading skeletons améliorés~~
+- [x] ~~Infinite scroll pour les matchs~~
 
 ### Moyen Terme
 - [ ] Intégration Stripe (achat crédits)
@@ -452,11 +452,13 @@ npm run build:win
 ## 🏆 État Actuel
 
 ### Frontend (nexra)
-✅ Landing page moderne
+✅ Landing page moderne avec video LoL
 ✅ Authentification Google OAuth
 ✅ Liaison compte Riot sécurisée
-✅ Dashboard protégé
+✅ Dashboard protégé avec redirections intelligentes
 ✅ Design system épuré
+✅ Loading skeletons premium avec shimmer cyan
+✅ Infinite scroll pour les matchs
 
 ### Backend (nexra-api)
 ✅ Table users avec crédits
@@ -473,4 +475,4 @@ npm run build:win
 
 ---
 
-*Dernière mise à jour : 14 Janvier 2026 - Session 3 (Auth & Users)*
+*Dernière mise à jour : 15 Janvier 2026 - Session 4 (UI/UX Improvements)*
