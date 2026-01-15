@@ -36,32 +36,26 @@ export default function LinkRiotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check if user already has a linked Riot account
+  // Check localStorage for previously linked account to pre-fill form
   useEffect(() => {
     if (status === 'loading') return;
 
-    const user = session?.user as any;
-    if (user?.riotPuuid) {
-      // User already has a linked account, redirect to dashboard
-      router.push('/dashboard');
-      return;
-    }
-
-    // Check localStorage for previously linked account
+    // Check localStorage to pre-fill form (but don't redirect)
     const savedAccount = localStorage.getItem('nexra_riot_account');
     if (savedAccount) {
       try {
         const parsed = JSON.parse(savedAccount);
         if (parsed.gameName && parsed.tagLine) {
-          setGameName(parsed.gameName);
-          setTagLine(parsed.tagLine);
-          if (parsed.region) setRegion(parsed.region);
+          // If localStorage has data, redirect to dashboard
+          // The dashboard will use this data
+          router.push('/dashboard');
+          return;
         }
       } catch (e) {
         // Invalid localStorage data, ignore
       }
     }
-  }, [session, status, router]);
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

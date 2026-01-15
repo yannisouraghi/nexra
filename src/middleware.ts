@@ -3,23 +3,13 @@ import { NextResponse } from 'next/server';
 
 export default auth((req) => {
   const isLoggedIn = !!req.auth;
-  const hasRiotAccount = !!(req.auth as any)?.user?.riotPuuid || !!(req.auth as any)?.riotPuuid;
   const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard');
   const isOnLinkRiot = req.nextUrl.pathname === '/link-riot';
   const isOnLogin = req.nextUrl.pathname === '/login';
 
-  // Check if URL has Riot account params (from linking redirect)
-  const hasRiotParams = req.nextUrl.searchParams.has('gameName') && req.nextUrl.searchParams.has('tagLine');
-
   // If trying to access dashboard without being logged in
   if (isOnDashboard && !isLoggedIn) {
     return NextResponse.redirect(new URL('/login', req.url));
-  }
-
-  // If trying to access dashboard without a Riot account linked
-  // BUT allow if URL has riot params (just linked)
-  if (isOnDashboard && isLoggedIn && !hasRiotAccount && !hasRiotParams) {
-    return NextResponse.redirect(new URL('/link-riot', req.url));
   }
 
   // If trying to access link-riot without being logged in
@@ -27,18 +17,10 @@ export default auth((req) => {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  // If on link-riot but already has a Riot account, go to dashboard
-  if (isOnLinkRiot && isLoggedIn && hasRiotAccount) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
-
-  // If logged in and trying to access login page
+  // If logged in and trying to access login page, redirect to dashboard
+  // The dashboard page will handle redirect to link-riot if needed
   if (isOnLogin && isLoggedIn) {
-    // Redirect to dashboard if has Riot account, otherwise to link-riot
-    if (hasRiotAccount) {
-      return NextResponse.redirect(new URL('/dashboard', req.url));
-    }
-    return NextResponse.redirect(new URL('/link-riot', req.url));
+    return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 
   return NextResponse.next();
