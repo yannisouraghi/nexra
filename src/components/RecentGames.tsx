@@ -14,6 +14,7 @@ import { MatchCardSkeletonList } from './skeletons/MatchCardSkeleton';
 import StatsGridSkeleton from './skeletons/StatsGridSkeleton';
 import NavigationTabsSkeleton from './skeletons/NavigationTabsSkeleton';
 import NexraVisionStatus from './NexraVisionStatus';
+import CreditsDisplay from './CreditsDisplay';
 
 interface RiotAccount {
   gameName: string;
@@ -378,6 +379,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
                     <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <CreditsDisplay />
                   </div>
                 </aside>
 
@@ -523,6 +525,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
                     <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <CreditsDisplay />
                   </div>
                 </aside>
 
@@ -640,6 +643,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
                     <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <CreditsDisplay />
                   </div>
                 </aside>
 
