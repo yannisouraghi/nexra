@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
-  title: "Nexra - League of Legends Stats Tracker",
-  description: "Track your League of Legends stats and recent games",
+  title: "Nexra - AI-Powered League of Legends Coach",
+  description: "Advanced AI coaching for League of Legends. Record your games, get personalized analysis, and climb the ranks.",
   icons: {
     icon: [
       { url: "/nexra-ico.ico", sizes: "any" },
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

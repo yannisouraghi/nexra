@@ -51,6 +51,3 @@ next-env.d.ts
 tmpclaude-*
 nul
 *.txt
-
-# Large video files
-public/hero-cinematic.mp4
