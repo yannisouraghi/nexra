@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -29,12 +29,39 @@ const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-ap
 
 export default function LinkRiotPage() {
   const router = useRouter();
-  const { data: session, update: updateSession } = useSession();
+  const { data: session, status, update: updateSession } = useSession();
   const [gameName, setGameName] = useState('');
   const [tagLine, setTagLine] = useState('');
   const [region, setRegion] = useState('euw1');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Check if user already has a linked Riot account
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    const user = session?.user as any;
+    if (user?.riotPuuid) {
+      // User already has a linked account, redirect to dashboard
+      router.push('/dashboard');
+      return;
+    }
+
+    // Check localStorage for previously linked account
+    const savedAccount = localStorage.getItem('nexra_riot_account');
+    if (savedAccount) {
+      try {
+        const parsed = JSON.parse(savedAccount);
+        if (parsed.gameName && parsed.tagLine) {
+          setGameName(parsed.gameName);
+          setTagLine(parsed.tagLine);
+          if (parsed.region) setRegion(parsed.region);
+        }
+      } catch (e) {
+        // Invalid localStorage data, ignore
+      }
+    }
+  }, [session, status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,6 +126,23 @@ export default function LinkRiotPage() {
     localStorage.removeItem('nexra_riot_account');
     signOut({ callbackUrl: '/' });
   };
+
+  // Show loading while checking session
+  if (status === 'loading') {
+    return (
+      <div className="auth-page">
+        <AnimatedBackground />
+        <div className="auth-container">
+          <div className="auth-card">
+            <div className="auth-card-glow"></div>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+              <span className="auth-spinner" style={{ width: '2rem', height: '2rem' }}></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
