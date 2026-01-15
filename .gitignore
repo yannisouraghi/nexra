@@ -50,4 +50,7 @@ next-env.d.ts
 # Temp files
 tmpclaude-*
 nul
+
+# Exclude txt files except riot.txt
 *.txt
+!public/riot.txt
