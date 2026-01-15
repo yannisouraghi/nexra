@@ -26,21 +26,7 @@ function DashboardContent() {
       return;
     }
 
-    // Priority 1: Check session for Riot account (from database)
-    const user = session?.user as any;
-    if (user?.riotGameName && user?.riotTagLine) {
-      const accountData = {
-        gameName: user.riotGameName,
-        tagLine: user.riotTagLine,
-        region: user.riotRegion || 'euw1',
-      };
-      // Sync to localStorage
-      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
-      setRiotAccount(accountData);
-      return;
-    }
-
-    // Priority 2: Check URL params (after linking redirect)
+    // Priority 1: Check URL params FIRST (after linking redirect)
     const gameName = searchParams.get('gameName');
     const tagLine = searchParams.get('tagLine');
     const region = searchParams.get('region') || 'euw1';
@@ -52,7 +38,7 @@ function DashboardContent() {
       return;
     }
 
-    // Priority 3: Check localStorage (fallback)
+    // Priority 2: Check localStorage (persisted from previous session)
     const saved = localStorage.getItem('nexra_riot_account');
     if (saved) {
       try {
@@ -64,6 +50,19 @@ function DashboardContent() {
       } catch (e) {
         console.error('Failed to parse saved riot account:', e);
       }
+    }
+
+    // Priority 3: Check session for Riot account (from database)
+    const user = session?.user as any;
+    if (user?.riotGameName && user?.riotTagLine) {
+      const accountData = {
+        gameName: user.riotGameName,
+        tagLine: user.riotTagLine,
+        region: user.riotRegion || 'euw1',
+      };
+      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
+      setRiotAccount(accountData);
+      return;
     }
 
     // No account found anywhere, redirect to link-riot page
