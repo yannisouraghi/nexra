@@ -110,11 +110,13 @@ export default function LinkRiotPage() {
       }));
 
       // Step 4: Update the session to reflect the linked account
-      await updateSession();
+      // Force session refresh by triggering a re-fetch
+      await updateSession({ riotLinked: true });
 
-      // Step 5: Redirect to dashboard
+      // Step 5: Redirect to dashboard with params (ensures data is available immediately)
       const params = new URLSearchParams({ gameName, tagLine, region });
-      router.push(`/dashboard?${params.toString()}`);
+      // Use window.location for full page reload to ensure fresh session
+      window.location.href = `/dashboard?${params.toString()}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to link account');
     } finally {
