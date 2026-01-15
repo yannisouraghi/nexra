@@ -7,7 +7,9 @@ export default auth((req) => {
   const isOnDashboard = req.nextUrl.pathname.startsWith('/dashboard');
   const isOnLinkRiot = req.nextUrl.pathname === '/link-riot';
   const isOnLogin = req.nextUrl.pathname === '/login';
-  const isOnHome = req.nextUrl.pathname === '/';
+
+  // Check if URL has Riot account params (from linking redirect)
+  const hasRiotParams = req.nextUrl.searchParams.has('gameName') && req.nextUrl.searchParams.has('tagLine');
 
   // If trying to access dashboard without being logged in
   if (isOnDashboard && !isLoggedIn) {
@@ -15,7 +17,8 @@ export default auth((req) => {
   }
 
   // If trying to access dashboard without a Riot account linked
-  if (isOnDashboard && isLoggedIn && !hasRiotAccount) {
+  // BUT allow if URL has riot params (just linked)
+  if (isOnDashboard && isLoggedIn && !hasRiotAccount && !hasRiotParams) {
     return NextResponse.redirect(new URL('/link-riot', req.url));
   }
 
