@@ -109,17 +109,13 @@ export default function LinkRiotPage() {
         profileIconId: summonerData.profileIconId,
       }));
 
-      // Step 4: Update the session to reflect the linked account
-      // Force session refresh by triggering a re-fetch
-      await updateSession({ riotLinked: true });
-
-      // Step 5: Redirect to dashboard with params (ensures data is available immediately)
+      // Step 4: Redirect to dashboard immediately (session will refresh on page load)
       const params = new URLSearchParams({ gameName, tagLine, region });
-      // Use window.location for full page reload to ensure fresh session
-      window.location.href = `/dashboard?${params.toString()}`;
+      window.location.replace(`/dashboard?${params.toString()}`);
+      return; // Prevent further execution
     } catch (err) {
+      console.error('Link account error:', err);
       setError(err instanceof Error ? err.message : 'Failed to link account');
-    } finally {
       setIsLoading(false);
     }
   };
