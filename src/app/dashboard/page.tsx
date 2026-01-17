@@ -7,6 +7,8 @@ import RecentGames from '@/components/RecentGames';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import OnboardingModal from '@/components/OnboardingModal';
 
+const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -17,6 +19,7 @@ function DashboardContent() {
     region: string;
   } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Wait for session to load
@@ -31,14 +34,17 @@ function DashboardContent() {
     const user = session?.user as any;
     const currentUserId = user?.id;
 
+    if (!currentUserId) {
+      setIsLoading(false);
+      return;
+    }
+
     // First, clean up any stale localStorage data from a different user
     const saved = localStorage.getItem('nexra_riot_account');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // If localStorage belongs to a different user, clear it
         if (parsed.userId && parsed.userId !== currentUserId) {
-          console.log('Clearing stale localStorage data from different user');
           localStorage.removeItem('nexra_riot_account');
         }
       } catch (e) {
@@ -55,39 +61,73 @@ function DashboardContent() {
       const accountData = { gameName, tagLine, region, userId: currentUserId };
       localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
       setRiotAccount(accountData);
+      setIsLoading(false);
       return;
     }
 
-    // Priority 2: Check session for Riot account (from database) - SOURCE OF TRUTH
-    if (user?.riotGameName && user?.riotTagLine) {
-      const accountData = {
-        gameName: user.riotGameName,
-        tagLine: user.riotTagLine,
-        region: user.riotRegion || 'euw1',
-        userId: currentUserId,
-      };
-      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
-      setRiotAccount(accountData);
-      return;
-    }
-
-    // Priority 3: Check localStorage (backup/cache) - only if it belongs to current user
-    const savedAfterCleanup = localStorage.getItem('nexra_riot_account');
-    if (savedAfterCleanup) {
+    // Priority 2: Fetch user data from backend (SOURCE OF TRUTH)
+    const fetchUserData = async () => {
       try {
-        const parsed = JSON.parse(savedAfterCleanup);
-        // Only use localStorage if it belongs to current user (or has no userId - legacy data)
-        if (parsed.gameName && parsed.tagLine && (!parsed.userId || parsed.userId === currentUserId)) {
-          setRiotAccount(parsed);
-          return;
-        }
-      } catch (e) {
-        console.error('Failed to parse saved riot account:', e);
-      }
-    }
+        console.log('Fetching user data from backend for:', currentUserId);
+        const response = await fetch(`${NEXRA_API_URL}/users/${currentUserId}`);
 
-    // No account found anywhere, redirect to link-riot page
-    router.push('/link-riot');
+        if (response.ok) {
+          const data = await response.json();
+          console.log('User data from DB:', data);
+
+          if (data.success && data.data?.riotGameName && data.data?.riotTagLine) {
+            const accountData = {
+              gameName: data.data.riotGameName,
+              tagLine: data.data.riotTagLine,
+              region: data.data.riotRegion || 'euw1',
+              userId: currentUserId,
+            };
+            localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
+            setRiotAccount(accountData);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Priority 3: Check localStorage (backup/cache)
+        const savedAfterCleanup = localStorage.getItem('nexra_riot_account');
+        if (savedAfterCleanup) {
+          try {
+            const parsed = JSON.parse(savedAfterCleanup);
+            if (parsed.gameName && parsed.tagLine && (!parsed.userId || parsed.userId === currentUserId)) {
+              setRiotAccount(parsed);
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Failed to parse saved riot account:', e);
+          }
+        }
+
+        // No account found anywhere, redirect to link-riot page
+        console.log('No Riot account found, redirecting to link-riot');
+        router.push('/link-riot');
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        // On error, try localStorage as fallback
+        const savedAfterCleanup = localStorage.getItem('nexra_riot_account');
+        if (savedAfterCleanup) {
+          try {
+            const parsed = JSON.parse(savedAfterCleanup);
+            if (parsed.gameName && parsed.tagLine) {
+              setRiotAccount(parsed);
+              setIsLoading(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Failed to parse saved riot account:', e);
+          }
+        }
+        router.push('/link-riot');
+      }
+    };
+
+    fetchUserData();
   }, [searchParams, router, status, session]);
 
   // Check if user needs onboarding (first-time user)

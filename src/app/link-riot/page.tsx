@@ -38,66 +38,70 @@ function getAuthHeaders(userId?: string, email?: string): HeadersInit {
 
 export default function LinkRiotPage() {
   const router = useRouter();
-  const { data: session, status, update: updateSession } = useSession();
+  const { data: session, status } = useSession();
   const [gameName, setGameName] = useState('');
   const [tagLine, setTagLine] = useState('');
   const [region, setRegion] = useState('euw1');
   const [isLoading, setIsLoading] = useState(false);
+  const [checkingAccount, setCheckingAccount] = useState(true);
   const [error, setError] = useState('');
 
-  // Check if user already has a linked Riot account (from session/database)
+  // Check if user already has a linked Riot account by fetching from database
   useEffect(() => {
     if (status === 'loading') return;
+    if (!session?.user?.id) {
+      setCheckingAccount(false);
+      return;
+    }
 
     // Check if user just unlinked their account - don't redirect
     const justUnlinked = localStorage.getItem('nexra_riot_unlinked');
     if (justUnlinked) {
       localStorage.removeItem('nexra_riot_unlinked');
-      // Also clear any stale localStorage data
       localStorage.removeItem('nexra_riot_account');
-      return; // Stay on link-riot page
-    }
-
-    // ONLY trust the session/database for Riot account info
-    // localStorage is just a cache and must match the current user
-    const user = session?.user as any;
-    const currentUserId = user?.id;
-
-    // Check localStorage but verify it belongs to current user
-    const savedAccount = localStorage.getItem('nexra_riot_account');
-    if (savedAccount) {
-      try {
-        const parsed = JSON.parse(savedAccount);
-        // If localStorage has a different user's data, clear it
-        if (parsed.userId && parsed.userId !== currentUserId) {
-          console.log('Clearing stale localStorage data from different user');
-          localStorage.removeItem('nexra_riot_account');
-        }
-      } catch (e) {
-        localStorage.removeItem('nexra_riot_account');
-      }
-    }
-
-    // Priority 1: Check session for Riot account (from database) - this is the source of truth
-    if (user?.riotGameName && user?.riotTagLine) {
-      // User has a linked Riot account in the database, update localStorage and redirect
-      const accountData = {
-        gameName: user.riotGameName,
-        tagLine: user.riotTagLine,
-        region: user.riotRegion || 'euw1',
-        puuid: user.riotPuuid,
-        userId: currentUserId, // Store user ID to verify ownership
-      };
-      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
-      router.push('/dashboard');
+      setCheckingAccount(false);
       return;
     }
 
-    // If no Riot account in session, clear any stale localStorage data
-    // The database is the source of truth, not localStorage
-    localStorage.removeItem('nexra_riot_account');
+    // Fetch user data directly from backend to check for Riot account
+    const checkRiotAccount = async () => {
+      try {
+        const userId = session.user.id;
+        console.log('Checking Riot account for user:', userId);
 
-    // User needs to link their Riot account - stay on this page
+        const response = await fetch(`${NEXRA_API_URL}/users/${userId}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('User data from DB:', data);
+
+          if (data.success && data.data?.riotGameName && data.data?.riotTagLine) {
+            // User has a linked Riot account in the database
+            console.log('User has Riot account, redirecting to dashboard');
+            const accountData = {
+              gameName: data.data.riotGameName,
+              tagLine: data.data.riotTagLine,
+              region: data.data.riotRegion || 'euw1',
+              puuid: data.data.riotPuuid,
+              userId: userId,
+            };
+            localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
+            router.push('/dashboard');
+            return;
+          }
+        }
+
+        // No Riot account found - stay on this page
+        console.log('No Riot account found, staying on link page');
+        localStorage.removeItem('nexra_riot_account');
+        setCheckingAccount(false);
+      } catch (err) {
+        console.error('Error checking Riot account:', err);
+        setCheckingAccount(false);
+      }
+    };
+
+    checkRiotAccount();
   }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,16 +178,17 @@ export default function LinkRiotPage() {
     signOut({ callbackUrl: '/' });
   };
 
-  // Show loading while checking session
-  if (status === 'loading') {
+  // Show loading while checking session or checking for Riot account
+  if (status === 'loading' || checkingAccount) {
     return (
       <div className="auth-page">
         <AnimatedBackground />
         <div className="auth-container">
           <div className="auth-card">
             <div className="auth-card-glow"></div>
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '3rem', gap: '1rem' }}>
               <span className="auth-spinner" style={{ width: '2rem', height: '2rem' }}></span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.875rem' }}>Checking account...</span>
             </div>
           </div>
         </div>
