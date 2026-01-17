@@ -503,7 +503,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       <AnimatedBackground />
 
       {/* Top Bar - Fixed at top right, responsive */}
-      <div className="fixed z-50 flex items-center" style={{ top: '0.75rem', right: '1rem', left: 'auto', gap: '0.375rem' }}>
+      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '0.75rem', right: '1rem', left: 'auto', gap: '0.375rem' }}>
         {/* User Email - hidden on mobile, truncated on desktop */}
         {session?.user?.email && (
           <span className="hidden sm:block" style={{

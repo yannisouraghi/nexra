@@ -65,21 +65,37 @@ function DashboardContent() {
       return;
     }
 
-    // Priority 2: Fetch user data from backend (SOURCE OF TRUTH)
+    // Priority 2: Sync user with backend and get their data (SOURCE OF TRUTH)
+    // Uses /users/auth which creates user if not exists
     const fetchUserData = async () => {
       try {
-        console.log('Fetching user data from backend for:', currentUserId);
-        const response = await fetch(`${NEXRA_API_URL}/users/${currentUserId}`);
+        const userEmail = (user as any).email;
+        const userName = (user as any).name;
+        const userImage = (user as any).image;
+
+        console.log('Syncing user with backend:', currentUserId, userEmail);
+
+        const response = await fetch(`${NEXRA_API_URL}/users/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentUserId,
+            email: userEmail,
+            name: userName,
+            image: userImage,
+          }),
+        });
 
         if (response.ok) {
           const data = await response.json();
-          console.log('User data from DB:', data);
+          console.log('User data from /users/auth:', data);
 
-          if (data.success && data.data?.riotGameName && data.data?.riotTagLine) {
+          // Check for Riot account (fields are snake_case from DB)
+          if (data.success && data.user?.riot_game_name && data.user?.riot_tag_line) {
             const accountData = {
-              gameName: data.data.riotGameName,
-              tagLine: data.data.riotTagLine,
-              region: data.data.riotRegion || 'euw1',
+              gameName: data.user.riot_game_name,
+              tagLine: data.user.riot_tag_line,
+              region: data.user.riot_region || 'euw1',
               userId: currentUserId,
             };
             localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));

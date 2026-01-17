@@ -483,20 +483,99 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
         {/* Rank Section */}
         {rank && rankImageUrl ? (
           <div style={styles.rankSection}>
-            <div style={styles.rankDisplay}>
-              <div style={styles.rankEmblem}>
-                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={styles.rankEmblemImg} />
-              </div>
-              <div style={styles.rankInfo}>
-                <h2 style={{ ...styles.rankTier, color: tierColor }}>
-                  {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
-                </h2>
-                <p style={styles.rankSubtitle}>Ranked Solo/Duo</p>
-                <div style={styles.lpRow}>
-                  <span style={styles.lpValue}>{rank.leaguePoints}</span>
-                  <span style={styles.lpLabel}>LP</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+              {/* Rank Emblem + Info */}
+              <div style={styles.rankDisplay}>
+                <div style={styles.rankEmblem}>
+                  <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={styles.rankEmblemImg} />
+                </div>
+                <div style={styles.rankInfo}>
+                  <h2 style={{ ...styles.rankTier, color: tierColor }}>
+                    {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
+                  </h2>
+                  <p style={styles.rankSubtitle}>Ranked Solo/Duo</p>
+                  <div style={styles.lpRow}>
+                    <span style={styles.lpValue}>{rank.leaguePoints}</span>
+                    <span style={styles.lpLabel}>LP</span>
+                  </div>
                 </div>
               </div>
+
+              {/* Player Stats - Recent Performance & Top Champions */}
+              {playerStats && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flex: 1, minWidth: 0 }}>
+                  {/* Recent Performance */}
+                  {playerStats.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <div style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                        Recent
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {playerStats.recentMatchResults.slice(0, 5).map((isWin, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              backgroundColor: isWin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                              border: `2px solid ${isWin ? '#22c55e' : '#ef4444'}`,
+                              color: isWin ? '#22c55e' : '#ef4444',
+                            }}
+                          >
+                            {isWin ? 'W' : 'L'}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Top Champions */}
+                  {playerStats.topChampions && playerStats.topChampions.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                        Top Champions
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
+                          <div
+                            key={idx}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              padding: '0.375rem 0.5rem',
+                              borderRadius: '0.5rem',
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+                              border: `1px solid ${champion.winrate >= 60 ? 'rgba(34, 197, 94, 0.3)' : champion.winrate >= 50 ? 'rgba(234, 179, 8, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                            }}
+                          >
+                            <img
+                              src={getChampionImageUrl(champion.championName, ddragonVersion)}
+                              alt={champion.championName}
+                              style={{ width: '28px', height: '28px', borderRadius: '0.25rem' }}
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: '40px' }}>
+                              <div style={{ fontSize: '10px', fontWeight: 700, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '50px' }}>
+                                {champion.championName}
+                              </div>
+                              <span style={{ fontSize: '10px', fontWeight: 700, color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
+                                {champion.winrate}%
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div style={styles.statsGrid}>

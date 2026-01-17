@@ -63,26 +63,41 @@ export default function LinkRiotPage() {
       return;
     }
 
-    // Fetch user data directly from backend to check for Riot account
+    // Use /users/auth to sync user and check for Riot account
+    // This endpoint creates the user if they don't exist and returns their data
     const checkRiotAccount = async () => {
       try {
         const userId = session.user.id;
-        console.log('Checking Riot account for user:', userId);
+        const userEmail = (session.user as any).email;
+        const userName = (session.user as any).name;
+        const userImage = (session.user as any).image;
 
-        const response = await fetch(`${NEXRA_API_URL}/users/${userId}`);
+        console.log('Syncing user and checking Riot account for:', userId, userEmail);
+
+        // Call /users/auth which creates user if not exists and returns their data
+        const response = await fetch(`${NEXRA_API_URL}/users/auth`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: userId,
+            email: userEmail,
+            name: userName,
+            image: userImage,
+          }),
+        });
 
         if (response.ok) {
           const data = await response.json();
-          console.log('User data from DB:', data);
+          console.log('User data from /users/auth:', data);
 
-          if (data.success && data.data?.riotGameName && data.data?.riotTagLine) {
-            // User has a linked Riot account in the database
+          // Check if user has Riot account (fields are snake_case from DB)
+          if (data.success && data.user?.riot_game_name && data.user?.riot_tag_line) {
             console.log('User has Riot account, redirecting to dashboard');
             const accountData = {
-              gameName: data.data.riotGameName,
-              tagLine: data.data.riotTagLine,
-              region: data.data.riotRegion || 'euw1',
-              puuid: data.data.riotPuuid,
+              gameName: data.user.riot_game_name,
+              tagLine: data.user.riot_tag_line,
+              region: data.user.riot_region || 'euw1',
+              puuid: data.user.riot_puuid,
               userId: userId,
             };
             localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
