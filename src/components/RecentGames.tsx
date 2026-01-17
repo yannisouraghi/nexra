@@ -17,6 +17,7 @@ import { MatchCardSkeletonList } from './skeletons/MatchCardSkeleton';
 import StatsGridSkeleton from './skeletons/StatsGridSkeleton';
 import NavigationTabsSkeleton from './skeletons/NavigationTabsSkeleton';
 import CreditsDisplay from './CreditsDisplay';
+import SettingsModal from './SettingsModal';
 
 interface RiotAccount {
   gameName: string;
@@ -119,6 +120,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   const [championSortBy, setChampionSortBy] = useState<'games' | 'winrate' | 'kda'>('games');
   const [isInGame, setIsInGame] = useState(false);
   const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [summonerData, setSummonerData] = useState<{
     profileIconId: number;
     summonerLevel: number;
@@ -502,33 +504,39 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       {/* Fond animé avec étoiles */}
       <AnimatedBackground />
 
-      {/* Top Bar - Fixed at top right, responsive */}
-      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '0.75rem', right: '1rem', left: 'auto', gap: '0.375rem' }}>
-        {/* User Email - hidden on mobile, truncated on desktop */}
-        {session?.user?.email && (
-          <span className="hidden sm:block" style={{
-            fontSize: '0.7rem',
-            color: 'rgba(255, 255, 255, 0.4)',
-            marginRight: '0.25rem',
-            maxWidth: '120px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {session.user.email}
-          </span>
-        )}
-
+      {/* Top Bar - Fixed at top right */}
+      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '0.75rem', right: '1rem', left: 'auto', gap: '0.5rem' }}>
         {/* Settings Button */}
         <button
-          onClick={() => router.push('/settings')}
-          className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all duration-300"
-          style={{ padding: '0.4rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setShowSettingsModal(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.5rem',
+            borderRadius: '0.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(10, 10, 20, 0.8)',
+            backdropFilter: 'blur(8px)',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'rgb(192, 132, 252)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.backgroundColor = 'rgba(10, 10, 20, 0.8)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'rgba(255, 255, 255, 0.7)';
+          }}
           title="Settings"
         >
           <svg
-            className="group-hover:text-purple-400 transition-all group-hover:rotate-90 duration-500"
-            style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.6)' }}
+            style={{ width: '22px', height: '22px', color: 'rgba(255, 255, 255, 0.7)', transition: 'all 0.3s' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -541,13 +549,34 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-300"
-          style={{ padding: '0.4rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0.5rem',
+            borderRadius: '0.5rem',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: 'rgba(10, 10, 20, 0.8)',
+            backdropFilter: 'blur(8px)',
+            cursor: 'pointer',
+            transition: 'all 0.3s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'rgb(248, 113, 113)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.backgroundColor = 'rgba(10, 10, 20, 0.8)';
+            const svg = e.currentTarget.querySelector('svg');
+            if (svg) svg.style.color = 'rgba(255, 255, 255, 0.7)';
+          }}
           title="Logout"
         >
           <svg
-            className="group-hover:text-red-400 transition-all duration-300"
-            style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.6)' }}
+            style={{ width: '22px', height: '22px', color: 'rgba(255, 255, 255, 0.7)', transition: 'all 0.3s' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -908,6 +937,9 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
           </div>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
     </div>
   );
 }

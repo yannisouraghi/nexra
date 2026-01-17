@@ -64,10 +64,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account, trigger }) {
       // First time login - set basic user info
       if (user && account) {
-        token.id = user.id;
+        // For Google OAuth, use 'sub' from account if user.id is not set
+        token.id = user.id || (account.providerAccountId);
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
+        console.log('[AUTH] First login - userId:', token.id, 'email:', token.email, 'provider:', account.provider);
       }
 
       // Always fetch latest user data from backend (on login and session refresh)
