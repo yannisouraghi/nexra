@@ -92,6 +92,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const data = await response.json();
             // Update token with latest user data from database
             if (data.user) {
+              // IMPORTANT: Use the database ID, not the OAuth provider ID
+              // This ensures consistency with foreign key references
+              if (data.user.id) {
+                token.id = data.user.id;
+                console.log('[AUTH] Using database ID:', token.id);
+              }
               token.riotPuuid = data.user.riot_puuid || null;
               token.riotGameName = data.user.riot_game_name || null;
               token.riotTagLine = data.user.riot_tag_line || null;
