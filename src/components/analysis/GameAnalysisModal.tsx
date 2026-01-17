@@ -6,16 +6,14 @@ import { getChampionImageUrl } from '@/utils/ddragon';
 import Image from 'next/image';
 import ErrorsList from './ErrorsList';
 import CoachingTips from './CoachingTips';
-import VideoClipPlayer from './VideoClipPlayer';
 import StatsComparison from './StatsComparison';
-import DeathClipsSection from './DeathClipsSection';
 
 interface GameAnalysisModalProps {
   analysis: GameAnalysis;
   onClose: () => void;
 }
 
-type TabType = 'summary' | 'deaths' | 'errors' | 'tips' | 'clips' | 'stats';
+type TabType = 'summary' | 'errors' | 'tips' | 'stats';
 
 export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('summary');
@@ -51,14 +49,10 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
 
   const performanceSummary = analysis.stats?.performanceSummary;
 
-  const deathClipsCount = analysis.clips?.filter(c => c.type === 'death').length || 0;
-
   const tabs: { id: TabType; label: string; count?: number }[] = [
-    { id: 'summary', label: 'Résumé' },
-    { id: 'deaths', label: 'Morts', count: deathClipsCount },
-    { id: 'errors', label: 'Erreurs', count: analysis.errors?.length || 0 },
-    { id: 'tips', label: 'Conseils', count: analysis.tips?.length || 0 },
-    { id: 'clips', label: 'Clips Vidéo', count: analysis.clips?.length || 0 },
+    { id: 'summary', label: 'Summary' },
+    { id: 'errors', label: 'Errors', count: analysis.errors?.length || 0 },
+    { id: 'tips', label: 'Tips', count: analysis.tips?.length || 0 },
     { id: 'stats', label: 'Stats' },
   ];
 
@@ -106,7 +100,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                     backgroundColor: isWin ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 51, 102, 0.2)',
                     color: isWin ? '#00ff88' : '#ff3366',
                   }}>
-                    {isWin ? 'VICTOIRE' : 'DÉFAITE'}
+                    {isWin ? 'VICTORY' : 'DEFEAT'}
                   </span>
                 </div>
                 <div style={styles.metaRow}>
@@ -192,12 +186,12 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                       <svg width="20" height="20" fill="none" stroke="#00d4ff" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                      Évaluation Globale
+                      Overall Assessment
                     </h3>
                     <p style={styles.cardText}>{performanceSummary.overallAssessment}</p>
                     {performanceSummary.estimatedRank && (
                       <div style={styles.rankRow}>
-                        <span style={styles.rankLabel}>Rang estimé:</span>
+                        <span style={styles.rankLabel}>Estimated rank:</span>
                         <span style={styles.rankValue}>{performanceSummary.estimatedRank}</span>
                       </div>
                     )}
@@ -211,7 +205,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Points Forts
+                        Strengths
                       </h4>
                       <ul style={styles.list}>
                         {performanceSummary.strengths.map((strength, i) => (
@@ -229,7 +223,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
-                        Points à Améliorer
+                        Areas to Improve
                       </h4>
                       <ul style={styles.list}>
                         {performanceSummary.weaknesses.map((weakness, i) => (
@@ -248,13 +242,13 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                       <svg width="20" height="20" fill="none" stroke="#ffd700" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                       </svg>
-                      Plan d&apos;Amélioration
+                      Improvement Plan
                     </h3>
                     <div style={styles.planGrid}>
                       {/* Immediate */}
                       <div style={styles.planSection}>
                         <h5 style={{ ...styles.planTitle, color: '#00d4ff' }}>
-                          Immédiat (Prochaine Game)
+                          Immediate (Next Game)
                         </h5>
                         <ul style={styles.planList}>
                           {performanceSummary.improvementPlan.immediate.map((item, i) => (
@@ -268,7 +262,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                       {/* Short Term */}
                       <div style={styles.planSection}>
                         <h5 style={{ ...styles.planTitle, color: '#a855f7' }}>
-                          Court Terme (Cette Semaine)
+                          Short Term (This Week)
                         </h5>
                         <ul style={styles.planList}>
                           {performanceSummary.improvementPlan.shortTerm.map((item, i) => (
@@ -282,7 +276,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                       {/* Long Term */}
                       <div style={styles.planSection}>
                         <h5 style={{ ...styles.planTitle, color: '#f97316' }}>
-                          Long Terme (Ce Mois)
+                          Long Term (This Month)
                         </h5>
                         <ul style={styles.planList}>
                           {performanceSummary.improvementPlan.longTerm.map((item, i) => (
@@ -302,7 +296,7 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                           </svg>
                           <div>
-                            <span style={styles.tipLabel}>Conseil pour Monter</span>
+                            <span style={styles.tipLabel}>Tip to Climb</span>
                             <p style={styles.tipText}>{performanceSummary.rankUpTip}</p>
                           </div>
                         </div>
@@ -320,22 +314,16 @@ export default function GameAnalysisModal({ analysis, onClose }: GameAnalysisMod
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <p style={styles.emptyText}>Le résumé de performance sera disponible avec les prochaines analyses.</p>
+                  <p style={styles.emptyText}>The performance summary will be available with next analyses.</p>
                 </div>
               )}
             </div>
-          )}
-          {activeTab === 'deaths' && analysis.clips && (
-            <DeathClipsSection clips={analysis.clips} matchId={analysis.matchId} />
           )}
           {activeTab === 'errors' && analysis.errors && (
             <ErrorsList errors={analysis.errors} matchId={analysis.matchId} />
           )}
           {activeTab === 'tips' && analysis.tips && (
             <CoachingTips tips={analysis.tips} />
-          )}
-          {activeTab === 'clips' && analysis.clips && (
-            <VideoClipPlayer clips={analysis.clips} matchId={analysis.matchId} />
           )}
           {activeTab === 'stats' && analysis.stats && (
             <StatsComparison stats={analysis.stats} />

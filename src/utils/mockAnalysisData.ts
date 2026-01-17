@@ -5,7 +5,6 @@ import {
   AnalyzedGameSummary,
   GameError,
   CoachingTip,
-  VideoClip,
   AnalysisStats,
   ErrorType,
   ErrorSeverity,
@@ -21,11 +20,6 @@ const mockErrors: GameError[] = [
     description: 'You were positioned too far forward without vision of the enemy jungler. This allowed the enemy team to collapse on you, resulting in your death and losing the teamfight.',
     timestamp: 847,
     suggestion: 'Stay behind your frontline and wait for key enemy abilities to be used before moving forward. Always check minimap for missing enemies.',
-    videoClip: {
-      start: 842,
-      end: 858,
-      url: '/mock-clips/positioning-error-1.mp4',
-    },
   },
   {
     id: 'err-2',
@@ -35,11 +29,6 @@ const mockErrors: GameError[] = [
     description: 'You missed a cannon minion worth 60+ gold while farming under tower. The tower took 2 shots before you auto-attacked.',
     timestamp: 312,
     suggestion: 'For cannon minions under tower: let tower hit twice, then auto-attack. Practice last-hitting under tower in practice tool.',
-    videoClip: {
-      start: 308,
-      end: 318,
-      url: '/mock-clips/cs-error-1.mp4',
-    },
   },
   {
     id: 'err-3',
@@ -49,11 +38,6 @@ const mockErrors: GameError[] = [
     description: 'Your team started Dragon without clearing enemy vision or establishing control wards. The enemy team was able to contest because they saw your team on the objective.',
     timestamp: 1205,
     suggestion: 'Before starting any objective, sweep the area with Oracle Lens and place a control ward. This denies enemy vision and allows for safer objective takes.',
-    videoClip: {
-      start: 1195,
-      end: 1230,
-      url: '/mock-clips/vision-error-1.mp4',
-    },
   },
   {
     id: 'err-4',
@@ -63,11 +47,6 @@ const mockErrors: GameError[] = [
     description: 'You traded into the enemy when they had minion advantage. You took 150 extra damage from minions, losing the trade significantly.',
     timestamp: 185,
     suggestion: 'Always check minion count before trading. Having 4+ more enemy minions means you should avoid extended trades.',
-    videoClip: {
-      start: 180,
-      end: 195,
-      url: '/mock-clips/trading-error-1.mp4',
-    },
   },
   {
     id: 'err-5',
@@ -77,11 +56,6 @@ const mockErrors: GameError[] = [
     description: 'Enemy jungler was visible on a ward 10 seconds before the gank, but you continued pushing without backing off. This resulted in a death.',
     timestamp: 456,
     suggestion: 'Glance at your minimap every 3-5 seconds. When you see the enemy jungler, immediately adjust your position.',
-    videoClip: {
-      start: 446,
-      end: 468,
-      url: '/mock-clips/map-awareness-error-1.mp4',
-    },
   },
   {
     id: 'err-6',
@@ -91,11 +65,6 @@ const mockErrors: GameError[] = [
     description: 'Your team started Baron when 3 enemies were alive and their jungler had Smite available. This is a high-risk call that resulted in a Baron steal.',
     timestamp: 1845,
     suggestion: 'Ideal Baron timing: enemy jungler dead, or at least 3 enemies dead. Always track enemy jungler before starting Baron.',
-    videoClip: {
-      start: 1835,
-      end: 1870,
-      url: '/mock-clips/objective-error-1.mp4',
-    },
   },
   {
     id: 'err-7',
@@ -166,50 +135,6 @@ const mockTips: CoachingTip[] = [
   },
 ];
 
-// Mock video clips
-const mockClips: VideoClip[] = [
-  {
-    id: 'clip-1',
-    type: 'error',
-    timestamp: 847,
-    duration: 16,
-    title: 'Teamfight positioning error',
-    description: 'Critical positioning mistake leading to death',
-    url: '/mock-clips/teamfight-death.mp4',
-    thumbnailUrl: '/mock-thumbnails/teamfight-death.jpg',
-  },
-  {
-    id: 'clip-2',
-    type: 'death',
-    timestamp: 456,
-    duration: 22,
-    title: 'Gank death - No map awareness',
-    description: 'Died to gank despite ward vision',
-    url: '/mock-clips/gank-death.mp4',
-    thumbnailUrl: '/mock-thumbnails/gank-death.jpg',
-  },
-  {
-    id: 'clip-3',
-    type: 'error',
-    timestamp: 1845,
-    duration: 35,
-    title: 'Baron stolen',
-    description: 'Poor Baron call resulting in steal',
-    url: '/mock-clips/baron-steal.mp4',
-    thumbnailUrl: '/mock-thumbnails/baron-steal.jpg',
-  },
-  {
-    id: 'clip-4',
-    type: 'highlight',
-    timestamp: 1520,
-    duration: 18,
-    title: 'Triple kill in teamfight',
-    description: 'Good positioning leading to multi-kill',
-    url: '/mock-clips/triple-kill.mp4',
-    thumbnailUrl: '/mock-thumbnails/triple-kill.jpg',
-  },
-];
-
 // Mock analysis stats
 const mockStats: AnalysisStats = {
   overallScore: 68,
@@ -248,7 +173,6 @@ export const mockGameAnalysis: GameAnalysis = {
   stats: mockStats,
   errors: mockErrors,
   tips: mockTips,
-  clips: mockClips,
 };
 
 // List of analyzed games summaries
@@ -454,18 +378,6 @@ export const mockGameAnalysis2: GameAnalysis = {
       description: 'You used Caitlyn\'s range advantage well in lane. Your headshot management was particularly good.',
       priority: 2,
       icon: 'swords',
-    },
-  ],
-  clips: [
-    {
-      id: 'clip-a1',
-      type: 'highlight',
-      timestamp: 1456,
-      duration: 20,
-      title: 'Perfect teamfight positioning',
-      description: 'Excellent positioning leading to quadra kill',
-      url: '/mock-clips/quadra-kill.mp4',
-      thumbnailUrl: '/mock-thumbnails/quadra-kill.jpg',
     },
   ],
 };

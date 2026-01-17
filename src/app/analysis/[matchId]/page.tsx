@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Analysis,
-  checkRecordingExists,
   getAnalysisByMatchId,
   getScoreColor,
   getScoreLabel,
@@ -14,20 +13,19 @@ import Image from 'next/image';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import ErrorsList from '@/components/analysis/ErrorsList';
 import CoachingTips from '@/components/analysis/CoachingTips';
-import VideoClipPlayer from '@/components/analysis/VideoClipPlayer';
 import StatsComparison from '@/components/analysis/StatsComparison';
 
 interface PageParams {
   matchId: string;
 }
 
-type TabType = 'errors' | 'tips' | 'clips' | 'stats';
+type TabType = 'errors' | 'tips' | 'stats';
 
 export default function AnalysisPage({ params }: { params: Promise<PageParams> }) {
   const { matchId } = use(params);
   const router = useRouter();
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [status, setStatus] = useState<'loading' | 'no_recording' | 'pending' | 'processing' | 'completed' | 'failed'>('loading');
+  const [status, setStatus] = useState<'loading' | 'not_found' | 'pending' | 'processing' | 'completed' | 'failed'>('loading');
   const [activeTab, setActiveTab] = useState<TabType>('errors');
   const [imageError, setImageError] = useState(false);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,7 +45,7 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
     setStatus('loading');
 
     try {
-      // First check if an analysis already exists
+      // Check if an analysis exists for this match
       const existingAnalysis = await getAnalysisByMatchId(matchId);
 
       if (existingAnalysis) {
@@ -64,20 +62,11 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
         return;
       }
 
-      // No analysis exists, check if recording exists
-      const hasRecording = await checkRecordingExists(matchId);
-
-      if (!hasRecording) {
-        setStatus('no_recording');
-        return;
-      }
-
-      // Recording exists but no analysis - this shouldn't happen normally
-      // The user would need to trigger analysis creation
-      setStatus('no_recording');
+      // No analysis found for this match
+      setStatus('not_found');
     } catch (error) {
       console.error('Failed to load analysis:', error);
-      setStatus('no_recording');
+      setStatus('not_found');
     }
   };
 
@@ -133,16 +122,6 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
       icon: (
         <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'clips',
-      label: 'Clips',
-      count: analysis?.clips?.length || 0,
-      icon: (
-        <svg style={{ width: '1rem', height: '1rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
       ),
     },
@@ -233,232 +212,66 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
             </div>
           )}
 
-          {/* No Recording State */}
-          {status === 'no_recording' && (
+          {/* Analysis Not Found State */}
+          {status === 'not_found' && (
             <div className="glass-card" style={{
               borderRadius: '1.5rem',
               padding: '3rem',
-              maxWidth: '48rem',
+              maxWidth: '32rem',
               margin: '0 auto',
+              textAlign: 'center',
             }}>
-              {/* Header */}
               <div style={{
-                textAlign: 'center',
-                marginBottom: '2rem',
+                width: '5rem',
+                height: '5rem',
+                margin: '0 auto 1.5rem',
+                borderRadius: '1.25rem',
+                background: 'linear-gradient(135deg, rgba(107, 114, 128, 0.3), rgba(75, 85, 99, 0.3))',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
-                <div style={{
-                  width: '5rem',
-                  height: '5rem',
-                  margin: '0 auto 1.5rem',
-                  borderRadius: '1.25rem',
-                  background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 0 40px rgba(168,85,247,0.3)',
-                }}>
-                  <svg style={{ width: '2.5rem', height: '2.5rem', color: 'white' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <h1 style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 700,
-                  color: 'white',
-                  marginBottom: '0.5rem',
-                }}>
-                  No Recording Found
-                </h1>
-                <p style={{
-                  color: 'rgba(255,255,255,0.5)',
-                  fontSize: '1rem',
-                }}>
-                  This game wasn't recorded with <span style={{ color: '#a855f7', fontWeight: 600 }}>Nexra Vision</span>
-                </p>
+                <svg style={{ width: '2.5rem', height: '2.5rem', color: 'rgba(255,255,255,0.5)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-
-              {/* Divider */}
-              <div style={{
-                height: '1px',
-                background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent)',
-                marginBottom: '2rem',
-              }} />
-
-              {/* Nexra Vision Info */}
-              <div style={{
-                textAlign: 'center',
-                marginBottom: '2rem',
+              <h1 style={{
+                fontSize: '1.5rem',
+                fontWeight: 700,
+                color: 'white',
+                marginBottom: '0.75rem',
               }}>
-                <h2 style={{
-                  fontSize: '1.25rem',
+                Analysis Not Found
+              </h1>
+              <p style={{
+                color: 'rgba(255,255,255,0.5)',
+                fontSize: '0.95rem',
+                marginBottom: '2rem',
+                lineHeight: 1.6,
+              }}>
+                This match hasn't been analyzed yet. Go to your dashboard to analyze your recent games.
+              </p>
+              <button
+                onClick={() => router.push('/dashboard')}
+                style={{
+                  padding: '0.875rem 2rem',
+                  borderRadius: '0.75rem',
+                  background: 'linear-gradient(135deg, #00d4ff, #6366f1)',
+                  color: 'white',
                   fontWeight: 600,
-                  color: 'white',
-                  marginBottom: '0.75rem',
-                }}>
-                  Get Nexra Vision
-                </h2>
-                <p style={{
-                  color: 'rgba(255,255,255,0.6)',
+                  border: 'none',
+                  cursor: 'pointer',
                   fontSize: '0.95rem',
-                  lineHeight: 1.7,
-                  maxWidth: '32rem',
-                  margin: '0 auto',
-                }}>
-                  Our desktop application runs in the background and automatically records your games,
-                  then uploads them for AI-powered analysis of your gameplay.
-                </p>
-              </div>
-
-              {/* Features Grid */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1rem',
-                marginBottom: '2rem',
-              }}>
-                <div style={{
-                  padding: '1rem 1.25rem',
-                  borderRadius: '0.75rem',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '1rem',
-                }}>
-                  <div style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(168,85,247,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    <svg style={{ width: '1.25rem', height: '1.25rem', color: '#a855f7' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'white' }}>AI-Detected Mistakes</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Positioning errors, missed CS, bad trades</div>
-                  </div>
-                </div>
-
-                <div style={{
-                  padding: '1rem 1.25rem',
-                  borderRadius: '0.75rem',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                }}>
-                  <div style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(236,72,153,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    <svg style={{ width: '1.25rem', height: '1.25rem', color: '#ec4899' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'white' }}>Video Clips</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Key moments with AI commentary</div>
-                  </div>
-                </div>
-
-                <div style={{
-                  padding: '1rem 1.25rem',
-                  borderRadius: '0.75rem',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                }}>
-                  <div style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(251,191,36,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    <svg style={{ width: '1.25rem', height: '1.25rem', color: '#fbbf24' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'white' }}>Coaching Tips</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Personalized advice for your rank</div>
-                  </div>
-                </div>
-
-                <div style={{
-                  padding: '1rem 1.25rem',
-                  borderRadius: '0.75rem',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1rem',
-                }}>
-                  <div style={{
-                    width: '2.5rem',
-                    height: '2.5rem',
-                    borderRadius: '0.5rem',
-                    background: 'rgba(34,211,238,0.15)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    <svg style={{ width: '1.25rem', height: '1.25rem', color: '#22d3ee' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'white' }}>Performance Scores</div>
-                    <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>Compare to players at your level</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA Button */}
-              <div style={{ textAlign: 'center' }}>
-                <button
-                  disabled
-                  style={{
-                    padding: '1rem 3rem',
-                    borderRadius: '0.75rem',
-                    background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-                    color: 'white',
-                    fontWeight: 600,
-                    border: 'none',
-                    opacity: 0.6,
-                    cursor: 'not-allowed',
-                    fontSize: '1rem',
-                  }}
-                >
-                  Coming Soon
-                </button>
-                <p style={{
-                  fontSize: '0.8rem',
-                  color: 'rgba(255,255,255,0.4)',
-                  marginTop: '0.75rem',
-                }}>
-                  Available for Windows & macOS • Free to use
-                </p>
-              </div>
+                  gap: '0.5rem',
+                }}
+              >
+                <svg style={{ width: '1.25rem', height: '1.25rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Go to Dashboard
+              </button>
             </div>
           )}
 
@@ -495,7 +308,7 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
                 </div>
 
                 <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'white' }}>
-                  Analyse<span className="animated-dots"></span>
+                  Analyzing<span className="animated-dots"></span>
                 </h2>
               </div>
             </div>
@@ -699,9 +512,6 @@ export default function AnalysisPage({ params }: { params: Promise<PageParams> }
                   )}
                   {activeTab === 'tips' && analysis.tips && (
                     <CoachingTips tips={analysis.tips} />
-                  )}
-                  {activeTab === 'clips' && analysis.clips && (
-                    <VideoClipPlayer clips={analysis.clips} />
                   )}
                   {activeTab === 'stats' && analysis.stats && (
                     <StatsComparison stats={analysis.stats} />

@@ -5,8 +5,6 @@ import {
   AnalysisStats,
   GameError,
   CoachingTip,
-  VideoClip,
-  RecordingWithAnalysis,
   getScoreColor as _getScoreColor,
   getScoreLabel as _getScoreLabel,
 } from '@/types/analysis';
@@ -19,8 +17,16 @@ interface ApiResponse<T = unknown> {
   error?: string;
 }
 
+// Generate auth header from user session
+export function getAuthHeader(userId?: string, email?: string): Record<string, string> {
+  if (userId && email) {
+    return { Authorization: `Bearer ${userId}:${email}` };
+  }
+  return {};
+}
+
 // Re-export types from @/types/analysis
-export type { AnalysisStats, GameError, CoachingTip, VideoClip };
+export type { AnalysisStats, GameError, CoachingTip };
 
 // Re-export helper functions
 export const getScoreColor = _getScoreColor;
@@ -47,17 +53,25 @@ export interface Analysis {
   stats?: AnalysisStats;
   errors?: GameError[];
   tips?: CoachingTip[];
-  clips?: VideoClip[];
   errorMessage?: string;
 }
 
-// Generic fetch wrapper
-async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<ApiResponse<T>> {
+// Generic fetch wrapper with optional auth
+interface ApiFetchOptions extends RequestInit {
+  auth?: { userId: string; email: string };
+}
+
+async function apiFetch<T>(endpoint: string, options?: ApiFetchOptions): Promise<ApiResponse<T>> {
   try {
+    const authHeaders = options?.auth
+      ? getAuthHeader(options.auth.userId, options.auth.email)
+      : {};
+
     const response = await fetch(`${API_URL}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
         ...options?.headers,
       },
     });
@@ -71,12 +85,6 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<Api
       error: error instanceof Error ? error.message : 'Request failed',
     };
   }
-}
-
-// Check if recording exists for a match
-export async function checkRecordingExists(matchId: string): Promise<boolean> {
-  const response = await apiFetch<{ exists: boolean }>(`/recordings/check/${matchId}`);
-  return response.success && response.data?.exists === true;
 }
 
 // Get analysis by match ID
@@ -154,7 +162,6 @@ export async function getUserAnalyses(puuid: string, limit = 20, offset = 0): Pr
         },
         errors: [],
         tips: [],
-        clips: [],
       }));
     }
 
@@ -184,22 +191,6 @@ export async function reanalyzeGame(analysisId: string): Promise<{ id: string; s
   }
 
   throw new Error(response.error || 'Failed to restart analysis');
-}
-
-// Get all recordings with their analysis status (uses local proxy to avoid CORS)
-export async function getUserRecordings(puuid: string, limit = 20, offset = 0): Promise<RecordingWithAnalysis[]> {
-  try {
-    // Use local API route to proxy to nexra-api
-    const response = await fetch(`/api/recordings?puuid=${puuid}&limit=${limit}&offset=${offset}`);
-    const data = await response.json();
-    if (data.success && data.data) {
-      return data.data;
-    }
-    return [];
-  } catch (error) {
-    console.error('Failed to fetch recordings:', error);
-    return [];
-  }
 }
 
 // Start analysis for a pending analysis (uses local proxy)

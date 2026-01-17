@@ -19,6 +19,35 @@ export type ErrorSeverity = 'critical' | 'high' | 'medium' | 'low';
 
 export type AnalysisStatus = 'not_started' | 'pending' | 'processing' | 'completed' | 'failed';
 
+// Context for detailed error analysis based on Riot API Timeline data
+export interface ErrorContext {
+  goldState?: {
+    player: number;
+    opponent: number;
+    differential: number;
+  };
+  levelState?: {
+    player: number;
+    opponent: number;
+  };
+  mapState?: {
+    zone: 'safe' | 'neutral' | 'danger';
+    nearestAlly?: { champion: string; distance: number };
+    nearestEnemy?: { champion: string; distance: number };
+    playerPosition?: { x: number; y: number };
+  };
+  visionState?: {
+    playerWardsActive: number;
+    areaWarded: boolean;
+  };
+  csState?: {
+    player: number;
+    opponent: number;
+    differential: number;
+  };
+  gamePhase: 'early' | 'mid' | 'late';
+}
+
 export interface GameError {
   id: string;
   type: ErrorType;
@@ -27,16 +56,10 @@ export interface GameError {
   description: string;
   timestamp: number;        // Seconds into game
   suggestion: string;       // How to improve
-  // Video clip timestamps for error replay
-  clipStart?: number;       // Start of clip (seconds)
-  clipEnd?: number;         // End of clip (seconds)
   // Extended coaching note from AI
   coachingNote?: string;    // Detailed coaching explanation
-  videoClip?: {
-    start: number;
-    end: number;
-    url: string;
-  };
+  // Context from Riot API Timeline
+  context?: ErrorContext;
 }
 
 export interface CoachingTip {
@@ -51,29 +74,6 @@ export interface CoachingTip {
   exercice?: string;        // Practice Tool exercise
 }
 
-export interface VideoClip {
-  id: string;
-  type: 'error' | 'highlight' | 'death';
-  timestamp: number;
-  duration: number;
-  title: string;
-  description: string;
-  url: string;
-  thumbnailUrl?: string;
-  // Video timestamps for clip extraction
-  startTime?: number;       // Start time in video (seconds)
-  endTime?: number;         // End time in video (seconds)
-  // Link to related error
-  errorId?: string;
-  // AI Analysis for death clips
-  aiAnalysis?: {
-    deathCause: string;           // Why the player died
-    mistakes: string[];           // List of mistakes made
-    suggestions: string[];        // How to avoid this death
-    situationalAdvice: string;    // Context-specific advice
-    severity: ErrorSeverity;      // How bad was this death
-  };
-}
 
 // Performance summary from AI analysis
 export interface PerformanceSummary {
@@ -98,7 +98,7 @@ export interface AnalysisStats {
   tradingScore?: number;    // Optional for backwards compatibility
   deathsAnalyzed: number;
   errorsFound: number;
-  comparedToRank: RankComparison[];
+  comparedToRank?: RankComparison[];  // Optional - may not be available for all analyses
   // Performance summary from AI coach
   performanceSummary?: PerformanceSummary;
 }
@@ -131,7 +131,6 @@ export interface GameAnalysis {
   stats?: AnalysisStats;
   errors?: GameError[];
   tips?: CoachingTip[];
-  clips?: VideoClip[];
 
   // Error info (only when failed)
   errorMessage?: string;
@@ -156,36 +155,26 @@ export interface AnalyzedGameSummary {
   gameMode: string;
 }
 
-// Recording with analysis status - unified view
-export interface RecordingWithAnalysis {
-  // Recording info
-  recordingId: string;
+// Match ready for analysis (based on Riot API data)
+export interface MatchForAnalysis {
   matchId: string;
   puuid: string;
   region: string;
-  videoKey: string;
-  recordingDuration: number | null;
-  fileSize: number | null;
-  recordingCreatedAt: string;
-  uploadedAt: string | null;
-  // Analysis info (null if not started)
-  analysisId: string | null;
-  analysisStatus: AnalysisStatus;
-  progress: number | null;
-  progressMessage: string | null;
-  champion: string | null;
-  result: 'win' | 'loss' | null;
-  gameDuration: number | null;
-  gameMode: string | null;
+  champion: string;
+  result: 'win' | 'loss';
+  gameDuration: number;
+  gameMode: string;
+  queueId: number;
   kills: number;
   deaths: number;
   assists: number;
-  role: string | null;
+  role: string;
+  timestamp: number;
+  // Analysis info (null if not analyzed)
+  analysisId: string | null;
+  analysisStatus: AnalysisStatus;
   overallScore: number;
   errorsCount: number;
-  analysisCreatedAt: string | null;
-  completedAt: string | null;
-  errorMessage: string | null;
 }
 
 // Status display helpers

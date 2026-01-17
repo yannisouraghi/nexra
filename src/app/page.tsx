@@ -18,6 +18,14 @@ export default function LandingPage() {
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Auth form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authSuccess, setAuthSuccess] = useState('');
+
   // Skip first 2 seconds of video
   const handleVideoLoaded = () => {
     if (videoRef.current) {
@@ -36,6 +44,85 @@ export default function LandingPage() {
 
   const handleGoogleSignIn = () => {
     signIn('google', { callbackUrl: '/link-riot' });
+  };
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccess('');
+    setAuthLoading(true);
+
+    try {
+      if (authMode === 'register') {
+        if (password !== confirmPassword) {
+          setAuthError('Passwords do not match');
+          setAuthLoading(false);
+          return;
+        }
+
+        if (password.length < 8) {
+          setAuthError('Password must be at least 8 characters');
+          setAuthLoading(false);
+          return;
+        }
+
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setAuthError(data.error || 'Registration failed');
+          setAuthLoading(false);
+          return;
+        }
+
+        setAuthSuccess('Account created! Signing you in...');
+
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setAuthError('Account created but login failed. Please try logging in.');
+          setAuthMode('login');
+          setAuthLoading(false);
+          return;
+        }
+
+        window.location.href = '/link-riot';
+      } else {
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setAuthError('Invalid email or password');
+          setAuthLoading(false);
+          return;
+        }
+
+        window.location.href = '/link-riot';
+      }
+    } catch {
+      setAuthError('Something went wrong. Please try again.');
+      setAuthLoading(false);
+    }
+  };
+
+  const switchAuthMode = (mode: 'login' | 'register') => {
+    setAuthMode(mode);
+    setAuthError('');
+    setAuthSuccess('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   // Animation variants
@@ -103,11 +190,11 @@ export default function LandingPage() {
     {
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <polygon points="5 3 19 12 5 21 5 3"/>
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
         </svg>
       ),
-      title: "Video Clips",
-      description: "Key moments highlighted with AI commentary explaining what happened.",
+      title: "Timeline Analysis",
+      description: "Deep dive into every moment of your game using Riot API Timeline data.",
       color: "#ffb800"
     },
     {
@@ -125,20 +212,19 @@ export default function LandingPage() {
   const steps = [
     {
       number: "01",
-      title: "Install Nexra Vision",
-      description: "Lightweight desktop app that runs silently in the background, automatically detecting and recording your League games.",
+      title: "Link Your Account",
+      description: "Sign in and connect your Riot account. We'll automatically sync your match history.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
         </svg>
       )
     },
     {
       number: "02",
       title: "Play Your Games",
-      description: "Just play normally. Nexra Vision captures everything: your gameplay, minimap movements, item timings, and more.",
+      description: "Just play normally. Your match data is automatically available for analysis after each game.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="12" cy="12" r="10"/>
@@ -149,7 +235,7 @@ export default function LandingPage() {
     {
       number: "03",
       title: "AI Analyzes",
-      description: "Our advanced AI breaks down every play, identifies mistakes you didn't notice, and finds patterns in your gameplay.",
+      description: "Our AI analyzes timeline data from the Riot API to identify mistakes, patterns, and areas for improvement.",
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
@@ -404,171 +490,6 @@ export default function LandingPage() {
       </section>
 
       {/* ============================================
-          NEXRA VISION SECTION
-          ============================================ */}
-      <section className="nexra-section nexra-vision-section">
-        <div className="nexra-container">
-          <div className="nexra-vision-content">
-            <motion.div
-              className="nexra-vision-info"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6 }}
-            >
-              <span className="nexra-section-tag">Nexra Vision</span>
-              <h2 className="nexra-section-title">
-                The <span className="nexra-text-gradient">eye</span> that never misses
-              </h2>
-              <p className="nexra-vision-desc">
-                Nexra Vision is our lightweight desktop recorder that automatically captures your League games.
-                No manual recording, no performance impact, no hassle.
-              </p>
-
-              <ul className="nexra-vision-features">
-                <motion.li
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>Auto-detects League of Legends</span>
-                </motion.li>
-                <motion.li
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>Zero performance impact</span>
-                </motion.li>
-                <motion.li
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>Automatic cloud sync</span>
-                </motion.li>
-                <motion.li
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span>Works in background silently</span>
-                </motion.li>
-              </ul>
-
-              <motion.button
-                onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}
-                className="nexra-vision-cta"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/>
-                  <polyline points="10 17 15 12 10 7"/>
-                  <line x1="15" y1="12" x2="3" y2="12"/>
-                </svg>
-                <span>Sign Up to Download</span>
-              </motion.button>
-            </motion.div>
-
-            <motion.div
-              className="nexra-vision-preview"
-              initial={{ opacity: 0, x: 50, rotateY: -10 }}
-              whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="nexra-vision-card">
-                <div className="nexra-vision-card-header">
-                  <div className="nexra-vision-dots">
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                  <span className="nexra-vision-card-title">Nexra Vision</span>
-                </div>
-                <div className="nexra-vision-card-body">
-                  <div className="nexra-vision-status">
-                    <div className="nexra-vision-eye">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                        <circle cx="12" cy="12" r="3"/>
-                      </svg>
-                      <motion.div
-                        className="nexra-vision-eye-glow"
-                        animate={{
-                          opacity: [0.5, 1, 0.5],
-                          scale: [1, 1.2, 1]
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                    </div>
-                    <div className="nexra-vision-status-text">
-                      <span className="nexra-vision-status-label">Status</span>
-                      <span className="nexra-vision-status-value">
-                        <span className="nexra-vision-status-dot" />
-                        Watching for games...
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="nexra-vision-stats">
-                    <div className="nexra-vision-stat">
-                      <span className="nexra-vision-stat-value">0</span>
-                      <span className="nexra-vision-stat-label">Games Today</span>
-                    </div>
-                    <div className="nexra-vision-stat">
-                      <span className="nexra-vision-stat-value">Ready</span>
-                      <span className="nexra-vision-stat-label">Sync Status</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating Elements */}
-              <motion.div
-                className="nexra-vision-float nexra-vision-float-1"
-                animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polygon points="10 8 16 12 10 16 10 8"/>
-                </svg>
-              </motion.div>
-              <motion.div
-                className="nexra-vision-float nexra-vision-float-2"
-                animate={{ y: [0, 10, 0], rotate: [0, -5, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <line x1="18" y1="20" x2="18" y2="10"/>
-                  <line x1="12" y1="20" x2="12" y2="4"/>
-                  <line x1="6" y1="20" x2="6" y2="14"/>
-                </svg>
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================
           HOW IT WORKS SECTION
           ============================================ */}
       <section className="nexra-section nexra-steps-section">
@@ -769,22 +690,43 @@ export default function LandingPage() {
               <div className="nexra-auth-tabs">
                 <button
                   className={`nexra-auth-tab ${authMode === 'login' ? 'active' : ''}`}
-                  onClick={() => setAuthMode('login')}
+                  onClick={() => switchAuthMode('login')}
                 >
                   Sign In
                 </button>
                 <button
                   className={`nexra-auth-tab ${authMode === 'register' ? 'active' : ''}`}
-                  onClick={() => setAuthMode('register')}
+                  onClick={() => switchAuthMode('register')}
                 >
                   Create Account
                 </button>
               </div>
 
+              {/* Error/Success Messages */}
+              {authError && (
+                <div className="nexra-auth-error">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  {authError}
+                </div>
+              )}
+              {authSuccess && (
+                <div className="nexra-auth-success">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  {authSuccess}
+                </div>
+              )}
+
               {/* Google Sign In */}
               <button
                 onClick={handleGoogleSignIn}
                 className="nexra-auth-google"
+                disabled={authLoading}
               >
                 <svg viewBox="0 0 24 24" fill="currentColor">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -800,23 +742,53 @@ export default function LandingPage() {
               </div>
 
               {/* Email Form */}
-              <form className="nexra-auth-form" onSubmit={(e) => e.preventDefault()}>
+              <form className="nexra-auth-form" onSubmit={handleCredentialsSubmit}>
                 <div className="nexra-auth-field">
                   <label>Email</label>
-                  <input type="email" placeholder="you@example.com" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={authLoading}
+                  />
                 </div>
                 <div className="nexra-auth-field">
                   <label>Password</label>
-                  <input type="password" placeholder="Enter your password" />
+                  <input
+                    type="password"
+                    placeholder={authMode === 'register' ? 'Min. 8 characters' : 'Enter your password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={authMode === 'register' ? 8 : undefined}
+                    disabled={authLoading}
+                  />
                 </div>
                 {authMode === 'register' && (
                   <div className="nexra-auth-field">
                     <label>Confirm Password</label>
-                    <input type="password" placeholder="Confirm your password" />
+                    <input
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      disabled={authLoading}
+                    />
                   </div>
                 )}
-                <button type="submit" className="nexra-auth-submit">
-                  {authMode === 'login' ? 'Sign In' : 'Create Account'}
+                <button
+                  type="submit"
+                  className="nexra-auth-submit"
+                  disabled={authLoading}
+                  style={{ opacity: authLoading ? 0.7 : 1 }}
+                >
+                  {authLoading
+                    ? (authMode === 'login' ? 'Signing in...' : 'Creating account...')
+                    : (authMode === 'login' ? 'Sign In' : 'Create Account')
+                  }
                 </button>
               </form>
 

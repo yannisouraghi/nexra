@@ -102,9 +102,9 @@ export default function AnalyzedGameCard({ game }: AnalyzedGameCardProps) {
   };
 
   const formatTimeAgo = (dateString: string) => {
-    if (!dateString) return 'Récemment';
+    if (!dateString) return 'Recently';
     const date = new Date(dateString.replace(' ', 'T') + 'Z');
-    if (isNaN(date.getTime())) return 'Récemment';
+    if (isNaN(date.getTime())) return 'Recently';
 
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -112,10 +112,10 @@ export default function AnalyzedGameCard({ game }: AnalyzedGameCardProps) {
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'À l\'instant';
-    if (diffMins < 60) return `Il y a ${diffMins}m`;
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    return `Il y a ${diffDays}j`;
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
   };
 
   const kda = game.deaths > 0
@@ -165,7 +165,7 @@ export default function AnalyzedGameCard({ game }: AnalyzedGameCardProps) {
             backgroundColor: isWin ? 'rgba(0, 255, 136, 0.25)' : 'rgba(255, 51, 102, 0.25)',
             color: isWin ? '#00ff88' : '#ff3366',
           }}>
-            {isWin ? 'VICTOIRE' : 'DÉFAITE'}
+            {isWin ? 'VICTORY' : 'DEFEAT'}
           </span>
         </div>
 
@@ -216,7 +216,7 @@ export default function AnalyzedGameCard({ game }: AnalyzedGameCardProps) {
               <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span>{game.errorsCount} erreurs détectées</span>
+              <span>{game.errorsCount} errors detected</span>
             </div>
           )}
         </div>
@@ -228,7 +228,7 @@ export default function AnalyzedGameCard({ game }: AnalyzedGameCardProps) {
         opacity: isHovered ? 1 : 0,
       }}>
         <div style={styles.viewButton}>
-          <span>Voir l&apos;Analyse</span>
+          <span>View Analysis</span>
           <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

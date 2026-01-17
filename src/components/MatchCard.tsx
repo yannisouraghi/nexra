@@ -743,7 +743,7 @@ export default function MatchCard({ match }: MatchCardProps) {
       450: 'ARAM',
       700: 'Clash',
       900: 'URF',
-      1020: 'Tous pour un',
+      1020: 'One for All',
       1300: 'Nexus Blitz',
       1400: 'Ultimate Spellbook',
       1700: 'Arena',
@@ -1656,7 +1656,7 @@ export default function MatchCard({ match }: MatchCardProps) {
                       <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
                     </svg>
-                    Résumé Économique
+                    Economic Summary
                   </h4>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: '1rem' }}>
@@ -2698,9 +2698,101 @@ export default function MatchCard({ match }: MatchCardProps) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', maxWidth: '500px', textAlign: 'center', width: '100%' }}>
                     {!isCalculatingProbability ? (
                       <>
-                        <p className="text-sm text-[var(--text-secondary)]" style={{ lineHeight: '1.6', padding: '0 1rem' }}>
-                          Calculate the win probability based on player statistics, champion mastery, recent form, and team composition.
-                        </p>
+                        <div className="flex items-center justify-center" style={{ gap: '0.5rem' }}>
+                          <p className="text-sm text-[var(--text-secondary)]" style={{ lineHeight: '1.6' }}>
+                            Calculate the win probability based on player statistics, champion mastery, recent form, and team composition.
+                          </p>
+                          {/* Info Icon with Tooltip */}
+                          <div className="relative group">
+                            <div
+                              className="cursor-help rounded-full border border-white/20 hover:border-purple-400/50 hover:bg-purple-400/10 transition-all duration-200"
+                              style={{ padding: '0.25rem' }}
+                            >
+                              <svg
+                                className="w-4 h-4 text-white/50 group-hover:text-purple-400 transition-colors"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                              </svg>
+                            </div>
+                            {/* Tooltip */}
+                            <div
+                              className="absolute z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none"
+                              style={{
+                                bottom: 'calc(100% + 0.5rem)',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '320px',
+                              }}
+                            >
+                              <div
+                                className="rounded-xl border border-purple-500/30 text-left"
+                                style={{
+                                  padding: '1rem',
+                                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%)',
+                                  backdropFilter: 'blur(12px)',
+                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                                }}
+                              >
+                                <p className="text-xs font-bold text-purple-300 uppercase tracking-wider" style={{ marginBottom: '0.75rem' }}>
+                                  Algorithm Factors
+                                </p>
+                                <ul className="text-xs text-white/80" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">35%</span>
+                                    <span><strong>ELO Score</strong> — Rank, division, LP</span>
+                                  </li>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">20%</span>
+                                    <span><strong>Champion Mastery</strong> — Level, winrate, KDA, games played</span>
+                                  </li>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">15%</span>
+                                    <span><strong>Recent Performance</strong> — Last 10 games winrate</span>
+                                  </li>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">15%</span>
+                                    <span><strong>Role Fit</strong> — Main role vs autofill penalty</span>
+                                  </li>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">10%</span>
+                                    <span><strong>Activity</strong> — Days since last game</span>
+                                  </li>
+                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
+                                    <span className="text-purple-400 font-bold">5%</span>
+                                    <span><strong>Streak</strong> — Win/lose streak bonus</span>
+                                  </li>
+                                </ul>
+                                <div className="border-t border-white/10" style={{ marginTop: '0.75rem', paddingTop: '0.75rem' }}>
+                                  <p className="text-xs text-white/60">
+                                    <strong className="text-white/80">Role Impact:</strong> Jungle (1.15x) &gt; Support (1.10x) &gt; Mid (1.05x) &gt; ADC (1.00x) &gt; Top (0.95x)
+                                  </p>
+                                </div>
+                              </div>
+                              {/* Arrow */}
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  bottom: '-6px',
+                                  left: '50%',
+                                  transform: 'translateX(-50%) rotate(45deg)',
+                                  width: '12px',
+                                  height: '12px',
+                                  background: 'rgba(139, 92, 246, 0.15)',
+                                  borderRight: '1px solid rgba(139, 92, 246, 0.3)',
+                                  borderBottom: '1px solid rgba(139, 92, 246, 0.3)',
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
                         <button
                           onClick={calculateProbability}
                           className="rounded-xl font-semibold text-white transition-all duration-300"

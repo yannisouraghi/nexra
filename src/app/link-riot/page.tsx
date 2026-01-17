@@ -27,6 +27,15 @@ const REGIONS = [
 
 const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
+// Generate auth header from session
+function getAuthHeaders(userId?: string, email?: string): HeadersInit {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (userId && email) {
+    headers['Authorization'] = `Bearer ${userId}:${email}`;
+  }
+  return headers;
+}
+
 export default function LinkRiotPage() {
   const router = useRouter();
   const { data: session, status, update: updateSession } = useSession();
@@ -36,26 +45,60 @@ export default function LinkRiotPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Check localStorage for previously linked account to pre-fill form
+  // Check if user already has a linked Riot account (from session/database)
   useEffect(() => {
     if (status === 'loading') return;
 
-    // Check localStorage to pre-fill form (but don't redirect)
+    // Check if user just unlinked their account - don't redirect
+    const justUnlinked = localStorage.getItem('nexra_riot_unlinked');
+    if (justUnlinked) {
+      localStorage.removeItem('nexra_riot_unlinked');
+      // Also clear any stale localStorage data
+      localStorage.removeItem('nexra_riot_account');
+      return; // Stay on link-riot page
+    }
+
+    // ONLY trust the session/database for Riot account info
+    // localStorage is just a cache and must match the current user
+    const user = session?.user as any;
+    const currentUserId = user?.id;
+
+    // Check localStorage but verify it belongs to current user
     const savedAccount = localStorage.getItem('nexra_riot_account');
     if (savedAccount) {
       try {
         const parsed = JSON.parse(savedAccount);
-        if (parsed.gameName && parsed.tagLine) {
-          // If localStorage has data, redirect to dashboard
-          // The dashboard will use this data
-          router.push('/dashboard');
-          return;
+        // If localStorage has a different user's data, clear it
+        if (parsed.userId && parsed.userId !== currentUserId) {
+          console.log('Clearing stale localStorage data from different user');
+          localStorage.removeItem('nexra_riot_account');
         }
       } catch (e) {
-        // Invalid localStorage data, ignore
+        localStorage.removeItem('nexra_riot_account');
       }
     }
-  }, [status, router]);
+
+    // Priority 1: Check session for Riot account (from database) - this is the source of truth
+    if (user?.riotGameName && user?.riotTagLine) {
+      // User has a linked Riot account in the database, update localStorage and redirect
+      const accountData = {
+        gameName: user.riotGameName,
+        tagLine: user.riotTagLine,
+        region: user.riotRegion || 'euw1',
+        puuid: user.riotPuuid,
+        userId: currentUserId, // Store user ID to verify ownership
+      };
+      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
+      router.push('/dashboard');
+      return;
+    }
+
+    // If no Riot account in session, clear any stale localStorage data
+    // The database is the source of truth, not localStorage
+    localStorage.removeItem('nexra_riot_account');
+
+    // User needs to link their Riot account - stay on this page
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,9 +130,10 @@ export default function LinkRiotPage() {
 
       // Step 2: Link the Riot account to the user in the database
       console.log('Linking to user:', userId);
+      const userEmail = (session?.user as { email?: string })?.email;
       const linkResponse = await fetch(`${NEXRA_API_URL}/users/${userId}/link-riot`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(userId, userEmail),
         body: JSON.stringify({
           puuid: summonerData.puuid,
           gameName,
@@ -104,13 +148,14 @@ export default function LinkRiotPage() {
       }
       console.log('Account linked successfully');
 
-      // Step 3: Store in localStorage as backup
+      // Step 3: Store in localStorage as backup (with userId for verification)
       localStorage.setItem('nexra_riot_account', JSON.stringify({
         gameName,
         tagLine,
         region,
         puuid: summonerData.puuid,
         profileIconId: summonerData.profileIconId,
+        userId, // Store user ID to verify ownership on next load
       }));
 
       // Step 4: Redirect to dashboard

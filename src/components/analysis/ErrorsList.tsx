@@ -5,6 +5,7 @@ import {
   GameError,
   ErrorType,
   ErrorSeverity,
+  ErrorContext,
   getSeverityColor,
   getSeverityLabel,
   getErrorTypeLabel,
@@ -14,10 +15,9 @@ import {
 interface ErrorsListProps {
   errors: GameError[];
   matchId?: string;
-  onPlayClip?: (startTime: number, endTime: number) => void;
 }
 
-export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListProps) {
+export default function ErrorsList({ errors, matchId }: ErrorsListProps) {
   const [filterSeverity, setFilterSeverity] = useState<ErrorSeverity | 'all'>('all');
   const [filterType, setFilterType] = useState<ErrorType | 'all'>('all');
   const [expandedError, setExpandedError] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListPr
       {/* Filters */}
       <div style={styles.filters}>
         <div style={styles.filterGroup}>
-          <span style={styles.filterLabel}>Sévérité:</span>
+          <span style={styles.filterLabel}>Severity:</span>
           <div style={styles.filterButtons}>
             {severities.map((sev) => {
               const isActive = filterSeverity === sev;
@@ -54,7 +54,7 @@ export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListPr
                     borderColor: isActive ? (sev === 'all' ? 'rgba(255,255,255,0.2)' : `${color}40`) : 'transparent',
                   }}
                 >
-                  {sev === 'all' ? 'Tous' : getSeverityLabel(sev as ErrorSeverity)}
+                  {sev === 'all' ? 'All' : getSeverityLabel(sev as ErrorSeverity)}
                 </button>
               );
             })}
@@ -68,7 +68,7 @@ export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListPr
             onChange={(e) => setFilterType(e.target.value as ErrorType | 'all')}
             style={styles.select}
           >
-            <option value="all">Tous les types</option>
+            <option value="all">All types</option>
             {errorTypes.map((type) => (
               <option key={type} value={type}>{getErrorTypeLabel(type)}</option>
             ))}
@@ -79,7 +79,7 @@ export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListPr
       {/* Errors List */}
       {sortedErrors.length === 0 ? (
         <div style={styles.emptyState}>
-          <p style={styles.emptyText}>Aucune erreur ne correspond à vos filtres</p>
+          <p style={styles.emptyText}>No errors match your filters</p>
         </div>
       ) : (
         <div style={styles.errorsList}>
@@ -136,32 +136,83 @@ export default function ErrorsList({ errors, matchId, onPlayClip }: ErrorsListPr
 
                     {/* Suggestion */}
                     <div style={styles.suggestionBox}>
-                      <span style={styles.suggestionLabel}>Comment corriger</span>
+                      <span style={styles.suggestionLabel}>How to fix</span>
                       <p style={styles.suggestionText}>{error.suggestion}</p>
                     </div>
 
                     {/* Coaching Note */}
                     {error.coachingNote && (
                       <div style={styles.coachingBox}>
-                        <span style={styles.coachingLabel}>Note du coach</span>
+                        <span style={styles.coachingLabel}>Coach's note</span>
                         <p style={styles.coachingText}>{error.coachingNote}</p>
                       </div>
                     )}
 
-                    {/* Video Clip Button */}
-                    {(error.clipStart !== undefined && error.clipEnd !== undefined) && (
-                      <button
-                        onClick={() => onPlayClip?.(error.clipStart!, error.clipEnd!)}
-                        style={styles.clipButton}
-                      >
-                        <svg width="20" height="20" fill="#ff6b35" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z"/>
-                        </svg>
-                        <span>Voir le clip</span>
-                        <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>
-                          ({formatTimestamp(error.clipStart)} - {formatTimestamp(error.clipEnd)})
-                        </span>
-                      </button>
+                    {/* Error Context Display */}
+                    {error.context && (
+                      <div style={styles.contextBox}>
+                        <span style={styles.contextLabel}>Contexte</span>
+                        <div style={styles.contextGrid}>
+                          {error.context.goldState && (
+                            <div style={styles.contextItem}>
+                              <span style={styles.contextItemLabel}>Gold</span>
+                              <span style={{
+                                ...styles.contextItemValue,
+                                color: error.context.goldState.differential >= 0 ? '#00ff88' : '#ff3366'
+                              }}>
+                                {error.context.goldState.differential >= 0 ? '+' : ''}{error.context.goldState.differential} gold
+                              </span>
+                            </div>
+                          )}
+                          {error.context.levelState && (
+                            <div style={styles.contextItem}>
+                              <span style={styles.contextItemLabel}>Niveau</span>
+                              <span style={styles.contextItemValue}>
+                                Lvl {error.context.levelState.player} vs {error.context.levelState.opponent}
+                              </span>
+                            </div>
+                          )}
+                          {error.context.mapState && (
+                            <div style={styles.contextItem}>
+                              <span style={styles.contextItemLabel}>Zone</span>
+                              <span style={{
+                                ...styles.contextItemValue,
+                                color: error.context.mapState.zone === 'safe' ? '#00ff88' :
+                                       error.context.mapState.zone === 'neutral' ? '#ffd700' : '#ff3366'
+                              }}>
+                                {error.context.mapState.zone === 'safe' ? 'Safe' :
+                                 error.context.mapState.zone === 'neutral' ? 'Neutre' : 'Danger'}
+                              </span>
+                            </div>
+                          )}
+                          {error.context.mapState?.nearestAlly && (
+                            <div style={styles.contextItem}>
+                              <span style={styles.contextItemLabel}>Allie proche</span>
+                              <span style={styles.contextItemValue}>
+                                {error.context.mapState.nearestAlly.champion} ({error.context.mapState.nearestAlly.distance} u)
+                              </span>
+                            </div>
+                          )}
+                          {error.context.csState && (
+                            <div style={styles.contextItem}>
+                              <span style={styles.contextItemLabel}>CS</span>
+                              <span style={{
+                                ...styles.contextItemValue,
+                                color: error.context.csState.differential >= 0 ? '#00ff88' : '#ff3366'
+                              }}>
+                                {error.context.csState.player} vs {error.context.csState.opponent}
+                              </span>
+                            </div>
+                          )}
+                          <div style={styles.contextItem}>
+                            <span style={styles.contextItemLabel}>Phase</span>
+                            <span style={styles.contextItemValue}>
+                              {error.context.gamePhase === 'early' ? 'Early game' :
+                               error.context.gamePhase === 'mid' ? 'Mid game' : 'Late game'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
@@ -329,19 +380,40 @@ const styles: { [key: string]: React.CSSProperties } = {
     lineHeight: 1.6,
     margin: 0,
   },
-  clipButton: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '12px 20px',
+  contextBox: {
+    padding: 16,
     borderRadius: 10,
-    backgroundColor: 'rgba(255,107,53,0.15)',
-    border: '1px solid rgba(255,107,53,0.3)',
-    color: 'white',
-    fontWeight: 500,
+    backgroundColor: 'rgba(168,85,247,0.08)',
+    border: '1px solid rgba(168,85,247,0.2)',
+  },
+  contextLabel: {
+    display: 'block',
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#a855f7',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    marginBottom: 12,
+  },
+  contextGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+    gap: 12,
+  },
+  contextItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 4,
+  },
+  contextItemLabel: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.5)',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.03em',
+  },
+  contextItemValue: {
     fontSize: 14,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    alignSelf: 'flex-start',
+    fontWeight: 600,
+    color: 'rgba(255,255,255,0.9)',
   },
 };

@@ -1,13 +1,13 @@
 'use client';
 
-import { RecordingWithAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role } from '@/types/analysis';
+import { MatchForAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role } from '@/types/analysis';
 import { getChampionSplashUrl } from '@/utils/ddragon';
 import { useState, type JSX } from 'react';
 import Link from 'next/link';
 
 interface GameAnalysisCardProps {
-  recording: RecordingWithAnalysis;
-  onStartAnalysis?: (recordingId: string, matchId: string) => void;
+  match: MatchForAnalysis;
+  onStartAnalysis?: (matchId: string) => void;
   isStarting?: boolean;
 }
 
@@ -150,7 +150,7 @@ const ProcessingAnimation = ({ progress }: { progress: number | null }) => {
         <div style={styles.progressPercent}>{displayProgress}%</div>
       </div>
       <div style={styles.processingText}>
-        Analyse<span className="animated-dots"></span>
+        Analyzing<span className="animated-dots"></span>
       </div>
       <style>{`
         .animated-dots::after {
@@ -187,7 +187,7 @@ const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLo
     {isLoading ? (
       <>
         <div style={styles.buttonSpinner} />
-        <span>Lancement...</span>
+        <span>Starting...</span>
       </>
     ) : (
       <>
@@ -195,17 +195,17 @@ const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLo
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span>Lancer l&apos;Analyse</span>
+        <span>Start Analysis</span>
       </>
     )}
   </button>
 );
 
-export default function GameAnalysisCard({ recording, onStartAnalysis, isStarting }: GameAnalysisCardProps) {
+export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }: GameAnalysisCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  const status = recording.analysisStatus;
+  const status = match.analysisStatus;
   const isCompleted = status === 'completed';
   const isProcessing = status === 'processing';
   const isPending = status === 'pending';
@@ -228,11 +228,11 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
     'UTILITY': 'SUPPORT',
     'SUP': 'SUPPORT',
   };
-  const normalizedRole = recording.role?.toUpperCase() || '';
+  const normalizedRole = match.role?.toUpperCase() || '';
   const role: Role = roleMap[normalizedRole] || 'UNKNOWN';
 
-  const scoreColor = isCompleted ? getScoreColor(recording.overallScore) : statusColor;
-  const isWin = recording.result === 'win';
+  const scoreColor = isCompleted ? getScoreColor(match.overallScore) : statusColor;
+  const isWin = match.result === 'win';
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '--:--';
@@ -242,9 +242,9 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
   };
 
   const formatTimeAgo = (dateString: string | null) => {
-    if (!dateString) return 'Récemment';
+    if (!dateString) return 'Recently';
     const date = new Date(dateString.replace(' ', 'T') + 'Z');
-    if (isNaN(date.getTime())) return 'Récemment';
+    if (isNaN(date.getTime())) return 'Recently';
 
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -252,17 +252,17 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
     const diffHours = Math.floor(diffMins / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    if (diffMins < 1) return 'À l\'instant';
-    if (diffMins < 60) return `Il y a ${diffMins}m`;
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    return `Il y a ${diffDays}j`;
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
   };
 
-  const kda = recording.deaths > 0
-    ? ((recording.kills + recording.assists) / recording.deaths).toFixed(2)
+  const kda = match.deaths > 0
+    ? ((match.kills + match.assists) / match.deaths).toFixed(2)
     : 'Perfect';
 
-  const champion = recording.champion || 'Unknown';
+  const champion = match.champion || 'Unknown';
   const champSplashUrl = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
 
   // Handle click - only navigate if completed
@@ -295,17 +295,17 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
 
       {/* Top Left - Date */}
       <span style={styles.timeAgo}>
-        {formatTimeAgo(recording.recordingCreatedAt)}
+        {formatTimeAgo(match.timestamp ? new Date(match.timestamp).toISOString() : null)}
       </span>
 
       {/* Top Right - Victory/Defeat Badge */}
-      {recording.result && (
+      {match.result && (
         <span style={{
           ...styles.resultBadge,
           backgroundColor: isWin ? 'rgba(0, 255, 136, 0.25)' : 'rgba(255, 51, 102, 0.25)',
           color: isWin ? '#00ff88' : '#ff3366',
         }}>
-          {isWin ? 'VICTOIRE' : 'DÉFAITE'}
+          {isWin ? 'VICTORY' : 'DEFEAT'}
         </span>
       )}
 
@@ -338,7 +338,7 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
         {/* Middle Section - Different content based on status */}
         <div style={styles.middleSection}>
           {isProcessing ? (
-            <ProcessingAnimation progress={recording.progress} />
+            <ProcessingAnimation progress={null} />
           ) : isNotStarted || isPending ? (
             <div style={styles.pendingContainer}>
               {role !== 'UNKNOWN' && (
@@ -347,7 +347,7 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
                 </div>
               )}
               <StartAnalysisButton
-                onClick={() => onStartAnalysis?.(recording.recordingId, recording.matchId)}
+                onClick={() => onStartAnalysis?.(match.matchId)}
                 isLoading={isStarting}
               />
             </div>
@@ -371,7 +371,7 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
                 color: scoreColor,
                 borderColor: `${scoreColor}60`,
               }}>
-                {recording.overallScore} pts
+                {match.overallScore} pts
               </div>
             </>
           )}
@@ -382,31 +382,31 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
           <h3 style={styles.championName}>{champion}</h3>
 
           {/* KDA - Only show if we have game data */}
-          {recording.result && (
+          {match.result && (
             <div style={styles.kdaRow}>
-              <span style={{ color: '#4ade80', fontWeight: 700, fontSize: 18 }}>{recording.kills}</span>
+              <span style={{ color: '#4ade80', fontWeight: 700, fontSize: 18 }}>{match.kills}</span>
               <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>/</span>
-              <span style={{ color: '#f87171', fontWeight: 700, fontSize: 18 }}>{recording.deaths}</span>
+              <span style={{ color: '#f87171', fontWeight: 700, fontSize: 18 }}>{match.deaths}</span>
               <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>/</span>
-              <span style={{ color: '#22d3ee', fontWeight: 700, fontSize: 18 }}>{recording.assists}</span>
+              <span style={{ color: '#22d3ee', fontWeight: 700, fontSize: 18 }}>{match.assists}</span>
               <span style={{ marginLeft: 8, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>({kda})</span>
             </div>
           )}
 
           {/* Game Mode & Duration */}
           <div style={styles.metaRow}>
-            <span style={styles.metaText}>{formatGameMode(recording.gameMode)}</span>
+            <span style={styles.metaText}>{formatGameMode(match.gameMode)}</span>
             <span style={styles.metaDot}>•</span>
-            <span style={styles.metaText}>{formatDuration(recording.gameDuration)}</span>
+            <span style={styles.metaText}>{formatDuration(match.gameDuration)}</span>
           </div>
 
           {/* Errors - Only show if completed */}
-          {isCompleted && recording.errorsCount > 0 && (
+          {isCompleted && match.errorsCount > 0 && (
             <div style={styles.errorsRow}>
               <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span>{recording.errorsCount} erreurs détectées</span>
+              <span>{match.errorsCount} errors detected</span>
             </div>
           )}
         </div>
@@ -419,7 +419,7 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
           opacity: isHovered ? 1 : 0,
         }}>
           <div style={styles.viewButton}>
-            <span>Voir l&apos;Analyse</span>
+            <span>View Analysis</span>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -430,10 +430,10 @@ export default function GameAnalysisCard({ recording, onStartAnalysis, isStartin
   );
 
   // Wrap in Link only if completed
-  if (isCompleted && recording.analysisId) {
+  if (isCompleted && match.analysisId) {
     return (
       <Link
-        href={`/dashboard/analysis/${recording.analysisId}`}
+        href={`/dashboard/analysis/${match.analysisId}`}
         style={{
           ...styles.card,
           borderColor: isWin ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 51, 102, 0.4)',

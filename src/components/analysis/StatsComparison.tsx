@@ -31,7 +31,7 @@ export default function StatsComparison({ stats }: StatsComparisonProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
           </svg>
-          Répartition des Scores
+          Score Breakdown
         </h3>
 
         <div style={styles.scoreGrid}>
@@ -65,13 +65,14 @@ export default function StatsComparison({ stats }: StatsComparisonProps) {
         </div>
       </div>
 
-      {/* Rank Comparison */}
+      {/* Rank Comparison - Only show if data is available */}
+      {stats.comparedToRank && stats.comparedToRank.length > 0 && (
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>
           <svg width="20" height="20" fill="none" stroke="#ffd700" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
-          Comparaison avec ton Rang
+          Comparison with your Rank
         </h3>
 
         <div style={styles.comparisonList}>
@@ -113,8 +114,8 @@ export default function StatsComparison({ stats }: StatsComparisonProps) {
 
                 <div style={styles.comparisonFooter}>
                   <div style={styles.comparisonStats}>
-                    <span style={styles.statLabel}>Toi: <span style={{ color: 'white', fontWeight: 500 }}>{comparison.yours}</span></span>
-                    <span style={styles.statLabel}>Moyenne: <span style={{ color: 'white', fontWeight: 500 }}>{comparison.average}</span></span>
+                    <span style={styles.statLabel}>You: <span style={{ color: 'white', fontWeight: 500 }}>{comparison.yours}</span></span>
+                    <span style={styles.statLabel}>Average: <span style={{ color: 'white', fontWeight: 500 }}>{comparison.average}</span></span>
                   </div>
                   <span style={{ ...styles.diffValue, color: isAboveAverage ? '#00ff88' : '#ff3366' }}>
                     {isAboveAverage ? '+' : ''}{diff}%
@@ -125,28 +126,29 @@ export default function StatsComparison({ stats }: StatsComparisonProps) {
           })}
         </div>
       </div>
+      )}
 
       {/* Summary Stats */}
       <div style={styles.summaryGrid}>
         <div style={styles.summaryCard}>
           <div style={styles.summaryValue}>{stats.deathsAnalyzed}</div>
-          <div style={styles.summaryLabel}>Morts analysées</div>
+          <div style={styles.summaryLabel}>Deaths analyzed</div>
         </div>
         <div style={styles.summaryCard}>
           <div style={{ ...styles.summaryValue, color: '#ff6b35' }}>{stats.errorsFound}</div>
-          <div style={styles.summaryLabel}>Erreurs trouvées</div>
+          <div style={styles.summaryLabel}>Errors found</div>
         </div>
         <div style={styles.summaryCard}>
           <div style={{ ...styles.summaryValue, color: '#00d4ff' }}>
             {Math.round(stats.errorsFound / stats.deathsAnalyzed * 10) / 10 || 0}
           </div>
-          <div style={styles.summaryLabel}>Erreurs/mort</div>
+          <div style={styles.summaryLabel}>Errors/death</div>
         </div>
         <div style={styles.summaryCard}>
           <div style={{ ...styles.summaryValue, color: getScoreColor(stats.overallScore) }}>
             {stats.overallScore}
           </div>
-          <div style={styles.summaryLabel}>Score global</div>
+          <div style={styles.summaryLabel}>Overall score</div>
         </div>
       </div>
     </div>

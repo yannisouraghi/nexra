@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { RecordingWithAnalysis } from '@/types/analysis';
-import { getUserRecordings, getUserAnalyses, createAndStartAnalysis } from '@/utils/nexraApi';
+import { MatchForAnalysis, AnalysisStatus } from '@/types/analysis';
 import AnalysisOverview from './AnalysisOverview';
 import GameAnalysisCard from './GameAnalysisCard';
 
@@ -16,205 +15,148 @@ interface AnalysisTabProps {
 
 type FilterType = 'all' | 'ready' | 'processing' | 'completed';
 
+interface RecentMatch {
+  matchId: string;
+  champion: string;
+  kills: number;
+  deaths: number;
+  assists: number;
+  win: boolean;
+  gameMode: string;
+  queueId: number;
+  gameDuration: number;
+  timestamp: number;
+  role?: string;
+  teamPosition?: string;
+}
+
 export default function AnalysisTab({ puuid, region, gameName, tagLine, profileIconId }: AnalysisTabProps) {
-  const [recordings, setRecordings] = useState<RecordingWithAnalysis[]>([]);
+  const [matches, setMatches] = useState<MatchForAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
-  const [startingIds, setStartingIds] = useState<Set<string>>(new Set());
+  const [analyzingIds, setAnalyzingIds] = useState<Set<string>>(new Set());
+  const [analyzedCache, setAnalyzedCache] = useState<Map<string, any>>(new Map());
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const [visionStatus, setVisionStatus] = useState<{
-    running: boolean;
-    linked: boolean;
-    account: string | null;
-    checking: boolean;
-    linking: boolean;
-    error: string | null;
-  }>({
-    running: false,
-    linked: false,
-    account: null,
-    checking: true,
-    linking: false,
-    error: null,
-  });
 
-  // Check Nexra Vision status via heartbeat API
-  const checkVisionStatus = useCallback(async () => {
-    if (!puuid) {
-      setVisionStatus(prev => ({ ...prev, running: false, linked: false, checking: false }));
-      return;
-    }
-
-    setVisionStatus(prev => ({ ...prev, checking: true, error: null }));
+  // Load recent matches
+  const loadMatches = useCallback(async () => {
+    setLoading(true);
     try {
+      // Fetch recent matches from Riot API
       const response = await fetch(
-        `https://nexra-api.nexra-api.workers.dev/vision/status/${encodeURIComponent(puuid)}`,
-        { cache: 'no-store' }
-      );
-      const data = await response.json();
-
-      // If heartbeat is recent, Vision is running and linked
-      const isOnline = data.online === true;
-      setVisionStatus(prev => ({
-        ...prev,
-        running: isOnline,
-        linked: isOnline,
-        account: isOnline && gameName && tagLine ? `${gameName}#${tagLine}` : null,
-        checking: false,
-      }));
-    } catch {
-      setVisionStatus(prev => ({
-        ...prev,
-        running: false,
-        checking: false,
-      }));
-    }
-  }, [puuid, gameName, tagLine]);
-
-
-  // Check Vision status on mount with fast polling
-  useEffect(() => {
-    checkVisionStatus();
-    const interval = setInterval(checkVisionStatus, 5000);
-    return () => clearInterval(interval);
-  }, [checkVisionStatus]);
-
-  // Load recordings with analysis status + existing analyses (for backwards compatibility)
-  const loadRecordings = useCallback(async (silent = false) => {
-    if (!silent) setLoading(true);
-    try {
-      // Fetch recordings AND existing analyses for both real puuid and 'local-user'
-      const [userRecordings, localRecordings, userAnalyses, localAnalyses] = await Promise.all([
-        getUserRecordings(puuid),
-        getUserRecordings('local-user'),
-        getUserAnalyses(puuid),
-        getUserAnalyses('local-user'),
-      ]);
-
-      // Combine recordings
-      const allRecordings = [...userRecordings, ...localRecordings];
-
-      // Convert existing analyses to RecordingWithAnalysis format (for backwards compatibility)
-      const allAnalyses = [...userAnalyses, ...localAnalyses];
-      const analysesAsRecordings: RecordingWithAnalysis[] = allAnalyses
-        .filter(a => a.status === 'completed') // Only show completed analyses without recordings
-        .map(analysis => ({
-          recordingId: `analysis-${analysis.id}`,
-          matchId: analysis.matchId,
-          puuid: analysis.puuid,
-          region: analysis.region,
-          videoKey: '',
-          recordingDuration: null,
-          fileSize: null,
-          recordingCreatedAt: analysis.createdAt,
-          uploadedAt: null,
-          analysisId: analysis.id,
-          analysisStatus: analysis.status as RecordingWithAnalysis['analysisStatus'],
-          progress: 100, // Completed analyses are 100%
-          progressMessage: null,
-          champion: analysis.champion || null,
-          result: analysis.result || null,
-          gameDuration: analysis.duration || null,
-          gameMode: analysis.gameMode || null,
-          kills: analysis.kills || 0,
-          deaths: analysis.deaths || 0,
-          assists: analysis.assists || 0,
-          role: analysis.role || null,
-          overallScore: analysis.stats?.overallScore || 0,
-          errorsCount: analysis.stats?.errorsFound || analysis.errors?.length || 0,
-          analysisCreatedAt: analysis.createdAt,
-          completedAt: analysis.completedAt || null,
-          errorMessage: analysis.errorMessage || null,
-        }));
-
-      // Merge: recordings take priority, then add analyses that don't have recordings
-      const recordingMatchIds = new Set(allRecordings.map(r => r.matchId));
-      const uniqueAnalyses = analysesAsRecordings.filter(a => !recordingMatchIds.has(a.matchId));
-
-      const combined = [...allRecordings, ...uniqueAnalyses];
-
-      // Deduplicate by matchId (keep first occurrence)
-      const uniqueRecordings = combined.filter((rec, index, self) =>
-        index === self.findIndex(r => r.matchId === rec.matchId)
+        `/api/riot/matches?gameName=${encodeURIComponent(gameName || '')}&tagLine=${encodeURIComponent(tagLine || '')}&region=${encodeURIComponent(region)}&puuid=${encodeURIComponent(puuid)}&count=10`
       );
 
-      // Sort by date (newest first)
-      uniqueRecordings.sort((a, b) => {
-        const dateA = a.recordingCreatedAt ? new Date(a.recordingCreatedAt.replace(' ', 'T') + 'Z').getTime() : 0;
-        const dateB = b.recordingCreatedAt ? new Date(b.recordingCreatedAt.replace(' ', 'T') + 'Z').getTime() : 0;
-        return dateB - dateA;
-      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch matches');
+      }
 
-      setRecordings(uniqueRecordings);
+      const recentMatches: RecentMatch[] = await response.json();
+
+      // Transform to MatchForAnalysis format
+      const transformedMatches: MatchForAnalysis[] = recentMatches.map(match => ({
+        matchId: match.matchId,
+        puuid,
+        region,
+        champion: match.champion,
+        result: match.win ? 'win' : 'loss',
+        gameDuration: match.gameDuration,
+        gameMode: match.gameMode,
+        queueId: match.queueId,
+        kills: match.kills,
+        deaths: match.deaths,
+        assists: match.assists,
+        role: match.teamPosition || match.role || 'UNKNOWN',
+        timestamp: match.timestamp,
+        analysisId: analyzedCache.get(match.matchId)?.id || null,
+        analysisStatus: analyzedCache.get(match.matchId) ? 'completed' : 'not_started',
+        overallScore: analyzedCache.get(match.matchId)?.stats?.overallScore || 0,
+        errorsCount: analyzedCache.get(match.matchId)?.errors?.length || 0,
+      }));
+
+      setMatches(transformedMatches);
     } catch (error) {
-      console.error('Failed to load recordings:', error);
-      setRecordings([]);
+      console.error('Failed to load matches:', error);
+      setMatches([]);
     }
-    if (!silent) setLoading(false);
-  }, [puuid]);
+    setLoading(false);
+  }, [puuid, region, gameName, tagLine, analyzedCache]);
 
   // Initial load
   useEffect(() => {
-    loadRecordings();
-  }, [loadRecordings]);
+    loadMatches();
+  }, [loadMatches]);
 
-  // Polling for processing analyses
-  useEffect(() => {
-    const hasProcessing = recordings.some(r => r.analysisStatus === 'processing' || r.analysisStatus === 'pending');
+  // Start analysis for a match
+  const handleStartAnalysis = useCallback(async (matchId: string) => {
+    setAnalyzingIds(prev => new Set(prev).add(matchId));
 
-    if (hasProcessing) {
-      // Start polling every 3 seconds when there are processing analyses
-      if (!pollingRef.current) {
-        pollingRef.current = setInterval(() => {
-          loadRecordings(true); // Silent refresh
-        }, 3000);
-      }
-    } else {
-      // Stop polling when no processing analyses
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    }
+    // Update match status to processing
+    setMatches(prev => prev.map(m =>
+      m.matchId === matchId
+        ? { ...m, analysisStatus: 'processing' as AnalysisStatus }
+        : m
+    ));
 
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
-  }, [recordings, loadRecordings]);
-
-  // Start analysis for a recording
-  const handleStartAnalysis = useCallback(async (recordingId: string, matchId: string) => {
-    setStartingIds(prev => new Set(prev).add(recordingId));
     try {
-      await createAndStartAnalysis(matchId, puuid, region, true);
-      // Refresh to get updated status
-      await loadRecordings(true);
+      const response = await fetch('/api/analysis/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ matchId, puuid, region }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.data) {
+        // Cache the analysis result
+        setAnalyzedCache(prev => new Map(prev).set(matchId, data.data));
+
+        // Update match with analysis results
+        setMatches(prev => prev.map(m =>
+          m.matchId === matchId
+            ? {
+                ...m,
+                analysisStatus: 'completed' as AnalysisStatus,
+                analysisId: data.data.id,
+                overallScore: data.data.stats?.overallScore || 0,
+                errorsCount: data.data.errors?.length || 0,
+              }
+            : m
+        ));
+      } else {
+        throw new Error(data.error || 'Analysis failed');
+      }
     } catch (error) {
-      console.error('Failed to start analysis:', error);
+      console.error('Failed to analyze match:', error);
+      // Update match status to failed
+      setMatches(prev => prev.map(m =>
+        m.matchId === matchId
+          ? { ...m, analysisStatus: 'failed' as AnalysisStatus }
+          : m
+      ));
     } finally {
-      setStartingIds(prev => {
+      setAnalyzingIds(prev => {
         const newSet = new Set(prev);
-        newSet.delete(recordingId);
+        newSet.delete(matchId);
         return newSet;
       });
     }
-  }, [puuid, region, loadRecordings]);
+  }, [puuid, region]);
 
-  // Calculate stats
-  const completedRecordings = recordings.filter(r => r.analysisStatus === 'completed');
-  const totalCompleted = completedRecordings.length;
-  const totalErrors = completedRecordings.reduce((sum, r) => sum + r.errorsCount, 0);
+  // Calculate stats from completed analyses
+  const completedMatches = matches.filter(m => m.analysisStatus === 'completed');
+  const totalCompleted = completedMatches.length;
+  const totalErrors = completedMatches.reduce((sum, m) => sum + m.errorsCount, 0);
 
   const overallStats = {
     totalGames: totalCompleted,
     avgScore: totalCompleted > 0
-      ? Math.round(completedRecordings.reduce((sum, r) => sum + r.overallScore, 0) / totalCompleted)
+      ? Math.round(completedMatches.reduce((sum, m) => sum + m.overallScore, 0) / totalCompleted)
       : 0,
     winRate: totalCompleted > 0
-      ? Math.round((completedRecordings.filter(r => r.result === 'win').length / totalCompleted) * 100)
+      ? Math.round((completedMatches.filter(m => m.result === 'win').length / totalCompleted) * 100)
       : 0,
     totalErrors,
     avgErrorsPerGame: totalCompleted > 0 ? Math.round((totalErrors / totalCompleted) * 10) / 10 : 0,
@@ -226,154 +168,52 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     ],
   };
 
-  // Filter recordings
-  const filteredRecordings = recordings.filter(rec => {
-    if (filter === 'ready') return rec.analysisStatus === 'not_started' || rec.analysisStatus === 'pending';
-    if (filter === 'processing') return rec.analysisStatus === 'processing';
-    if (filter === 'completed') return rec.analysisStatus === 'completed';
+  // Filter matches
+  const filteredMatches = matches.filter(match => {
+    if (filter === 'ready') return match.analysisStatus === 'not_started';
+    if (filter === 'processing') return match.analysisStatus === 'processing';
+    if (filter === 'completed') return match.analysisStatus === 'completed';
     return true;
   });
 
   // Count by status
   const statusCounts = {
-    all: recordings.length,
-    ready: recordings.filter(r => r.analysisStatus === 'not_started' || r.analysisStatus === 'pending').length,
-    processing: recordings.filter(r => r.analysisStatus === 'processing').length,
-    completed: recordings.filter(r => r.analysisStatus === 'completed').length,
+    all: matches.length,
+    ready: matches.filter(m => m.analysisStatus === 'not_started').length,
+    processing: matches.filter(m => m.analysisStatus === 'processing').length,
+    completed: matches.filter(m => m.analysisStatus === 'completed').length,
   };
 
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
         <div style={styles.spinner} />
-        <p style={styles.loadingText}>Chargement des enregistrements...</p>
+        <p style={styles.loadingText}>Loading recent matches...</p>
       </div>
     );
   }
 
   const filterOptions: { key: FilterType; label: string; count: number }[] = [
-    { key: 'all', label: 'Toutes', count: statusCounts.all },
-    { key: 'ready', label: 'Prêtes', count: statusCounts.ready },
-    { key: 'processing', label: 'En cours', count: statusCounts.processing },
-    { key: 'completed', label: 'Terminées', count: statusCounts.completed },
+    { key: 'all', label: 'All', count: statusCounts.all },
+    { key: 'ready', label: 'Ready', count: statusCounts.ready },
+    { key: 'processing', label: 'Processing', count: statusCounts.processing },
+    { key: 'completed', label: 'Completed', count: statusCounts.completed },
   ];
 
   return (
     <div style={styles.container}>
-      {/* Nexra Vision Connection Status */}
-      <div style={{
-        ...styles.visionCard,
-        borderColor: visionStatus.running && visionStatus.linked
-          ? 'rgba(34, 197, 94, 0.3)'
-          : visionStatus.running
-            ? 'rgba(234, 179, 8, 0.3)'
-            : 'rgba(168, 85, 247, 0.2)',
-      }}>
-        <div style={styles.visionHeader}>
-          <div style={styles.visionInfo}>
-            <div style={{
-              ...styles.visionIcon,
-              background: visionStatus.running && visionStatus.linked
-                ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.3) 0%, rgba(16, 185, 129, 0.3) 100%)'
-                : visionStatus.running
-                  ? 'linear-gradient(135deg, rgba(234, 179, 8, 0.3) 0%, rgba(245, 158, 11, 0.3) 100%)'
-                  : 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(0, 212, 255, 0.3) 100%)',
-              color: visionStatus.running && visionStatus.linked ? '#22c55e' : visionStatus.running ? '#eab308' : '#a855f7',
-            }}>
-              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <div>
-              <h3 style={styles.visionTitle}>Nexra Vision</h3>
-              <p style={{
-                ...styles.visionSubtitle,
-                color: visionStatus.running && visionStatus.linked
-                  ? 'rgba(34, 197, 94, 0.8)'
-                  : 'rgba(255,255,255,0.5)',
-              }}>
-                {visionStatus.checking
-                  ? 'Detecting...'
-                  : visionStatus.running
-                    ? visionStatus.linked
-                      ? `Connected: ${visionStatus.account}`
-                      : 'Detected - Not linked'
-                    : 'Not detected - Launch Nexra Vision'}
-              </p>
-            </div>
-          </div>
-
-          {/* Status Indicator */}
-          <div style={styles.statusWrapper}>
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {visionStatus.running && visionStatus.linked && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    width: 20,
-                    height: 20,
-                    borderRadius: '50%',
-                    backgroundColor: '#22c55e',
-                    opacity: 0.3,
-                    animation: 'pulse-ring 2s ease-out infinite',
-                  }}
-                />
-              )}
-              <div
-                style={{
-                  ...styles.statusDot,
-                  backgroundColor: visionStatus.checking
-                    ? '#6b7280'
-                    : visionStatus.running
-                      ? visionStatus.linked
-                        ? '#22c55e'
-                        : '#eab308'
-                      : '#ef4444',
-                  boxShadow: visionStatus.running
-                    ? visionStatus.linked
-                      ? '0 0 12px #22c55e'
-                      : '0 0 10px #eab308'
-                    : '0 0 10px #ef4444',
-                  animation: visionStatus.checking ? 'pulse 1.5s ease-in-out infinite' : 'none',
-                }}
-              />
-            </div>
-            <span style={{
-              ...styles.statusText,
-              color: visionStatus.checking
-                ? '#6b7280'
-                : visionStatus.running
-                  ? visionStatus.linked ? '#22c55e' : '#eab308'
-                  : '#ef4444',
-            }}>
-              {visionStatus.checking
-                ? 'Detecting...'
-                : visionStatus.running
-                  ? visionStatus.linked ? 'Connected' : 'Detected'
-                  : 'Offline'}
-            </span>
-          </div>
+      {/* Info Banner */}
+      <div style={styles.infoBanner}>
+        <div style={styles.infoIcon}>
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
         </div>
-
-        {/* Actions */}
-        <div style={styles.visionActions}>
-          {!visionStatus.running && !visionStatus.checking && (
-            <button
-              onClick={() => window.open('https://github.com/yannisouraghi/nexra-vision/releases/download/v1.0.4/Nexra-Vision-Setup-1-0-4.exe', '_blank')}
-              style={styles.downloadButton}
-            >
-              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download Nexra Vision
-            </button>
-          )}
-
-          <button onClick={checkVisionStatus} style={styles.refreshButton}>
-            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-          </button>
+        <div>
+          <h3 style={styles.infoTitle}>AI Analysis</h3>
+          <p style={styles.infoText}>
+            Analyze your recent games using Riot API Timeline data. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives.
+          </p>
         </div>
       </div>
 
@@ -386,11 +226,11 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
           <svg width="20" height="20" fill="none" stroke="#00d4ff" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
           </svg>
-          Mes Parties
+          Recent Games
           {statusCounts.processing > 0 && (
             <span style={styles.processingBadge}>
               <span style={styles.processingDot} />
-              {statusCounts.processing} en cours
+              {statusCounts.processing} analyzing
             </span>
           )}
         </h2>
@@ -423,39 +263,40 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       </div>
 
       {/* Games Grid */}
-      {filteredRecordings.length === 0 ? (
+      {filteredMatches.length === 0 ? (
         <div style={styles.emptyCard}>
           <div style={styles.emptyIcon}>
             <svg width="40" height="40" fill="none" stroke="rgba(255,255,255,0.4)" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
           </div>
           <h3 style={styles.emptyTitle}>
-            {filter === 'all' ? 'Aucune partie enregistrée' :
-              filter === 'ready' ? 'Aucune partie en attente' :
-                filter === 'processing' ? 'Aucune analyse en cours' :
-                  'Aucune analyse terminée'}
+            {filter === 'all' ? 'No recent games found' :
+              filter === 'ready' ? 'No games to analyze' :
+                filter === 'processing' ? 'No analysis in progress' :
+                  'No completed analyses'}
           </h3>
           <p style={styles.emptyText}>
             {filter === 'all'
-              ? 'Utilise Nexra Vision pour enregistrer tes parties. Après chaque match, tu pourras lancer l\'analyse IA.'
-              : 'Aucune partie ne correspond à ce filtre.'}
+              ? 'Play some games and come back to analyze them!'
+              : 'No games match this filter.'}
           </p>
         </div>
       ) : (
         <div style={styles.gamesGrid}>
-          {filteredRecordings.map((recording, index) => (
+          {filteredMatches.map((match, index) => (
             <div
-              key={recording.recordingId}
+              key={match.matchId}
               style={{
                 animation: `fadeInUp 0.3s ease-out ${index * 50}ms forwards`,
                 opacity: 0,
               }}
             >
-              <GameAnalysisCard
-                recording={recording}
+              <MatchAnalysisCard
+                match={match}
                 onStartAnalysis={handleStartAnalysis}
-                isStarting={startingIds.has(recording.recordingId)}
+                isAnalyzing={analyzingIds.has(match.matchId)}
+                analysisData={analyzedCache.get(match.matchId)}
               />
             </div>
           ))}
@@ -473,24 +314,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
             transform: translateY(0);
           }
         }
-        @keyframes pulse-ring {
-          0% {
-            transform: scale(1);
-            opacity: 0.4;
-          }
-          100% {
-            transform: scale(2.5);
-            opacity: 0;
-          }
-        }
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 0.4;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
         @keyframes spin {
           from {
             transform: rotate(0deg);
@@ -504,99 +327,159 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   );
 }
 
+// Match Analysis Card Component
+interface MatchAnalysisCardProps {
+  match: MatchForAnalysis;
+  onStartAnalysis: (matchId: string) => void;
+  isAnalyzing: boolean;
+  analysisData?: any;
+}
+
+function MatchAnalysisCard({ match, onStartAnalysis, isAnalyzing, analysisData }: MatchAnalysisCardProps) {
+  const isCompleted = match.analysisStatus === 'completed';
+  const isProcessing = match.analysisStatus === 'processing' || isAnalyzing;
+
+  // Format duration
+  const minutes = Math.floor(match.gameDuration / 60);
+  const seconds = match.gameDuration % 60;
+  const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+  // Format timestamp
+  const date = new Date(match.timestamp);
+  const timeAgo = getTimeAgo(date);
+
+  return (
+    <div style={{
+      ...cardStyles.card,
+      borderColor: match.result === 'win' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 51, 102, 0.2)',
+    }}>
+      {/* Champion Icon */}
+      <div style={cardStyles.championSection}>
+        <img
+          src={`https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${match.champion}.png`}
+          alt={match.champion}
+          style={cardStyles.championIcon}
+        />
+        <div style={{
+          ...cardStyles.resultBadge,
+          backgroundColor: match.result === 'win' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 51, 102, 0.2)',
+          color: match.result === 'win' ? '#00ff88' : '#ff3366',
+        }}>
+          {match.result === 'win' ? 'W' : 'L'}
+        </div>
+      </div>
+
+      {/* Match Info */}
+      <div style={cardStyles.info}>
+        <div style={cardStyles.champion}>{match.champion}</div>
+        <div style={cardStyles.kda}>
+          <span style={{ color: '#00ff88' }}>{match.kills}</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+          <span style={{ color: '#ff3366' }}>{match.deaths}</span>
+          <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+          <span style={{ color: '#00d4ff' }}>{match.assists}</span>
+        </div>
+        <div style={cardStyles.meta}>
+          {durationStr} • {match.gameMode} • {timeAgo}
+        </div>
+      </div>
+
+      {/* Analysis Section */}
+      <div style={cardStyles.analysisSection}>
+        {isCompleted && analysisData ? (
+          <div style={cardStyles.scoreSection}>
+            <div style={{
+              ...cardStyles.scoreCircle,
+              borderColor: getScoreColor(match.overallScore),
+            }}>
+              <span style={{ ...cardStyles.scoreValue, color: getScoreColor(match.overallScore) }}>
+                {match.overallScore}
+              </span>
+            </div>
+            <div style={cardStyles.errorsCount}>
+              {match.errorsCount} errors
+            </div>
+          </div>
+        ) : isProcessing ? (
+          <div style={cardStyles.processingSection}>
+            <div style={cardStyles.processingSpinner} />
+            <span style={cardStyles.processingText}>Analyzing...</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => onStartAnalysis(match.matchId)}
+            style={cardStyles.analyzeButton}
+            disabled={isAnalyzing}
+          >
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+            Analyze
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
+function getScoreColor(score: number): string {
+  if (score >= 90) return '#00ff88';
+  if (score >= 70) return '#00d4ff';
+  if (score >= 50) return '#ffd700';
+  if (score >= 30) return '#ff6b35';
+  return '#ff3366';
+}
+
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: 'flex',
     flexDirection: 'column',
     gap: 24,
   },
-  visionCard: {
-    padding: '16px 20px',
-    borderRadius: 12,
-    background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%)',
-    border: '1px solid rgba(168, 85, 247, 0.2)',
+  infoBanner: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-  },
-  visionHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     gap: 16,
+    padding: 20,
+    borderRadius: 12,
+    background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%)',
+    border: '1px solid rgba(0, 212, 255, 0.2)',
   },
-  visionInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-  },
-  visionIcon: {
+  infoIcon: {
     width: 44,
     height: 44,
     borderRadius: 10,
-    background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(0, 212, 255, 0.3) 100%)',
+    background: 'rgba(0, 212, 255, 0.2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#a855f7',
+    color: '#00d4ff',
+    flexShrink: 0,
   },
-  visionTitle: {
+  infoTitle: {
     fontSize: 16,
     fontWeight: 700,
     color: 'white',
-    margin: 0,
+    margin: '0 0 4px 0',
   },
-  visionSubtitle: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.5)',
-    margin: 0,
-  },
-  statusWrapper: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: '50%',
-  },
-  statusText: {
-    fontSize: 13,
-    fontWeight: 600,
-  },
-  visionActions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-  },
-  downloadButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '10px 18px',
-    borderRadius: 8,
-    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-    border: 'none',
-    color: 'white',
+  infoText: {
     fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-  },
-  refreshButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    color: 'rgba(255,255,255,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    marginLeft: 'auto',
+    color: 'rgba(255,255,255,0.6)',
+    margin: 0,
+    lineHeight: 1.5,
   },
   loadingContainer: {
     display: 'flex',
@@ -709,9 +592,127 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   gamesGrid: {
     display: 'flex',
-    flexWrap: 'wrap',
-    gap: 20,
-    justifyContent: 'center',
+    flexDirection: 'column',
+    gap: 12,
     paddingBottom: 60,
+  },
+};
+
+const cardStyles: { [key: string]: React.CSSProperties } = {
+  card: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 16,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.02)',
+    border: '1px solid',
+    transition: 'all 0.2s',
+  },
+  championSection: {
+    position: 'relative',
+    flexShrink: 0,
+  },
+  championIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    objectFit: 'cover',
+  },
+  resultBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: 700,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  info: {
+    flex: 1,
+    minWidth: 0,
+  },
+  champion: {
+    fontSize: 16,
+    fontWeight: 600,
+    color: 'white',
+    marginBottom: 4,
+  },
+  kda: {
+    fontSize: 14,
+    fontWeight: 600,
+    marginBottom: 4,
+  },
+  meta: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.4)',
+  },
+  analysisSection: {
+    flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  scoreSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  scoreCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: '50%',
+    border: '3px solid',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  scoreValue: {
+    fontSize: 16,
+    fontWeight: 700,
+  },
+  errorsCount: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+  },
+  processingSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '8px 16px',
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+  },
+  processingSpinner: {
+    width: 16,
+    height: 16,
+    border: '2px solid rgba(0,212,255,0.2)',
+    borderTopColor: '#00d4ff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
+  },
+  processingText: {
+    fontSize: 13,
+    color: '#00d4ff',
+    fontWeight: 500,
+  },
+  analyzeButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '10px 20px',
+    borderRadius: 8,
+    background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
+    border: 'none',
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
   },
 };

@@ -9,17 +9,50 @@ import RankedStats from './RankedStats';
 import AnimatedBackground from './AnimatedBackground';
 import ChampionsStats from './ChampionsStats';
 import AnalysisTab from './analysis/AnalysisTab';
+import LiveGameTab from './LiveGameTab';
 import PlayerHeaderSkeleton from './skeletons/PlayerHeaderSkeleton';
 import { MatchCardSkeletonList } from './skeletons/MatchCardSkeleton';
 import StatsGridSkeleton from './skeletons/StatsGridSkeleton';
 import NavigationTabsSkeleton from './skeletons/NavigationTabsSkeleton';
-import NexraVisionStatus from './NexraVisionStatus';
 import CreditsDisplay from './CreditsDisplay';
 
 interface RiotAccount {
   gameName: string;
   tagLine: string;
   region: string;
+}
+
+interface ChampionStats {
+  championName: string;
+  games: number;
+  wins: number;
+  losses: number;
+  winrate: number;
+}
+
+interface PlayerStats {
+  topChampions: ChampionStats[];
+  recentMatchResults: boolean[];
+  mainRole: string;
+  totalGames: number;
+}
+
+interface CachedData {
+  summonerData: {
+    profileIconId: number;
+    summonerLevel: number;
+    puuid: string;
+    rank: {
+      tier: string;
+      rank: string;
+      leaguePoints: number;
+      wins: number;
+      losses: number;
+    } | null;
+  };
+  matches: Match[];
+  playerStats: PlayerStats | null;
+  timestamp: number;
 }
 
 interface Participant {
@@ -62,6 +95,13 @@ interface RecentGamesProps {
   riotAccount: RiotAccount;
 }
 
+// Cache duration: 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000;
+
+// Global flag to track if initial page load check was done (persists across component remounts)
+// This resets on actual page refresh since the JS context reloads
+let initialLoadHandled = false;
+
 export default function RecentGames({ riotAccount }: RecentGamesProps) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,8 +109,10 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('summary');
   const [selectedMode, setSelectedMode] = useState('all');
-  const [hasMoreMatches, setHasMoreMatches] = useState(true); // Pour savoir s'il y a encore des matchs
+  const [hasMoreMatches, setHasMoreMatches] = useState(true);
   const [championSortBy, setChampionSortBy] = useState<'games' | 'winrate' | 'kda'>('games');
+  const [isInGame, setIsInGame] = useState(false);
+  const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
   const [summonerData, setSummonerData] = useState<{
     profileIconId: number;
     summonerLevel: number;
@@ -84,29 +126,83 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     } | null;
   } | null>(null);
 
+  // Generate cache key based on riot account
+  const getCacheKey = useCallback(() => {
+    return `nexra_dashboard_cache_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
+  }, [riotAccount]);
+
+  // Restore active tab from localStorage on mount (client-side only)
+  useEffect(() => {
+    const savedTab = localStorage.getItem('nexra_active_tab');
+    if (savedTab && ['summary', 'champions', 'analysis', 'livegame'].includes(savedTab)) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  // Persist active tab to localStorage
+  const handleTabChange = useCallback((tab: string) => {
+    setActiveTab(tab);
+    localStorage.setItem('nexra_active_tab', tab);
+  }, []);
+
   // Ref for infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadAllData();
-  }, [riotAccount]);
+    const cacheKey = getCacheKey();
 
-  // Store riot account info for Nexra Vision auto-config
-  useEffect(() => {
-    if (summonerData?.puuid && riotAccount) {
-      // Store riot account in cookie for Vision to fetch
-      fetch('/api/user/riot-account', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          gameName: riotAccount.gameName,
-          tagLine: riotAccount.tagLine,
-          region: riotAccount.region,
-          puuid: summonerData.puuid,
-        }),
-      }).catch(console.error);
+    // On first load of the SPA session, check if this is a page refresh
+    // The global `initialLoadHandled` flag resets on actual page refresh (JS context reloads)
+    if (!initialLoadHandled) {
+      initialLoadHandled = true;
+
+      // Detect if page was refreshed (browser F5, Ctrl+R, etc.)
+      const isPageRefresh = (() => {
+        try {
+          const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+          if (navEntries.length > 0) {
+            return navEntries[0].type === 'reload';
+          }
+          // Fallback for older browsers
+          return performance.navigation?.type === 1;
+        } catch {
+          return false;
+        }
+      })();
+
+      // If page was refreshed, clear cache to get fresh data
+      if (isPageRefresh) {
+        sessionStorage.removeItem(cacheKey);
+        loadAllData();
+        return;
+      }
     }
-  }, [summonerData?.puuid, riotAccount]);
+
+    // Check cache for SPA navigation
+    const cachedDataStr = sessionStorage.getItem(cacheKey);
+
+    if (cachedDataStr) {
+      try {
+        const cachedData: CachedData = JSON.parse(cachedDataStr);
+        const isExpired = Date.now() - cachedData.timestamp > CACHE_DURATION;
+
+        if (!isExpired) {
+          // Use cached data - set all state at once
+          setSummonerData(cachedData.summonerData);
+          setMatches(cachedData.matches);
+          setPlayerStats(cachedData.playerStats);
+          setHasMoreMatches(cachedData.matches.length >= 20);
+          setIsLoading(false);
+          return;
+        }
+      } catch (e) {
+        sessionStorage.removeItem(cacheKey);
+      }
+    }
+
+    // No valid cache, load fresh data
+    loadAllData();
+  }, [riotAccount, getCacheKey]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
@@ -131,61 +227,55 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     return () => observer.disconnect();
   }, [hasMoreMatches, isLoadingMore, isLoading, activeTab]);
 
-  const loadAllData = async (retryCount = 0) => {
+  const loadAllData = async (retryCount = 0, forceRefresh = false) => {
     setIsLoading(true);
     setError('');
 
     try {
-      // Récupérer d'abord les données du summoner
+      // Step 1: Fetch summoner data first (needed for puuid)
       const summonerResponse = await fetch(
         `/api/riot/summoner?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}`
       );
 
-      // Traiter les données du summoner immédiatement
-      let puuid = '';
-      if (summonerResponse.ok) {
-        const data = await summonerResponse.json();
-        puuid = data.puuid;
-        setSummonerData({
-          profileIconId: data.profileIconId,
-          summonerLevel: data.summonerLevel,
-          puuid: data.puuid,
-          rank: data.rank || null,
-        });
-      } else {
+      if (!summonerResponse.ok) {
         const errorData = await summonerResponse.json();
         throw new Error(errorData.error || 'Error retrieving profile');
       }
 
-      // Délai pour éviter de surcharger l'API Riot (rate limit)
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const summonerDataResponse = await summonerResponse.json();
+      const puuid = summonerDataResponse.puuid;
 
-      // Ensuite récupérer les matches - Utiliser gameName/tagLine au lieu du PUUID
-      // pour éviter tout problème de routing region
-      const matchesResponse = await fetch(
-        `/api/riot/matches?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}&puuid=${encodeURIComponent(puuid)}`
-      );
+      // Step 2: Fetch matches and player stats in parallel
+      const regionMap: { [key: string]: string } = {
+        'euw1': 'europe', 'eun1': 'europe', 'na1': 'americas', 'br1': 'americas',
+        'la1': 'americas', 'la2': 'americas', 'oc1': 'sea', 'ru': 'europe',
+        'tr1': 'europe', 'jp1': 'asia', 'kr': 'asia', 'ph2': 'sea',
+        'sg2': 'sea', 'th2': 'sea', 'tw2': 'sea', 'vn2': 'sea',
+      };
+      const routingRegion = regionMap[riotAccount.region] || 'europe';
 
-      // Traiter les matches
-      if (matchesResponse.ok) {
-        const matchesData = await matchesResponse.json();
-        setMatches(matchesData);
-        // Si on reçoit moins de 20 matchs, il n'y en a plus à charger
-        if (matchesData.length < 20) {
-          setHasMoreMatches(false);
-        }
-      } else {
+      const [matchesResponse, playerStatsResponse] = await Promise.all([
+        fetch(
+          `/api/riot/matches?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}&puuid=${encodeURIComponent(puuid)}`
+        ),
+        fetch(
+          `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
+        ),
+      ]);
+
+      // Handle matches response
+      if (!matchesResponse.ok) {
         let errorData;
         try {
           errorData = await matchesResponse.json();
         } catch (e) {
-          console.error('Erreur lors du parsing de la réponse d\'erreur:', e);
-          throw new Error(`Erreur HTTP ${matchesResponse.status}`);
+          console.error('Error parsing error response:', e);
+          throw new Error(`HTTP Error ${matchesResponse.status}`);
         }
 
-        console.error('Erreur API matches:', errorData);
+        console.error('API matches error:', errorData);
 
-        // Si c'est une erreur 429 (rate limit) et qu'on n'a pas encore réessayé, on réessaie après 2 secondes
+        // Retry on rate limit (429)
         if (matchesResponse.status === 429 && retryCount < 1) {
           setError('Too many requests, retrying in 2 seconds...');
           await new Promise(resolve => setTimeout(resolve, 2000));
@@ -193,6 +283,39 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         }
 
         throw new Error(errorData.error || 'Error retrieving matches');
+      }
+
+      const matchesData = await matchesResponse.json();
+
+      // Handle player stats response (non-blocking - ok if it fails)
+      let playerStatsData: PlayerStats | null = null;
+      if (playerStatsResponse.ok) {
+        playerStatsData = await playerStatsResponse.json();
+      }
+
+      // Step 3: Prepare all data
+      const newSummonerData = {
+        profileIconId: summonerDataResponse.profileIconId,
+        summonerLevel: summonerDataResponse.summonerLevel,
+        puuid: summonerDataResponse.puuid,
+        rank: summonerDataResponse.rank || null,
+      };
+
+      // Step 4: Save to cache
+      const cacheData: CachedData = {
+        summonerData: newSummonerData,
+        matches: matchesData,
+        playerStats: playerStatsData,
+        timestamp: Date.now(),
+      };
+      sessionStorage.setItem(getCacheKey(), JSON.stringify(cacheData));
+
+      // Step 5: Set ALL state at once so UI renders everything together
+      setSummonerData(newSummonerData);
+      setMatches(matchesData);
+      setPlayerStats(playerStatsData);
+      if (matchesData.length < 20) {
+        setHasMoreMatches(false);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to retrieve recent games');
@@ -204,6 +327,12 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   const fetchRecentGames = async () => {
     await loadAllData();
   };
+
+  // Force refresh - clears cache and reloads
+  const forceRefresh = useCallback(() => {
+    sessionStorage.removeItem(getCacheKey());
+    loadAllData(0, true);
+  }, [getCacheKey]);
 
   const loadMoreData = async () => {
     if (!summonerData?.puuid || isLoadingMore) return;
@@ -313,6 +442,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                   summonerLevel={summonerData?.summonerLevel}
                   puuid={summonerData?.puuid}
                   rank={summonerData?.rank}
+                  playerStats={playerStats}
+                  onRefresh={forceRefresh}
                 />
               </div>
             </div>
@@ -363,6 +494,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 summonerLevel={summonerData?.summonerLevel}
                 puuid={summonerData?.puuid}
                 rank={summonerData?.rank}
+                playerStats={playerStats}
+                onRefresh={forceRefresh}
               />
             </div>
           </div>
@@ -377,8 +510,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 {/* Sidebar Navigation - Desktop only */}
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                     <CreditsDisplay />
                   </div>
                 </aside>
@@ -387,7 +519,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <div className="flex-1">
                   {/* Mobile Navigation - Horizontal */}
                   <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
                   <div className="glass-card" style={{ padding: '3rem' }}>
@@ -523,8 +655,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 {/* Sidebar Navigation - Desktop only */}
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                     <CreditsDisplay />
                   </div>
                 </aside>
@@ -533,7 +664,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <div className="flex-1">
                   {/* Mobile Navigation - Horizontal */}
                   <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
                   <div className="glass-card" style={{ padding: '2rem' }}>
@@ -641,8 +772,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 {/* Sidebar Navigation - Desktop only */}
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
-                    <NexraVisionStatus puuid={summonerData?.puuid} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                     <CreditsDisplay />
                   </div>
                 </aside>
@@ -651,7 +781,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <div className="flex-1">
                   {/* Mobile Navigation - Horizontal */}
                   <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
                   <AnalysisTab
@@ -660,6 +790,37 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     gameName={riotAccount.gameName}
                     tagLine={riotAccount.tagLine}
                     profileIconId={summonerData.profileIconId}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'livegame' && summonerData?.puuid && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }} className="animate-fadeIn">
+              {/* Section avec Menu Vertical */}
+              <div style={{ display: 'flex', gap: '2rem' }}>
+                {/* Sidebar Navigation - Desktop only */}
+                <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
+                  <div style={{ position: 'sticky', top: '2rem' }}>
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
+                    <CreditsDisplay />
+                  </div>
+                </aside>
+
+                {/* Live Game Content */}
+                <div className="flex-1">
+                  {/* Mobile Navigation - Horizontal */}
+                  <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
+                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
+                  </div>
+
+                  <LiveGameTab
+                    puuid={summonerData.puuid}
+                    region={riotAccount.region}
+                    gameName={riotAccount.gameName}
+                    tagLine={riotAccount.tagLine}
+                    onGameStatusChange={setIsInGame}
                   />
                 </div>
               </div>

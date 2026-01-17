@@ -27,8 +27,8 @@ export default function CoachingTips({ tips }: CoachingTipsProps) {
           </svg>
         </div>
         <div>
-          <h3 style={styles.headerTitle}>Conseils de Coaching</h3>
-          <p style={styles.headerSubtitle}>Basés sur l'analyse de ta partie</p>
+          <h3 style={styles.headerTitle}>Coaching Tips</h3>
+          <p style={styles.headerSubtitle}>Based on your game analysis</p>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export default function CoachingTips({ tips }: CoachingTipsProps) {
                 {/* Exercise */}
                 {tip.exercice && (
                   <div style={styles.exerciseBox}>
-                    <span style={styles.exerciseLabel}>Exercice pratique</span>
+                    <span style={styles.exerciseLabel}>Practical exercise</span>
                     <p style={styles.exerciseText}>{tip.exercice}</p>
                   </div>
                 )}
@@ -68,7 +68,7 @@ export default function CoachingTips({ tips }: CoachingTipsProps) {
                 {/* Related Errors */}
                 {tip.relatedErrors && tip.relatedErrors.length > 0 && (
                   <span style={styles.relatedErrors}>
-                    Lié à {tip.relatedErrors.length} erreur{tip.relatedErrors.length > 1 ? 's' : ''} dans cette partie
+                    Linked to {tip.relatedErrors.length} error{tip.relatedErrors.length > 1 ? 's' : ''} in this game
                   </span>
                 )}
               </div>
@@ -85,9 +85,9 @@ export default function CoachingTips({ tips }: CoachingTipsProps) {
           </svg>
         </div>
         <div>
-          <h4 style={styles.proTipTitle}>Conseil Pro</h4>
+          <h4 style={styles.proTipTitle}>Pro Tip</h4>
           <p style={styles.proTipText}>
-            Concentre-toi sur un seul aspect à la fois. Commence par le conseil priorité #1 et travaille dessus pendant 5-10 parties avant de passer au suivant.
+            Focus on one aspect at a time. Start with tip priority #1 and work on it for 5-10 games before moving to the next.
           </p>
         </div>
       </div>

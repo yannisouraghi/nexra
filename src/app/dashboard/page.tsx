@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import RecentGames from '@/components/RecentGames';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import OnboardingModal from '@/components/OnboardingModal';
 
 function DashboardContent() {
   const router = useRouter();
@@ -15,6 +16,7 @@ function DashboardContent() {
     tagLine: string;
     region: string;
   } | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     // Wait for session to load
@@ -26,24 +28,56 @@ function DashboardContent() {
       return;
     }
 
+    const user = session?.user as any;
+    const currentUserId = user?.id;
+
+    // First, clean up any stale localStorage data from a different user
+    const saved = localStorage.getItem('nexra_riot_account');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // If localStorage belongs to a different user, clear it
+        if (parsed.userId && parsed.userId !== currentUserId) {
+          console.log('Clearing stale localStorage data from different user');
+          localStorage.removeItem('nexra_riot_account');
+        }
+      } catch (e) {
+        localStorage.removeItem('nexra_riot_account');
+      }
+    }
+
     // Priority 1: Check URL params FIRST (after linking redirect)
     const gameName = searchParams.get('gameName');
     const tagLine = searchParams.get('tagLine');
     const region = searchParams.get('region') || 'euw1';
 
     if (gameName && tagLine) {
-      const accountData = { gameName, tagLine, region };
+      const accountData = { gameName, tagLine, region, userId: currentUserId };
       localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
       setRiotAccount(accountData);
       return;
     }
 
-    // Priority 2: Check localStorage (persisted from previous session)
-    const saved = localStorage.getItem('nexra_riot_account');
-    if (saved) {
+    // Priority 2: Check session for Riot account (from database) - SOURCE OF TRUTH
+    if (user?.riotGameName && user?.riotTagLine) {
+      const accountData = {
+        gameName: user.riotGameName,
+        tagLine: user.riotTagLine,
+        region: user.riotRegion || 'euw1',
+        userId: currentUserId,
+      };
+      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
+      setRiotAccount(accountData);
+      return;
+    }
+
+    // Priority 3: Check localStorage (backup/cache) - only if it belongs to current user
+    const savedAfterCleanup = localStorage.getItem('nexra_riot_account');
+    if (savedAfterCleanup) {
       try {
-        const parsed = JSON.parse(saved);
-        if (parsed.gameName && parsed.tagLine) {
+        const parsed = JSON.parse(savedAfterCleanup);
+        // Only use localStorage if it belongs to current user (or has no userId - legacy data)
+        if (parsed.gameName && parsed.tagLine && (!parsed.userId || parsed.userId === currentUserId)) {
           setRiotAccount(parsed);
           return;
         }
@@ -52,22 +86,25 @@ function DashboardContent() {
       }
     }
 
-    // Priority 3: Check session for Riot account (from database)
-    const user = session?.user as any;
-    if (user?.riotGameName && user?.riotTagLine) {
-      const accountData = {
-        gameName: user.riotGameName,
-        tagLine: user.riotTagLine,
-        region: user.riotRegion || 'euw1',
-      };
-      localStorage.setItem('nexra_riot_account', JSON.stringify(accountData));
-      setRiotAccount(accountData);
-      return;
-    }
-
     // No account found anywhere, redirect to link-riot page
     router.push('/link-riot');
   }, [searchParams, router, status, session]);
+
+  // Check if user needs onboarding (first-time user)
+  useEffect(() => {
+    if (!riotAccount) return;
+
+    // Check if onboarding has been completed
+    const onboardingCompleted = localStorage.getItem('nexra_onboarding_completed');
+    if (!onboardingCompleted) {
+      // First-time user, show onboarding
+      setShowOnboarding(true);
+    }
+  }, [riotAccount]);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+  };
 
   // Show loading while checking session
   if (status === 'loading' || !riotAccount) {
@@ -115,7 +152,14 @@ function DashboardContent() {
     );
   }
 
-  return <RecentGames riotAccount={riotAccount} />;
+  return (
+    <>
+      <RecentGames riotAccount={riotAccount} />
+      {showOnboarding && (
+        <OnboardingModal onComplete={handleOnboardingComplete} />
+      )}
+    </>
+  );
 }
 
 function DashboardLoader() {

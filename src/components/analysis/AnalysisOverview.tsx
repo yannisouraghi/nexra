@@ -61,7 +61,7 @@ export default function AnalysisOverview({ stats }: AnalysisOverviewProps) {
               <span style={{ ...styles.scoreValue, color: scoreColor }}>
                 {stats.avgScore}
               </span>
-              <span style={styles.scoreSubtext}>Moyenne</span>
+              <span style={styles.scoreSubtext}>Average</span>
             </div>
           </div>
           <span style={{
@@ -76,7 +76,7 @@ export default function AnalysisOverview({ stats }: AnalysisOverviewProps) {
         {/* Stats Grid */}
         <div style={styles.statsGrid}>
           <StatCard
-            label="Parties Analysées"
+            label="Analyzed Games"
             value={stats.totalGames.toString()}
             icon={
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@ export default function AnalysisOverview({ stats }: AnalysisOverviewProps) {
             color={stats.winRate >= 50 ? '#00ff88' : '#ff3366'}
           />
           <StatCard
-            label="Erreurs Totales"
+            label="Total Errors"
             value={stats.totalErrors.toString()}
             icon={
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -106,7 +106,7 @@ export default function AnalysisOverview({ stats }: AnalysisOverviewProps) {
             color="#ff6b35"
           />
           <StatCard
-            label="Erreurs/Partie"
+            label="Errors/Game"
             value={stats.avgErrorsPerGame.toString()}
             icon={
               <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@ export default function AnalysisOverview({ stats }: AnalysisOverviewProps) {
             <svg width="16" height="16" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            Erreurs Fréquentes
+            Common Errors
           </h3>
           <div style={styles.errorsList}>
             {stats.mostCommonErrors.slice(0, 4).map((error) => {

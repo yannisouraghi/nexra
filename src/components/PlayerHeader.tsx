@@ -1,23 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getLatestDDragonVersion, getChampionImageUrl } from '@/utils/ddragon';
+import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
+import { getChampionImageUrl } from '@/utils/ddragon';
 
-interface PlayerHeaderProps {
-  gameName: string;
-  tagLine: string;
-  region: string;
-  profileIconId?: number;
-  summonerLevel?: number;
-  puuid?: string;
-  rank?: {
-    tier: string;
-    rank: string;
-    leaguePoints: number;
-    wins: number;
-    losses: number;
-  } | null;
-}
+const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
 interface ChampionStats {
   championName: string;
@@ -34,10 +22,29 @@ interface PlayerStats {
   totalGames: number;
 }
 
-export default function PlayerHeader({ gameName, tagLine, region, profileIconId, summonerLevel, puuid, rank }: PlayerHeaderProps) {
+interface PlayerHeaderProps {
+  gameName: string;
+  tagLine: string;
+  region: string;
+  profileIconId?: number;
+  summonerLevel?: number;
+  puuid?: string;
+  rank?: {
+    tier: string;
+    rank: string;
+    leaguePoints: number;
+    wins: number;
+    losses: number;
+  } | null;
+  playerStats?: PlayerStats | null;
+  onRefresh?: () => void;
+}
+
+export default function PlayerHeader({ gameName, tagLine, region, profileIconId, summonerLevel, puuid, rank, playerStats, onRefresh }: PlayerHeaderProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
   const [currentSeason, setCurrentSeason] = useState<{ year: number; split: number } | null>(null);
-  const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
-  const [loadingStats, setLoadingStats] = useState(false);
+  const [unlinkingAccount, setUnlinkingAccount] = useState(false);
   const [ddragonVersion, setDdragonVersion] = useState('15.1.1');
 
   useEffect(() => {
@@ -74,52 +81,6 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
     fetchCurrentSeason();
   }, []);
-
-  useEffect(() => {
-    // Récupérer les stats du joueur
-    const fetchPlayerStats = async () => {
-      if (!puuid) return;
-
-      setLoadingStats(true);
-      try {
-        // Convertir la région platform en région routing
-        const regionMap: { [key: string]: string } = {
-          'euw1': 'europe',
-          'eun1': 'europe',
-          'na1': 'americas',
-          'br1': 'americas',
-          'la1': 'americas',
-          'la2': 'americas',
-          'oc1': 'sea',
-          'ru': 'europe',
-          'tr1': 'europe',
-          'jp1': 'asia',
-          'kr': 'asia',
-          'ph2': 'sea',
-          'sg2': 'sea',
-          'th2': 'sea',
-          'tw2': 'sea',
-          'vn2': 'sea',
-        };
-        const routingRegion = regionMap[region] || 'europe';
-
-        const response = await fetch(
-          `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setPlayerStats(data);
-        }
-      } catch (error) {
-        console.error('Error fetching player stats:', error);
-      } finally {
-        setLoadingStats(false);
-      }
-    };
-
-    fetchPlayerStats();
-  }, [puuid, region]);
   const regionLabels: { [key: string]: string } = {
     'euw1': 'EUW',
     'eun1': 'EUNE',
@@ -175,28 +136,163 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   const totalGames = rank ? rank.wins + rank.losses : 0;
 
   // Normaliser le nom du champion pour l'URL de l'image
+  const handleLogout = () => {
+    // Clear local storage
+    localStorage.removeItem('nexra_riot_account');
+    // Sign out and redirect to landing page
+    signOut({ callbackUrl: '/' });
+  };
+
+  const handleUnlinkRiot = async () => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    setUnlinkingAccount(true);
+    try {
+      // Delete from database
+      const response = await fetch(`${NEXRA_API_URL}/users/${userId}/link-riot`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to unlink account');
+      }
+
+      // Clear localStorage and set unlink flag
+      localStorage.removeItem('nexra_riot_account');
+      localStorage.setItem('nexra_riot_unlinked', 'true');
+
+      // Redirect to link-riot page
+      router.push('/link-riot');
+    } catch (error) {
+      console.error('Error unlinking Riot account:', error);
+      setUnlinkingAccount(false);
+    }
+  };
+
   return (
     <div className="glass-card relative overflow-hidden">
-      {/* Refresh Button */}
-      <button
-        onClick={() => window.location.reload()}
-        className="absolute top-4 right-4 z-20 group p-2 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/10 transition-all duration-300"
-        title="Refresh"
-      >
-        <svg
-          className="w-5 h-5 text-white/70 group-hover:text-white transition-all group-hover:rotate-180 duration-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      {/* Action Buttons */}
+      <div className="absolute z-20 flex items-center" style={{ top: '1rem', right: '1rem', gap: '0.75rem' }}>
+        {/* Settings Button */}
+        <button
+          onClick={() => router.push('/settings')}
+          className="group flex items-center rounded-xl border border-white/10 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all duration-300"
+          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
-      </button>
+          <svg
+            className="group-hover:text-purple-400 transition-all group-hover:rotate-90 duration-500"
+            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <span
+            className="group-hover:text-purple-400 transition-colors duration-300"
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
+          >
+            Settings
+          </span>
+        </button>
+
+        {/* Refresh Button */}
+        <button
+          onClick={onRefresh}
+          className="group flex items-center rounded-xl border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
+          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+        >
+          <svg
+            className="group-hover:text-cyan-400 transition-all group-hover:rotate-180 duration-500"
+            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          <span
+            className="group-hover:text-cyan-400 transition-colors duration-300"
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
+          >
+            Refresh
+          </span>
+        </button>
+
+        {/* Change Account Button */}
+        <button
+          onClick={handleUnlinkRiot}
+          disabled={unlinkingAccount}
+          className="group flex items-center rounded-xl border border-white/10 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+        >
+          <svg
+            className="group-hover:text-orange-400 transition-all duration-300"
+            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+            />
+          </svg>
+          <span
+            className="group-hover:text-orange-400 transition-colors duration-300"
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
+          >
+            {unlinkingAccount ? 'Unlinking...' : 'Change Account'}
+          </span>
+        </button>
+
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className="group flex items-center rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-300"
+          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+        >
+          <svg
+            className="group-hover:text-red-400 transition-all duration-300"
+            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          <span
+            className="group-hover:text-red-400 transition-colors duration-300"
+            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
+          >
+            Logout
+          </span>
+        </button>
+      </div>
 
       <div style={{ padding: '2rem' }}>
         {/* Player Identity */}
@@ -302,7 +398,7 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               </div>
 
               {/* Stats additionnelles horizontales */}
-              {playerStats && !loadingStats && (
+              {playerStats && (
                 <>
                   {/* Recent Performance - Last 5 matches */}
                   {playerStats.recentMatchResults.length > 0 && (

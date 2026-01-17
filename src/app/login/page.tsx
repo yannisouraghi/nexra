@@ -1,12 +1,112 @@
 'use client';
 
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AnimatedBackground from '@/components/AnimatedBackground';
 
-export default function LoginPage() {
+type AuthMode = 'login' | 'register';
+
+function LoginContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [mode, setMode] = useState<AuthMode>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+
+  const callbackUrl = searchParams.get('callbackUrl') || '/link-riot';
+
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/link-riot' });
+    signIn('google', { callbackUrl });
+  };
+
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      if (mode === 'register') {
+        // Validation
+        if (password !== confirmPassword) {
+          setError('Passwords do not match');
+          setLoading(false);
+          return;
+        }
+
+        if (password.length < 8) {
+          setError('Password must be at least 8 characters');
+          setLoading(false);
+          return;
+        }
+
+        // Register
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, name }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          setError(data.error || 'Registration failed');
+          setLoading(false);
+          return;
+        }
+
+        setSuccess('Account created! Signing you in...');
+
+        // Auto sign in after registration
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError('Account created but login failed. Please try logging in.');
+          setMode('login');
+          setLoading(false);
+          return;
+        }
+
+        router.push(callbackUrl);
+      } else {
+        // Login
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.error) {
+          setError('Invalid email or password');
+          setLoading(false);
+          return;
+        }
+
+        router.push(callbackUrl);
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    setError('');
+    setSuccess('');
+    setPassword('');
+    setConfirmPassword('');
   };
 
   return (
@@ -32,13 +132,140 @@ export default function LoginPage() {
           <span className="auth-logo-text">NEXRA</span>
         </Link>
 
-        {/* Login Card */}
-        <div className="auth-card">
+        {/* Auth Card */}
+        <div className="auth-card" style={{ maxWidth: '420px' }}>
           <div className="auth-card-glow"></div>
 
-          <div className="auth-header">
-            <h1 className="auth-title">Welcome Back</h1>
-            <p className="auth-subtitle">Sign in to access your dashboard</p>
+          {/* Mode Tabs */}
+          <div style={styles.tabs}>
+            <button
+              onClick={() => switchMode('login')}
+              style={{
+                ...styles.tab,
+                ...(mode === 'login' ? styles.tabActive : {}),
+              }}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => switchMode('register')}
+              style={{
+                ...styles.tab,
+                ...(mode === 'register' ? styles.tabActive : {}),
+              }}
+            >
+              Create Account
+            </button>
+          </div>
+
+          <div className="auth-header" style={{ marginTop: '1.5rem' }}>
+            <h1 className="auth-title">
+              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+            </h1>
+            <p className="auth-subtitle">
+              {mode === 'login'
+                ? 'Sign in to access your dashboard'
+                : 'Join Nexra to improve your gameplay'}
+            </p>
+          </div>
+
+          {/* Error/Success Messages */}
+          {error && (
+            <div style={styles.errorBox}>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {error}
+            </div>
+          )}
+          {success && (
+            <div style={styles.successBox}>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {success}
+            </div>
+          )}
+
+          {/* Email/Password Form */}
+          <form onSubmit={handleCredentialsSubmit} style={styles.form}>
+            {mode === 'register' && (
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Name (optional)</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  style={styles.input}
+                />
+              </div>
+            )}
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                style={styles.input}
+              />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={mode === 'register' ? 'Min. 8 characters' : 'Your password'}
+                required
+                minLength={mode === 'register' ? 8 : undefined}
+                style={styles.input}
+              />
+            </div>
+
+            {mode === 'register' && (
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Confirm Password</label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                  style={styles.input}
+                />
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                ...styles.submitButton,
+                opacity: loading ? 0.7 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer',
+              }}
+            >
+              {loading ? (
+                <>
+                  <div style={styles.spinner}></div>
+                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                </>
+              ) : (
+                mode === 'login' ? 'Sign In' : 'Create Account'
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div style={styles.divider}>
+            <span style={styles.dividerLine}></span>
+            <span style={styles.dividerText}>or</span>
+            <span style={styles.dividerLine}></span>
           </div>
 
           {/* Google Sign In Button */}
@@ -69,6 +296,166 @@ export default function LoginPage() {
           Back to Home
         </Link>
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
+  );
+}
+
+const styles: { [key: string]: React.CSSProperties } = {
+  tabs: {
+    display: 'flex',
+    gap: '4px',
+    padding: '4px',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: '12px',
+    marginBottom: '0.5rem',
+  },
+  tab: {
+    flex: 1,
+    padding: '10px 16px',
+    fontSize: '14px',
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  tabActive: {
+    backgroundColor: 'rgba(0, 212, 255, 0.15)',
+    color: '#00d4ff',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+    marginTop: '1.5rem',
+  },
+  inputGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  label: {
+    fontSize: '13px',
+    fontWeight: 500,
+    color: 'rgba(255,255,255,0.7)',
+  },
+  input: {
+    padding: '12px 16px',
+    fontSize: '15px',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    color: 'white',
+    outline: 'none',
+    transition: 'all 0.2s',
+  },
+  submitButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '14px 24px',
+    fontSize: '15px',
+    fontWeight: 600,
+    color: 'white',
+    background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    marginTop: '8px',
+  },
+  spinner: {
+    width: '18px',
+    height: '18px',
+    border: '2px solid rgba(255,255,255,0.3)',
+    borderTopColor: 'white',
+    borderRadius: '50%',
+    animation: 'spin 0.8s linear infinite',
+  },
+  divider: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '16px',
+    margin: '24px 0',
+  },
+  dividerLine: {
+    flex: 1,
+    height: '1px',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  dividerText: {
+    fontSize: '13px',
+    color: 'rgba(255,255,255,0.4)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  },
+  errorBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(255, 51, 102, 0.1)',
+    border: '1px solid rgba(255, 51, 102, 0.3)',
+    borderRadius: '10px',
+    color: '#ff3366',
+    fontSize: '14px',
+    marginTop: '1rem',
+  },
+  successBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '12px 16px',
+    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+    border: '1px solid rgba(0, 255, 136, 0.3)',
+    borderRadius: '10px',
+    color: '#00ff88',
+    fontSize: '14px',
+    marginTop: '1rem',
+  },
+};
+
+function LoginLoader() {
+  return (
+    <div className="auth-page">
+      <AnimatedBackground />
+      <div className="auth-container">
+        <div className="auth-card" style={{ padding: '3rem', textAlign: 'center' }}>
+          <div className="auth-card-glow"></div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              border: '3px solid rgba(0, 212, 255, 0.2)',
+              borderTopColor: '#00d4ff',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+            }} />
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoader />}>
+      <LoginContent />
+    </Suspense>
   );
 }
