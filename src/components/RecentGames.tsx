@@ -503,10 +503,18 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       <AnimatedBackground />
 
       {/* Top Bar - Fixed at top right */}
-      <div className="fixed z-50 flex items-center" style={{ top: '1rem', right: '1.5rem', gap: '0.5rem' }}>
-        {/* User Email */}
+      <div className="fixed z-50 flex items-center" style={{ top: '1rem', right: '1.5rem', left: 'auto', gap: '0.5rem' }}>
+        {/* User Email - truncated */}
         {session?.user?.email && (
-          <span style={{ fontSize: '0.8rem', color: 'rgba(255, 255, 255, 0.5)', marginRight: '0.5rem' }}>
+          <span style={{
+            fontSize: '0.75rem',
+            color: 'rgba(255, 255, 255, 0.5)',
+            marginRight: '0.5rem',
+            maxWidth: '150px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
             {session.user.email}
           </span>
         )}
