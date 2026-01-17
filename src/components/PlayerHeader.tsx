@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { getChampionImageUrl } from '@/utils/ddragon';
 
 const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
@@ -135,14 +135,6 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   const winRate = rank ? Math.round((rank.wins / (rank.wins + rank.losses)) * 100) : 0;
   const totalGames = rank ? rank.wins + rank.losses : 0;
 
-  // Normaliser le nom du champion pour l'URL de l'image
-  const handleLogout = () => {
-    // Clear local storage
-    localStorage.removeItem('nexra_riot_account');
-    // Sign out and redirect to landing page
-    signOut({ callbackUrl: '/' });
-  };
-
   const handleUnlinkRiot = async () => {
     const userId = session?.user?.id;
     if (!userId) return;
@@ -172,51 +164,18 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
   return (
     <div className="glass-card relative overflow-hidden">
-      {/* Action Buttons */}
-      <div className="absolute z-20 flex items-center" style={{ top: '1rem', right: '1rem', gap: '0.75rem' }}>
-        {/* Settings Button */}
-        <button
-          onClick={() => router.push('/settings')}
-          className="group flex items-center rounded-xl border border-white/10 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all duration-300"
-          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        >
-          <svg
-            className="group-hover:text-purple-400 transition-all group-hover:rotate-90 duration-500"
-            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <span
-            className="group-hover:text-purple-400 transition-colors duration-300"
-            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
-          >
-            Settings
-          </span>
-        </button>
-
+      {/* Action Buttons - Only Refresh and Change Account */}
+      <div className="absolute z-20 flex items-center" style={{ top: '1rem', right: '1rem', gap: '0.5rem' }}>
         {/* Refresh Button */}
         <button
           onClick={onRefresh}
-          className="group flex items-center rounded-xl border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
-          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
+          style={{ padding: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          title="Refresh data"
         >
           <svg
             className="group-hover:text-cyan-400 transition-all group-hover:rotate-180 duration-500"
-            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -228,24 +187,19 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          <span
-            className="group-hover:text-cyan-400 transition-colors duration-300"
-            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
-          >
-            Refresh
-          </span>
         </button>
 
         {/* Change Account Button */}
         <button
           onClick={handleUnlinkRiot}
           disabled={unlinkingAccount}
-          className="group flex items-center rounded-xl border border-white/10 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ padding: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          title="Change Riot account"
         >
           <svg
             className="group-hover:text-orange-400 transition-all duration-300"
-            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
+            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -257,40 +211,6 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
             />
           </svg>
-          <span
-            className="group-hover:text-orange-400 transition-colors duration-300"
-            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
-          >
-            {unlinkingAccount ? 'Unlinking...' : 'Change Account'}
-          </span>
-        </button>
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className="group flex items-center rounded-xl border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-300"
-          style={{ padding: '0.75rem 1.25rem', gap: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-        >
-          <svg
-            className="group-hover:text-red-400 transition-all duration-300"
-            style={{ width: '20px', height: '20px', color: 'rgba(255, 255, 255, 0.7)' }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
-          </svg>
-          <span
-            className="group-hover:text-red-400 transition-colors duration-300"
-            style={{ fontSize: '0.875rem', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)' }}
-          >
-            Logout
-          </span>
         </button>
       </div>
 
