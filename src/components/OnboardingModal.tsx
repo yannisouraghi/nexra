@@ -36,32 +36,8 @@ const steps: OnboardingStep[] = [
     tip: "Let's get you started in just a few steps!"
   },
   {
-    title: "Link Your Riot Account",
-    description: "First, connect your Riot Games account so we can track your matches. Enter your Riot ID (GameName#TAG) to get started.",
-    image: (
-      <div style={{ width: '100%', height: '200px', background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(0,0,0,0.3)', padding: '12px 20px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="#ef4444">
-            <path d="M12.534 21.77l-1.09-2.81 10.52.54-.451 4.5zM15.06 0L.307 6.969 2.59 17.471H5.6l-.52-7.084 2.688-1.478.623 8.562h3.01l-.58-10.2 2.779-1.53.796 11.73h3.09l-.18-14.583z" />
-          </svg>
-          <div style={{ color: 'white', fontSize: '18px', fontWeight: 600 }}>
-            YourName<span style={{ color: 'rgba(255,255,255,0.4)' }}>#</span><span style={{ color: '#22d3ee' }}>TAG</span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4M12 8h.01" />
-          </svg>
-          Find your Riot ID in the League client
-        </div>
-      </div>
-    ),
-    tip: "Your Riot ID can be found in the top-right corner of the League client."
-  },
-  {
     title: "Play a League Game",
-    description: "Once your account is linked, simply play a game of League of Legends. We automatically detect when you start and finish a match.",
+    description: "Now that your Riot account is linked, simply play a game of League of Legends. We automatically detect when you start and finish a match.",
     image: (
       <div style={{ width: '100%', height: '200px', background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '20px' }}>
         <div style={{ position: 'relative' }}>
@@ -88,23 +64,39 @@ const steps: OnboardingStep[] = [
     description: "After your game ends, it will appear in your dashboard. You'll see your champion, KDA, and match result. The game is now ready to be analyzed!",
     image: (
       <div style={{ width: '100%', height: '200px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Mock game card */}
-        <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-            🎮
-          </div>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ color: 'white', fontWeight: 600 }}>Yasuo</span>
-              <span style={{ color: '#22c55e', fontSize: '12px', fontWeight: 600, background: 'rgba(34, 197, 94, 0.2)', padding: '2px 8px', borderRadius: '4px' }}>VICTORY</span>
+        {/* Mock game card with champion splash style */}
+        <div style={{
+          position: 'relative',
+          height: '140px',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%)',
+          border: '1px solid rgba(34, 197, 94, 0.3)',
+        }}>
+          {/* Champion splash background effect */}
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)' }} />
+          {/* Content */}
+          <div style={{ position: 'relative', height: '100%', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span style={{ color: '#22c55e', fontSize: '11px', fontWeight: 600, background: 'rgba(34, 197, 94, 0.2)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>Victory</span>
+                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Ranked Solo</span>
+              </div>
+              <div style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>Yasuo</div>
+              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginTop: '4px' }}>
+                <span style={{ color: '#22c55e', fontWeight: 600 }}>12</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
+                <span style={{ color: '#ef4444', fontWeight: 600 }}>3</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
+                <span style={{ color: '#f59e0b', fontWeight: 600 }}>8</span>
+                <span style={{ marginLeft: '12px', color: 'rgba(255,255,255,0.4)' }}>32:45</span>
+              </div>
             </div>
-            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '13px', marginTop: '4px' }}>
-              <span style={{ color: '#22c55e' }}>12</span> / <span style={{ color: '#ef4444' }}>3</span> / <span style={{ color: '#f59e0b' }}>8</span>
-              <span style={{ marginLeft: '12px' }}>32:45</span>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <div style={{ background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)', padding: '8px 20px', borderRadius: '8px', color: 'white', fontWeight: 600, fontSize: '13px' }}>
+                Analyze
+              </div>
             </div>
-          </div>
-          <div style={{ background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)', padding: '8px 16px', borderRadius: '6px', color: 'white', fontWeight: 600, fontSize: '13px' }}>
-            Analyze
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>
