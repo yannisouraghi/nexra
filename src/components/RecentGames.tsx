@@ -105,6 +105,10 @@ const CACHE_DURATION = 5 * 60 * 1000;
 let initialLoadHandled = false;
 
 export default function RecentGames({ riotAccount }: RecentGamesProps) {
+  // All hooks must be at the top level (before any conditional returns)
+  const router = useRouter();
+  const { data: session } = useSession();
+
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -487,9 +491,6 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       </div>
     );
   }
-
-  const router = useRouter();
-  const { data: session } = useSession();
 
   const handleLogout = () => {
     localStorage.removeItem('nexra_riot_account');
