@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -12,6 +13,8 @@ import Image from 'next/image';
 // ============================================
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [isLoaded, setIsLoaded] = useState(false);
@@ -42,8 +45,18 @@ export default function LandingPage() {
     setIsLoaded(true);
   }, []);
 
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      // User is already logged in, redirect to dashboard
+      // The dashboard will handle the Riot account check
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
+
   const handleGoogleSignIn = () => {
-    signIn('google', { callbackUrl: '/link-riot' });
+    // Redirect to dashboard - it will handle Riot account check
+    signIn('google', { callbackUrl: '/dashboard' });
   };
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
@@ -95,7 +108,7 @@ export default function LandingPage() {
           return;
         }
 
-        window.location.href = '/link-riot';
+        window.location.href = '/dashboard';
       } else {
         const result = await signIn('credentials', {
           email,
@@ -109,7 +122,7 @@ export default function LandingPage() {
           return;
         }
 
-        window.location.href = '/link-riot';
+        window.location.href = '/dashboard';
       }
     } catch {
       setAuthError('Something went wrong. Please try again.');

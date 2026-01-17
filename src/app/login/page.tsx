@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
+import { useState, Suspense, useEffect } from 'react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import AnimatedBackground from '@/components/AnimatedBackground';
@@ -11,6 +11,7 @@ type AuthMode = 'login' | 'register';
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session, status } = useSession();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +21,14 @@ function LoginContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
 
-  const callbackUrl = searchParams.get('callbackUrl') || '/link-riot';
+  const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
+
+  // Redirect authenticated users to dashboard
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user) {
+      router.push('/dashboard');
+    }
+  }, [status, session, router]);
 
   const handleGoogleSignIn = () => {
     signIn('google', { callbackUrl });
