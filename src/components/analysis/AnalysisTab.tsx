@@ -283,7 +283,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
           </p>
         </div>
       ) : (
-        <div style={styles.gamesGrid}>
+        <div style={styles.gamesGridCards}>
           {filteredMatches.map((match, index) => (
             <div
               key={match.matchId}
@@ -292,11 +292,10 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
                 opacity: 0,
               }}
             >
-              <MatchAnalysisCard
+              <GameAnalysisCard
                 match={match}
                 onStartAnalysis={handleStartAnalysis}
-                isAnalyzing={analyzingIds.has(match.matchId)}
-                analysisData={analyzedCache.get(match.matchId)}
+                isStarting={analyzingIds.has(match.matchId)}
               />
             </div>
           ))}
@@ -325,122 +324,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       `}</style>
     </div>
   );
-}
-
-// Match Analysis Card Component
-interface MatchAnalysisCardProps {
-  match: MatchForAnalysis;
-  onStartAnalysis: (matchId: string) => void;
-  isAnalyzing: boolean;
-  analysisData?: any;
-}
-
-function MatchAnalysisCard({ match, onStartAnalysis, isAnalyzing, analysisData }: MatchAnalysisCardProps) {
-  const isCompleted = match.analysisStatus === 'completed';
-  const isProcessing = match.analysisStatus === 'processing' || isAnalyzing;
-
-  // Format duration
-  const minutes = Math.floor(match.gameDuration / 60);
-  const seconds = match.gameDuration % 60;
-  const durationStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-  // Format timestamp
-  const date = new Date(match.timestamp);
-  const timeAgo = getTimeAgo(date);
-
-  return (
-    <div style={{
-      ...cardStyles.card,
-      borderColor: match.result === 'win' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 51, 102, 0.2)',
-    }}>
-      {/* Champion Icon */}
-      <div style={cardStyles.championSection}>
-        <img
-          src={`https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${match.champion}.png`}
-          alt={match.champion}
-          style={cardStyles.championIcon}
-        />
-        <div style={{
-          ...cardStyles.resultBadge,
-          backgroundColor: match.result === 'win' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 51, 102, 0.2)',
-          color: match.result === 'win' ? '#00ff88' : '#ff3366',
-        }}>
-          {match.result === 'win' ? 'W' : 'L'}
-        </div>
-      </div>
-
-      {/* Match Info */}
-      <div style={cardStyles.info}>
-        <div style={cardStyles.champion}>{match.champion}</div>
-        <div style={cardStyles.kda}>
-          <span style={{ color: '#00ff88' }}>{match.kills}</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
-          <span style={{ color: '#ff3366' }}>{match.deaths}</span>
-          <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
-          <span style={{ color: '#00d4ff' }}>{match.assists}</span>
-        </div>
-        <div style={cardStyles.meta}>
-          {durationStr} • {match.gameMode} • {timeAgo}
-        </div>
-      </div>
-
-      {/* Analysis Section */}
-      <div style={cardStyles.analysisSection}>
-        {isCompleted && analysisData ? (
-          <div style={cardStyles.scoreSection}>
-            <div style={{
-              ...cardStyles.scoreCircle,
-              borderColor: getScoreColor(match.overallScore),
-            }}>
-              <span style={{ ...cardStyles.scoreValue, color: getScoreColor(match.overallScore) }}>
-                {match.overallScore}
-              </span>
-            </div>
-            <div style={cardStyles.errorsCount}>
-              {match.errorsCount} errors
-            </div>
-          </div>
-        ) : isProcessing ? (
-          <div style={cardStyles.processingSection}>
-            <div style={cardStyles.processingSpinner} />
-            <span style={cardStyles.processingText}>Analyzing...</span>
-          </div>
-        ) : (
-          <button
-            onClick={() => onStartAnalysis(match.matchId)}
-            style={cardStyles.analyzeButton}
-            disabled={isAnalyzing}
-          >
-            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
-            Analyze
-          </button>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function getTimeAgo(date: Date): string {
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
-}
-
-function getScoreColor(score: number): string {
-  if (score >= 90) return '#00ff88';
-  if (score >= 70) return '#00d4ff';
-  if (score >= 50) return '#ffd700';
-  if (score >= 30) return '#ff6b35';
-  return '#ff3366';
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
@@ -596,123 +479,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: 12,
     paddingBottom: 60,
   },
-};
-
-const cardStyles: { [key: string]: React.CSSProperties } = {
-  card: {
+  gamesGridCards: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 16,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.02)',
-    border: '1px solid',
-    transition: 'all 0.2s',
-  },
-  championSection: {
-    position: 'relative',
-    flexShrink: 0,
-  },
-  championIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    objectFit: 'cover',
-  },
-  resultBadge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    width: 20,
-    height: 20,
-    borderRadius: 4,
-    fontSize: 11,
-    fontWeight: 700,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  info: {
-    flex: 1,
-    minWidth: 0,
-  },
-  champion: {
-    fontSize: 16,
-    fontWeight: 600,
-    color: 'white',
-    marginBottom: 4,
-  },
-  kda: {
-    fontSize: 14,
-    fontWeight: 600,
-    marginBottom: 4,
-  },
-  meta: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
-  },
-  analysisSection: {
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-  },
-  scoreSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-  },
-  scoreCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: '50%',
-    border: '3px solid',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  scoreValue: {
-    fontSize: 16,
-    fontWeight: 700,
-  },
-  errorsCount: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.5)',
-  },
-  processingSection: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '8px 16px',
-    borderRadius: 8,
-    backgroundColor: 'rgba(0, 212, 255, 0.1)',
-  },
-  processingSpinner: {
-    width: 16,
-    height: 16,
-    border: '2px solid rgba(0,212,255,0.2)',
-    borderTopColor: '#00d4ff',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
-  },
-  processingText: {
-    fontSize: 13,
-    color: '#00d4ff',
-    fontWeight: 500,
-  },
-  analyzeButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '10px 20px',
-    borderRadius: 8,
-    background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)',
-    border: 'none',
-    color: 'white',
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
+    flexWrap: 'wrap',
+    gap: 20,
+    paddingBottom: 60,
   },
 };
