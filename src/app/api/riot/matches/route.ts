@@ -301,9 +301,36 @@ export async function GET(request: NextRequest) {
     );
 
     if (!matchlistResponse.ok) {
-      console.error(`Erreur API Riot Match List: ${matchlistResponse.status}`);
+      let errorBody = '';
+      try {
+        errorBody = await matchlistResponse.text();
+      } catch (e) {
+        errorBody = 'Unable to read error body';
+      }
+      console.error(`Riot API Match List Error: ${matchlistResponse.status} - ${errorBody}`);
+
+      // Handle specific error codes
+      if (matchlistResponse.status === 429) {
+        return NextResponse.json(
+          { error: 'Rate limit exceeded. Please wait a moment and try again.' },
+          { status: 429 }
+        );
+      }
+      if (matchlistResponse.status === 403) {
+        return NextResponse.json(
+          { error: 'API key expired or invalid. Please contact support.' },
+          { status: 403 }
+        );
+      }
+      if (matchlistResponse.status === 404) {
+        return NextResponse.json(
+          { error: 'No matches found for this account.' },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
-        { error: `Erreur lors de la récupération de la liste des matches (${matchlistResponse.status})` },
+        { error: `Error fetching matches (${matchlistResponse.status})` },
         { status: matchlistResponse.status }
       );
     }

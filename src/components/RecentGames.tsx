@@ -265,24 +265,35 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
       // Handle matches response
       if (!matchesResponse.ok) {
-        let errorData;
+        let errorMessage = `Error ${matchesResponse.status}`;
+
         try {
-          errorData = await matchesResponse.json();
+          const errorData = await matchesResponse.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
+          }
         } catch (e) {
-          console.error('Error parsing error response:', e);
-          throw new Error(`HTTP Error ${matchesResponse.status}`);
+          // Response wasn't JSON, try text
+          try {
+            const errorText = await matchesResponse.text();
+            if (errorText) {
+              errorMessage = errorText.substring(0, 100);
+            }
+          } catch {
+            // Ignore
+          }
         }
 
-        console.error('API matches error:', errorData);
+        console.error('API matches error:', matchesResponse.status, errorMessage);
 
         // Retry on rate limit (429)
         if (matchesResponse.status === 429 && retryCount < 1) {
-          setError('Too many requests, retrying in 2 seconds...');
+          setError('Rate limit reached, retrying in 2 seconds...');
           await new Promise(resolve => setTimeout(resolve, 2000));
           return loadAllData(retryCount + 1);
         }
 
-        throw new Error(errorData.error || 'Error retrieving matches');
+        throw new Error(errorMessage);
       }
 
       const matchesData = await matchesResponse.json();

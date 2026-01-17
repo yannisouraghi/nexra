@@ -48,7 +48,16 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch matches');
+        let errorMessage = `Error ${response.status}`;
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch {
+          // Ignore JSON parse errors
+        }
+        throw new Error(errorMessage);
       }
 
       const recentMatches: RecentMatch[] = await response.json();
