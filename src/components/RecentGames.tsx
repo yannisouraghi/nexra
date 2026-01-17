@@ -502,15 +502,15 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       {/* Fond animé avec étoiles */}
       <AnimatedBackground />
 
-      {/* Top Bar - Fixed at top right */}
-      <div className="fixed z-50 flex items-center" style={{ top: '1rem', right: '1.5rem', left: 'auto', gap: '0.5rem' }}>
-        {/* User Email - truncated */}
+      {/* Top Bar - Fixed at top right, responsive */}
+      <div className="fixed z-50 flex items-center" style={{ top: '0.75rem', right: '1rem', left: 'auto', gap: '0.375rem' }}>
+        {/* User Email - hidden on mobile, truncated on desktop */}
         {session?.user?.email && (
-          <span style={{
-            fontSize: '0.75rem',
-            color: 'rgba(255, 255, 255, 0.5)',
-            marginRight: '0.5rem',
-            maxWidth: '150px',
+          <span className="hidden sm:block" style={{
+            fontSize: '0.7rem',
+            color: 'rgba(255, 255, 255, 0.4)',
+            marginRight: '0.25rem',
+            maxWidth: '120px',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
@@ -523,28 +523,18 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <button
           onClick={() => router.push('/settings')}
           className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-purple-500/30 hover:bg-purple-500/10 transition-all duration-300"
-          style={{ padding: '0.5rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
+          style={{ padding: '0.4rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
           title="Settings"
         >
           <svg
             className="group-hover:text-purple-400 transition-all group-hover:rotate-90 duration-500"
-            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
+            style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         </button>
 
@@ -552,22 +542,17 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <button
           onClick={handleLogout}
           className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-300"
-          style={{ padding: '0.5rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
+          style={{ padding: '0.4rem', backgroundColor: 'rgba(10, 10, 20, 0.8)', backdropFilter: 'blur(8px)' }}
           title="Logout"
         >
           <svg
             className="group-hover:text-red-400 transition-all duration-300"
-            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
+            style={{ width: '16px', height: '16px', color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
         </button>
       </div>

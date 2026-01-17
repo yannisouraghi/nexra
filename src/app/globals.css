@@ -2431,6 +2431,107 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* Auth Pages - Responsive */
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 1rem;
+  }
+
+  .auth-container {
+    max-width: 100%;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  .auth-logo {
+    margin-bottom: 1.5rem;
+  }
+
+  .auth-logo-mark {
+    width: 40px;
+    height: 40px;
+  }
+
+  .auth-logo-text {
+    font-size: 1.5rem;
+  }
+
+  .auth-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .auth-input {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .auth-select {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .auth-submit {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .auth-submit-content {
+    font-size: 0.9375rem;
+  }
+
+  .auth-tip {
+    font-size: 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .auth-user-info {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+
+  .auth-user-email {
+    font-size: 0.75rem;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .auth-icon-wrap {
+    width: 48px;
+    height: 48px;
+  }
+
+  .auth-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .auth-back {
+    font-size: 0.8125rem;
+  }
+
+  .auth-terms {
+    font-size: 0.6875rem;
+  }
+
+  .auth-google-btn {
+    padding: 0.875rem;
+  }
+
+  .auth-google-content {
+    font-size: 0.875rem;
+  }
+}
+
 /* =============================================
    NEXRA LANDING PAGE v2 - PREMIUM GAMER SAAS
    Liquid Glass / Apple-like Design System
@@ -3916,6 +4017,51 @@ body {
 
   .nexra-stat-value {
     font-size: 1.5rem;
+  }
+
+  .nexra-section-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .nexra-section-subtitle {
+    font-size: 0.9375rem;
+    padding: 0 0.5rem;
+  }
+
+  .nexra-feature-card {
+    padding: 1.25rem;
+  }
+
+  .nexra-feature-title {
+    font-size: 1rem;
+  }
+
+  .nexra-feature-desc {
+    font-size: 0.8125rem;
+  }
+
+  .nexra-step-title {
+    font-size: 1rem;
+  }
+
+  .nexra-step-desc {
+    font-size: 0.8125rem;
+  }
+
+  .nexra-cta-title {
+    font-size: 1.5rem;
+  }
+
+  .nexra-cta-desc {
+    font-size: 0.875rem;
+  }
+
+  .nexra-footer-disclaimer {
+    font-size: 0.6875rem;
+  }
+
+  .nexra-scroll-indicator {
+    display: none;
   }
 }
 

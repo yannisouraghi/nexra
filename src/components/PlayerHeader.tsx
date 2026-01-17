@@ -165,27 +165,22 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   return (
     <div className="glass-card relative overflow-hidden">
       {/* Action Buttons - Only Refresh and Change Account */}
-      <div className="absolute z-20 flex items-center" style={{ top: '1rem', right: '1rem', gap: '0.5rem' }}>
+      <div className="absolute z-20 flex items-center" style={{ top: '0.75rem', right: '0.75rem', gap: '0.375rem' }}>
         {/* Refresh Button */}
         <button
           onClick={onRefresh}
           className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-cyan-500/30 hover:bg-cyan-500/10 transition-all duration-300"
-          style={{ padding: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          style={{ padding: '0.4rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
           title="Refresh data"
         >
           <svg
-            className="group-hover:text-cyan-400 transition-all group-hover:rotate-180 duration-500"
-            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
+            className="group-hover:text-cyan-400 transition-all group-hover:rotate-180 duration-500 w-4 h-4 sm:w-[18px] sm:h-[18px]"
+            style={{ color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
 
@@ -194,81 +189,69 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           onClick={handleUnlinkRiot}
           disabled={unlinkingAccount}
           className="group flex items-center justify-center rounded-lg border border-white/10 hover:border-orange-500/30 hover:bg-orange-500/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ padding: '0.5rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+          style={{ padding: '0.4rem', backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
           title="Change Riot account"
         >
           <svg
-            className="group-hover:text-orange-400 transition-all duration-300"
-            style={{ width: '18px', height: '18px', color: 'rgba(255, 255, 255, 0.6)' }}
+            className="group-hover:text-orange-400 transition-all duration-300 w-4 h-4 sm:w-[18px] sm:h-[18px]"
+            style={{ color: 'rgba(255, 255, 255, 0.6)' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
         </button>
       </div>
 
-      <div style={{ padding: '2rem' }}>
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* Player Identity */}
-        <div className="flex items-center" style={{ marginBottom: '2rem', gap: '1.25rem' }}>
+        <div className="flex items-center gap-3 sm:gap-5 mb-4 sm:mb-6">
           {/* Profile Icon */}
-          <div className="relative">
-            <div className="w-20 h-20 rounded-xl border-2 overflow-hidden bg-gradient-to-br from-gray-900 to-black" style={{ borderColor: '#06b6d4' }}>
+          <div className="relative flex-shrink-0">
+            <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl border-2 overflow-hidden bg-gradient-to-br from-gray-900 to-black" style={{ borderColor: '#06b6d4' }}>
               {profileIconUrl ? (
-                <img
-                  src={profileIconUrl}
-                  alt={`${gameName} profile`}
-                  className="w-full h-full object-cover"
-                />
+                <img src={profileIconUrl} alt={`${gameName} profile`} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-7 h-7 sm:w-10 sm:h-10 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               )}
             </div>
             {summonerLevel && (
-              <div className="absolute -bottom-1.5 -right-1.5 rounded-lg px-2 py-0.5 border-2" style={{ backgroundColor: '#06b6d4', borderColor: '#06b6d4', boxShadow: '0 0 10px #06b6d4' }}>
-                <span className="text-xs font-bold text-white">{summonerLevel}</span>
+              <div className="absolute -bottom-1 -right-1 sm:-bottom-1.5 sm:-right-1.5 rounded-md sm:rounded-lg px-1.5 sm:px-2 py-0.5 border-2" style={{ backgroundColor: '#06b6d4', borderColor: '#06b6d4', boxShadow: '0 0 10px #06b6d4' }}>
+                <span className="text-[10px] sm:text-xs font-bold text-white">{summonerLevel}</span>
               </div>
             )}
           </div>
 
           {/* Name and Region */}
-          <div className="flex-1">
-            <div className="flex items-baseline" style={{ gap: '0.5rem', marginBottom: '0.5rem' }}>
-              <h1 className="text-3xl font-bold text-white">{gameName}</h1>
-              <span className="text-lg text-white/50 font-medium">#{tagLine}</span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white truncate">{gameName}</h1>
+              <span className="text-sm sm:text-base lg:text-lg text-white/50 font-medium flex-shrink-0">#{tagLine}</span>
             </div>
-            <div className="flex items-center" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
               {/* Region Badge */}
-              <div className="inline-flex items-center rounded-md bg-white/5 border border-white/10" style={{ gap: '0.375rem', padding: '0.25rem 0.75rem' }}>
-                <div className="w-1.5 h-1.5 rounded-full bg-white/60"></div>
-                <span className="text-xs font-semibold text-white/60 uppercase tracking-wide">
+              <div className="inline-flex items-center rounded bg-white/5 border border-white/10 gap-1 sm:gap-1.5 px-2 py-0.5 sm:py-1">
+                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-white/60"></div>
+                <span className="text-[10px] sm:text-xs font-semibold text-white/60 uppercase tracking-wide">
                   {regionLabels[region] || region.toUpperCase()}
                 </span>
               </div>
 
               {/* Season Badge */}
               {currentSeason && (
-                <div className="inline-flex items-center rounded-md border" style={{
-                  gap: '0.375rem',
-                  padding: '0.25rem 0.75rem',
+                <div className="inline-flex items-center rounded border gap-1 sm:gap-1.5 px-2 py-0.5 sm:py-1" style={{
                   background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)',
                   borderColor: 'rgba(139, 92, 246, 0.3)',
-                  boxShadow: '0 0 10px rgba(139, 92, 246, 0.2)',
                 }}>
-                  <svg className="w-3 h-3" style={{ color: '#a78bfa' }} fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" style={{ color: '#a78bfa' }} fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: '#a78bfa' }}>
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wide" style={{ color: '#a78bfa' }}>
                     S{currentSeason.year} Split {currentSeason.split}
                   </span>
                 </div>
@@ -280,63 +263,53 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
         {/* Rank Section */}
         {rank && rankImageUrl ? (
           <div>
-            {/* Rank Display */}
-            <div className="flex items-center" style={{ gap: '2rem', marginBottom: '1.5rem', width: '100%' }}>
+            {/* Rank Display - Responsive layout */}
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8 mb-4 lg:mb-6">
               {/* Rank Emblem + Info Group */}
-              <div className="flex items-center" style={{ gap: '0.5rem', flex: '0 0 auto' }}>
-                {/* Rank Emblem - Small */}
-                <div className="flex-shrink-0" style={{ width: '150px', overflow: 'visible' }}>
+              <div className="flex items-center gap-2 sm:gap-4">
+                {/* Rank Emblem - Responsive size */}
+                <div className="flex-shrink-0 w-[80px] sm:w-[120px] lg:w-[150px] overflow-visible">
                   <img
                     src={rankImageUrl}
                     alt={`${rank.tier} ${rank.rank}`}
-                    style={{
-                      width: '150px',
-                      height: 'auto',
-                      display: 'block',
-                      transform: 'scale(2.2)',
-                      transformOrigin: 'center',
-                    }}
+                    className="w-full h-auto scale-[1.8] sm:scale-[2] lg:scale-[2.2] origin-center"
                   />
                 </div>
 
                 {/* Rank Info */}
-                <div style={{ minWidth: '180px' }}>
-                  <div style={{ marginBottom: '0.5rem' }}>
-                    <h2
-                      className="text-2xl font-bold"
-                      style={{ color: tierColor }}
-                    >
+                <div className="min-w-0">
+                  <div className="mb-1 sm:mb-2">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold" style={{ color: tierColor }}>
                       {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
                     </h2>
-                    <p className="text-sm text-white/50">Ranked Solo/Duo</p>
+                    <p className="text-xs sm:text-sm text-white/50">Ranked Solo/Duo</p>
                   </div>
-                  <div className="flex items-center" style={{ gap: '0.5rem' }}>
-                    <span className="text-xl font-bold text-white">{rank.leaguePoints}</span>
-                    <span className="text-sm text-white/60">LP</span>
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <span className="text-base sm:text-lg lg:text-xl font-bold text-white">{rank.leaguePoints}</span>
+                    <span className="text-xs sm:text-sm text-white/60">LP</span>
                   </div>
                 </div>
               </div>
 
-              {/* Stats additionnelles horizontales */}
+              {/* Stats additionnelles - Hidden on mobile, shown on larger screens */}
               {playerStats && (
-                <>
-                  {/* Recent Performance - Last 5 matches */}
+                <div className="hidden md:flex items-center gap-6 lg:gap-8 flex-1">
+                  {/* Recent Performance */}
                   {playerStats.recentMatchResults.length > 0 && (
-                    <div className="flex flex-col items-start" style={{ flex: '1 1 0', minWidth: '0' }}>
-                      <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
-                        Recent Matches
+                    <div className="flex flex-col items-start">
+                      <div className="text-[10px] sm:text-xs font-semibold text-white/50 uppercase tracking-wider mb-1.5">
+                        Recent
                       </div>
-                      <div className="flex items-center" style={{ gap: '0.375rem' }}>
+                      <div className="flex items-center gap-1">
                         {playerStats.recentMatchResults.slice(0, 5).map((isWin, idx) => (
                           <div
                             key={idx}
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+                            className="w-6 h-6 lg:w-7 lg:h-7 rounded-full flex items-center justify-center text-[10px] lg:text-xs font-bold"
                             style={{
                               backgroundColor: isWin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
                               border: `2px solid ${isWin ? '#22c55e' : '#ef4444'}`,
                               color: isWin ? '#22c55e' : '#ef4444',
                             }}
-                            title={isWin ? 'Victory' : 'Defeat'}
                           >
                             {isWin ? 'W' : 'L'}
                           </div>
@@ -345,88 +318,66 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                     </div>
                   )}
 
-                  {/* Top 3 Champions - Horizontal polished */}
+                  {/* Top Champions - Compact on tablet, full on desktop */}
                   {playerStats.topChampions.length > 0 && (
-                    <div className="flex flex-col items-start" style={{ flex: '2 1 0', minWidth: '0' }}>
-                      <div className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">
+                    <div className="flex flex-col items-start flex-1 min-w-0">
+                      <div className="text-[10px] sm:text-xs font-semibold text-white/50 uppercase tracking-wider mb-1.5">
                         Top Champions
                       </div>
-                      <div className="flex items-center" style={{ gap: '0.625rem' }}>
-                        {playerStats.topChampions.map((champion, idx) => (
+                      <div className="flex items-center gap-2">
+                        {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center rounded-lg border transition-all duration-200 hover:scale-105"
+                            className="flex items-center rounded-lg border p-1.5 lg:p-2 gap-1.5 lg:gap-2"
                             style={{
-                              padding: '0.5rem 0.75rem',
-                              gap: '0.625rem',
                               background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
                               borderColor: champion.winrate >= 60 ? 'rgba(34, 197, 94, 0.3)' : champion.winrate >= 50 ? 'rgba(234, 179, 8, 0.3)' : 'rgba(239, 68, 68, 0.3)',
-                              boxShadow: champion.winrate >= 60
-                                ? '0 0 12px rgba(34, 197, 94, 0.15)'
-                                : champion.winrate >= 50
-                                ? '0 0 12px rgba(234, 179, 8, 0.15)'
-                                : '0 0 12px rgba(239, 68, 68, 0.15)',
                             }}
                           >
-                            <div className="relative">
-                              <img
-                                src={getChampionImageUrl(champion.championName, ddragonVersion)}
-                                alt={champion.championName}
-                                className="rounded"
-                                style={{ width: '36px', height: '36px' }}
-                                onError={(e) => {
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                            <div className="flex flex-col" style={{ minWidth: '65px' }}>
-                              <div className="text-[11px] font-bold text-white leading-tight mb-0.5">
-                                {champion.championName.length > 8 ? champion.championName.substring(0, 8) + '.' : champion.championName}
+                            <img
+                              src={getChampionImageUrl(champion.championName, ddragonVersion)}
+                              alt={champion.championName}
+                              className="w-7 h-7 lg:w-9 lg:h-9 rounded"
+                              onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                            />
+                            <div className="hidden lg:flex flex-col min-w-[50px]">
+                              <div className="text-[10px] font-bold text-white truncate max-w-[60px]">
+                                {champion.championName}
                               </div>
-                              <div className="flex items-center justify-between" style={{ gap: '0.5rem' }}>
-                                <span className="text-[10px] text-white/50">
-                                  {champion.games}G
-                                </span>
-                                <span
-                                  className="text-xs font-extrabold"
-                                  style={{
-                                    color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444',
-                                  }}
-                                >
-                                  {champion.winrate}%
-                                </span>
-                              </div>
+                              <span className="text-[10px] font-bold" style={{ color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
+                                {champion.winrate}%
+                              </span>
                             </div>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3" style={{ gap: '1rem' }}>
+            {/* Stats Grid - Responsive */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4">
               {/* Total Games */}
-              <div className="text-center rounded-lg bg-white/5 border border-white/10" style={{ padding: '1rem' }}>
-                <div className="text-2xl font-bold text-white">{totalGames}</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider font-semibold" style={{ marginTop: '0.25rem' }}>
+              <div className="text-center rounded-lg bg-white/5 border border-white/10 p-2 sm:p-3 lg:p-4">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{totalGames}</div>
+                <div className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider font-semibold mt-0.5">
                   Games
                 </div>
               </div>
 
               {/* Win Rate */}
-              <div className="text-center rounded-lg bg-white/5 border border-white/10" style={{ padding: '1rem' }}>
-                <div className="text-2xl font-bold text-white">{winRate}%</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider font-semibold" style={{ marginTop: '0.25rem' }}>
+              <div className="text-center rounded-lg bg-white/5 border border-white/10 p-2 sm:p-3 lg:p-4">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-white">{winRate}%</div>
+                <div className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wider font-semibold mt-0.5">
                   Winrate
                 </div>
               </div>
 
               {/* W/L */}
-              <div className="text-center rounded-lg bg-white/5 border border-white/10" style={{ padding: '1rem' }}>
-                <div className="flex items-center justify-center" style={{ gap: '0.5rem' }}>
+              <div className="text-center rounded-lg bg-white/5 border border-white/10 p-2 sm:p-3 lg:p-4">
+                <div className="flex items-center justify-center gap-1 sm:gap-2">
                   <span className="text-lg font-bold text-green-400">{rank.wins}</span>
                   <span className="text-sm text-white/40">/</span>
                   <span className="text-lg font-bold text-red-400">{rank.losses}</span>

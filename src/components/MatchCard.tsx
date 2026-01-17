@@ -876,15 +876,15 @@ export default function MatchCard({ match }: MatchCardProps) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '2.25rem' }}>
-        <div className="flex items-center flex-wrap" style={{ gap: '2rem' }}>
+        <div className="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-8">
           {/* Left Section - Champion & KDA */}
-          <div className="flex items-center flex-shrink-0" style={{ gap: '1rem' }}>
+          <div className="flex items-center flex-shrink-0 gap-2 sm:gap-3 lg:gap-4">
 
             {/* Champion Image & Name */}
-            <div className="flex items-center" style={{ gap: '0.75rem' }}>
+            <div className="flex items-center gap-2 sm:gap-3">
               {/* Champion Portrait */}
               <div className="relative">
-                <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-white/10 bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-lg sm:rounded-xl overflow-hidden border-2 border-white/10 bg-gradient-to-br from-purple-600 to-blue-600 shadow-lg">
                   <img
                     src={championImageUrl}
                     alt={match.champion}
@@ -902,9 +902,9 @@ export default function MatchCard({ match }: MatchCardProps) {
                 </div>
               </div>
 
-              <div className="flex flex-col" style={{ gap: '0.25rem' }}>
-                <div className="flex items-center" style={{ gap: '0.5rem' }}>
-                  <h4 className="text-lg font-bold text-white font-['Rajdhani']">{match.champion}</h4>
+              <div className="flex flex-col gap-0.5 sm:gap-1">
+                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                  <h4 className="text-sm sm:text-base lg:text-lg font-bold text-white font-['Rajdhani']">{match.champion}</h4>
                   {match.rank && (() => {
                     const badge = getRankBadge(match.rank);
                     return (
@@ -924,33 +924,33 @@ export default function MatchCard({ match }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10" style={{ gap: '1rem', paddingLeft: '1rem' }}>
+            <div className="flex items-center border-l border-white/10 gap-2 sm:gap-3 lg:gap-4 pl-2 sm:pl-3 lg:pl-4">
               <div className="text-center">
-                <div className="text-base font-bold text-white tracking-tight" style={{ marginBottom: '0.125rem' }}>
+                <div className="text-xs sm:text-sm lg:text-base font-bold text-white tracking-tight mb-0.5">
                   {match.kills}
-                  <span className="text-[var(--text-tertiary)] mx-2">/</span>
+                  <span className="text-[var(--text-tertiary)] mx-1 sm:mx-2">/</span>
                   <span className="text-red-400">{match.deaths}</span>
-                  <span className="text-[var(--text-tertiary)] mx-2">/</span>
+                  <span className="text-[var(--text-tertiary)] mx-1 sm:mx-2">/</span>
                   {match.assists}
                 </div>
-                <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
+                <p className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
               </div>
 
-              <div className="h-10 w-px bg-white/10"></div>
+              <div className="h-8 sm:h-10 w-px bg-white/10"></div>
 
               <div className="text-center">
-                <p className={`text-xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`} style={{ marginBottom: '0.125rem' }}>
+                <p className={`text-base sm:text-lg lg:text-xl font-bold tracking-tight ${kdaColor} font-['Rajdhani'] mb-0.5`}>
                   {kda}:1
                 </p>
-                <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
+                <p className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Teams */}
-          <div className="flex items-start flex-1 border-l border-white/10" style={{ gap: '1.5rem', marginLeft: '1.5rem', paddingLeft: '1.5rem' }}>
+          {/* Right Section - Teams (hidden on mobile) */}
+          <div className="hidden md:flex items-start flex-1 border-l border-white/10 gap-4 lg:gap-6 ml-4 lg:ml-6 pl-4 lg:pl-6">
           {/* Teams */}
-          <div className="flex flex-1" style={{ gap: '1.5rem' }}>
+          <div className="flex flex-1 gap-4 lg:gap-6">
             {/* Allies (Blue team) - Vertical */}
             {match.teammates && match.teammates.length > 0 && (
               <div className="flex-1">
@@ -1045,9 +1045,9 @@ export default function MatchCard({ match }: MatchCardProps) {
 
       {/* Détails étendus avec onglets */}
       {isExpanded && (
-        <div className="border-t border-white/5 animate-liquidExpand" style={{ marginTop: '1rem', paddingTop: '1.5rem' }}>
-          {/* Navigation des onglets */}
-          <div className="match-details-tabs" style={{ marginBottom: '1.5rem' }}>
+        <div className="border-t border-white/5 animate-liquidExpand mt-3 sm:mt-4 pt-3 sm:pt-6">
+          {/* Navigation des onglets - horizontally scrollable on mobile */}
+          <div className="match-details-tabs overflow-x-auto pb-2 mb-3 sm:mb-6 flex-nowrap" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <button
               onClick={() => setActiveTab('overview')}
               className={`match-details-tab ${activeTab === 'overview' ? 'match-details-tab-active' : ''}`}
