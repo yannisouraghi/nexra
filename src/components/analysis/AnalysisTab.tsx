@@ -62,9 +62,9 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
 
       const recentMatches: RecentMatch[] = await response.json();
 
-      // Filter only Ranked games (Solo/Duo: 420, Flex: 440)
+      // Filter only Ranked Solo/Duo games (queueId: 420)
       const rankedMatches = recentMatches.filter(match =>
-        match.queueId === 420 || match.queueId === 440
+        match.queueId === 420
       );
 
       // Transform to MatchForAnalysis format
@@ -224,24 +224,9 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
           </svg>
         </div>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <h3 style={styles.infoTitle}>AI Analysis</h3>
-            <span style={{
-              fontSize: '10px',
-              fontWeight: 600,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(234, 179, 8, 0.1) 100%)',
-              color: '#eab308',
-              border: '1px solid rgba(234, 179, 8, 0.3)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}>
-              Ranked Only
-            </span>
-          </div>
+          <h3 style={styles.infoTitle}>AI Analysis</h3>
           <p style={styles.infoText}>
-            Analyze your recent <strong style={{ color: '#eab308' }}>Ranked Solo/Duo</strong> and <strong style={{ color: '#eab308' }}>Ranked Flex</strong> games. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives.
+            Analyze your recent <strong style={{ color: '#00d4ff' }}>Ranked Solo/Duo</strong> games. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives.
           </p>
         </div>
       </div>

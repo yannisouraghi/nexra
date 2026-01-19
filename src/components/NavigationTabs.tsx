@@ -12,7 +12,7 @@ export default function NavigationTabs({ activeTab, onTabChange, isInGame }: Nav
   const tabs = [
     { id: 'summary', label: 'Summary', icon: BarChart3 },
     { id: 'champions', label: 'Champions', icon: Trophy },
-    { id: 'analysis', label: 'Analysis', icon: Sparkles, badge: 'Ranked' },
+    { id: 'analysis', label: 'Analysis', icon: Sparkles },
     { id: 'livegame', label: 'Live Game', icon: Radio, highlight: isInGame },
   ];
 
