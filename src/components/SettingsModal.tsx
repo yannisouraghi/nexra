@@ -121,7 +121,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         localStorage.removeItem('nexra_riot_account');
         localStorage.setItem('nexra_riot_unlinked', 'true');
         setMessage({ type: 'success', text: 'Riot account unlinked' });
+
+        // Update session to reflect the change
+        await updateSession();
         fetchUserData();
+
         // Redirect to link-riot page after unlink
         setTimeout(() => {
           onClose();

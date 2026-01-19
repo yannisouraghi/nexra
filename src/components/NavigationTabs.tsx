@@ -56,22 +56,6 @@ export default function NavigationTabs({ activeTab, onTabChange, isInGame }: Nav
                   )}
                 </div>
                 <span className="tracking-wide">{tab.label}</span>
-                {tab.badge && (
-                  <span style={{
-                    marginLeft: 'auto',
-                    fontSize: '9px',
-                    fontWeight: 700,
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    background: 'rgba(234, 179, 8, 0.15)',
-                    color: '#eab308',
-                    border: '1px solid rgba(234, 179, 8, 0.3)',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                  }}>
-                    {tab.badge}
-                  </span>
-                )}
                 {isLiveAndInGame && activeTab !== tab.id && (
                   <span className="ml-auto text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full font-bold">
                     LIVE
@@ -115,33 +99,8 @@ export default function NavigationTabs({ activeTab, onTabChange, isInGame }: Nav
                 {isLiveAndInGame && (
                   <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 )}
-                {tab.badge && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '-2px',
-                    right: '-4px',
-                    width: '6px',
-                    height: '6px',
-                    borderRadius: '50%',
-                    background: '#eab308',
-                  }} />
-                )}
               </div>
               <span className="tracking-wide relative z-10 hidden sm:inline">{tab.label}</span>
-              {tab.badge && (
-                <span className="hidden sm:inline" style={{
-                  fontSize: '8px',
-                  fontWeight: 700,
-                  padding: '1px 4px',
-                  borderRadius: '3px',
-                  background: 'rgba(234, 179, 8, 0.15)',
-                  color: '#eab308',
-                  textTransform: 'uppercase',
-                  marginLeft: '4px',
-                }}>
-                  {tab.badge}
-                </span>
-              )}
             </button>
           );
         })}

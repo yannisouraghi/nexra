@@ -7,6 +7,14 @@ import { getChampionImageUrl } from '@/utils/ddragon';
 
 const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
+function getAuthHeaders(userId?: string, email?: string): HeadersInit {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (userId && email) {
+    headers['Authorization'] = `Bearer ${userId}:${email}`;
+  }
+  return headers;
+}
+
 interface ChampionStats {
   championName: string;
   games: number;
@@ -106,24 +114,32 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   const totalGames = rank ? rank.wins + rank.losses : 0;
 
   const handleUnlinkRiot = async () => {
-    const userId = session?.user?.id;
-    if (!userId) return;
+    const user = session?.user as { id?: string; email?: string };
+    if (!user?.id) return;
 
     setUnlinkingAccount(true);
     try {
-      const response = await fetch(`${NEXRA_API_URL}/users/${userId}/link-riot`, {
+      const response = await fetch(`${NEXRA_API_URL}/users/${user.id}/link-riot`, {
         method: 'DELETE',
+        headers: getAuthHeaders(user.id, user.email),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to unlink account');
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to unlink account');
       }
 
+      // Clear local storage
       localStorage.removeItem('nexra_riot_account');
       localStorage.setItem('nexra_riot_unlinked', 'true');
+
+      // Redirect to link-riot page
       router.push('/link-riot');
     } catch (error) {
       console.error('Error unlinking Riot account:', error);
+      alert('Failed to unlink Riot account. Please try again.');
+    } finally {
       setUnlinkingAccount(false);
     }
   };
