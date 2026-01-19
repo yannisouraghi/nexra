@@ -695,7 +695,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
               </div>
 
               {/* Match List - Pleine largeur */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {filteredMatches.map((match, index) => (
                   <div
                     key={match.matchId}
