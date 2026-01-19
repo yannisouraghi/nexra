@@ -250,8 +250,8 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         </div>
       </div>
 
-      {/* Overview Section - Only show if has completed analyses */}
-      {totalCompleted > 0 && <AnalysisOverview stats={overallStats} />}
+      {/* Overview Section - Always show */}
+      <AnalysisOverview stats={overallStats} />
 
       {/* Games List Header */}
       <div style={styles.listHeader}>
