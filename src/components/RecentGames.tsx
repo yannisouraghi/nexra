@@ -18,6 +18,7 @@ import StatsGridSkeleton from './skeletons/StatsGridSkeleton';
 import NavigationTabsSkeleton from './skeletons/NavigationTabsSkeleton';
 import CreditsDisplay from './CreditsDisplay';
 import SettingsModal from './SettingsModal';
+import PricingModal from './PricingModal';
 
 interface RiotAccount {
   gameName: string;
@@ -121,6 +122,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   const [isInGame, setIsInGame] = useState(false);
   const [playerStats, setPlayerStats] = useState<PlayerStats | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [summonerData, setSummonerData] = useState<{
     profileIconId: number;
     summonerLevel: number;
@@ -617,7 +619,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
-                    <CreditsDisplay />
+                    <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
                   </div>
                 </aside>
 
@@ -762,7 +764,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
-                    <CreditsDisplay />
+                    <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
                   </div>
                 </aside>
 
@@ -879,7 +881,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
-                    <CreditsDisplay />
+                    <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
                   </div>
                 </aside>
 
@@ -896,6 +898,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     gameName={riotAccount.gameName}
                     tagLine={riotAccount.tagLine}
                     profileIconId={summonerData.profileIconId}
+                    onInsufficientCredits={() => setShowPricingModal(true)}
                   />
                 </div>
               </div>
@@ -910,7 +913,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
                   <div style={{ position: 'sticky', top: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
-                    <CreditsDisplay />
+                    <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
                   </div>
                 </aside>
 
@@ -940,6 +943,9 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
       {/* Settings Modal */}
       <SettingsModal isOpen={showSettingsModal} onClose={() => setShowSettingsModal(false)} />
+
+      {/* Pricing Modal */}
+      <PricingModal isOpen={showPricingModal} onClose={() => setShowPricingModal(false)} />
     </div>
   );
 }

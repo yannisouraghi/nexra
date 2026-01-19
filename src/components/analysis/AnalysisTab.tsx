@@ -1,10 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import { MatchForAnalysis, AnalysisStatus } from '@/types/analysis';
 import AnalysisOverview from './AnalysisOverview';
 import GameAnalysisCard from './GameAnalysisCard';
 import AnalysisModal from './AnalysisModal';
+
+const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
 interface AnalysisTabProps {
   puuid: string;
@@ -12,6 +15,7 @@ interface AnalysisTabProps {
   gameName?: string;
   tagLine?: string;
   profileIconId?: number;
+  onInsufficientCredits?: () => void;
 }
 
 type FilterType = 'all' | 'ready' | 'processing' | 'completed';
@@ -31,13 +35,15 @@ interface RecentMatch {
   teamPosition?: string;
 }
 
-export default function AnalysisTab({ puuid, region, gameName, tagLine, profileIconId }: AnalysisTabProps) {
+export default function AnalysisTab({ puuid, region, gameName, tagLine, profileIconId, onInsufficientCredits }: AnalysisTabProps) {
+  const { data: session, update: updateSession } = useSession();
   const [matches, setMatches] = useState<MatchForAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
   const [analyzingIds, setAnalyzingIds] = useState<Set<string>>(new Set());
   const [analyzedCache, setAnalyzedCache] = useState<Map<string, any>>(new Map());
   const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
+  const [creditError, setCreditError] = useState<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
@@ -111,6 +117,24 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
 
   // Start analysis for a match
   const handleStartAnalysis = useCallback(async (matchId: string) => {
+    setCreditError(null);
+
+    const user = session?.user as { id?: string; email?: string; credits?: number };
+    const userId = user?.id;
+
+    if (!userId) {
+      setCreditError('You must be logged in to analyze games.');
+      return;
+    }
+
+    // Check if user has credits
+    const currentCredits = user?.credits ?? 0;
+    if (currentCredits <= 0) {
+      setCreditError('You need credits to analyze games.');
+      onInsufficientCredits?.();
+      return;
+    }
+
     setAnalyzingIds(prev => new Set(prev).add(matchId));
 
     // Update match status to processing
@@ -121,6 +145,41 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     ));
 
     try {
+      // First, consume a credit
+      const creditResponse = await fetch(`${NEXRA_API_URL}/users/${userId}/use-credit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userId}:${user?.email || ''}`,
+        },
+      });
+
+      const creditData = await creditResponse.json();
+
+      if (!creditResponse.ok) {
+        if (creditResponse.status === 402) {
+          setCreditError('Insufficient credits. Purchase more to continue.');
+          onInsufficientCredits?.();
+          // Reset match status
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? { ...m, analysisStatus: 'not_started' as AnalysisStatus }
+              : m
+          ));
+          setAnalyzingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchId);
+            return newSet;
+          });
+          return;
+        }
+        throw new Error(creditData.error || 'Failed to use credit');
+      }
+
+      // Update session with new credit count
+      await updateSession();
+
+      // Now start the analysis
       const response = await fetch('/api/analysis/analyze', {
         method: 'POST',
         headers: {
@@ -166,7 +225,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         return newSet;
       });
     }
-  }, [puuid, region]);
+  }, [puuid, region, session, onInsufficientCredits, updateSession]);
 
   // Handle card click - open modal
   const handleCardClick = useCallback((match: MatchForAnalysis) => {
@@ -235,6 +294,27 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
 
   return (
     <div style={styles.container}>
+      {/* Credit Error Banner */}
+      {creditError && (
+        <div style={styles.errorBanner}>
+          <div style={styles.errorIcon}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <span>{creditError}</span>
+          <button
+            onClick={() => {
+              setCreditError(null);
+              onInsufficientCredits?.();
+            }}
+            style={styles.buyCreditsButton}
+          >
+            Buy Credits
+          </button>
+        </div>
+      )}
+
       {/* Info Banner */}
       <div style={styles.infoBanner}>
         <div style={styles.infoIcon}>
@@ -245,7 +325,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         <div>
           <h3 style={styles.infoTitle}>AI Analysis</h3>
           <p style={styles.infoText}>
-            Analyze your recent <strong style={{ color: '#00d4ff' }}>Ranked Solo/Duo</strong> games. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives.
+            Analyze your recent <strong style={{ color: '#00d4ff' }}>Ranked Solo/Duo</strong> games. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives. <strong style={{ color: '#ffd700' }}>1 credit per analysis.</strong>
           </p>
         </div>
       </div>
@@ -376,6 +456,37 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     flexDirection: 'column',
     gap: 24,
+  },
+  errorBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '12px 16px',
+    borderRadius: 12,
+    background: 'rgba(255, 51, 102, 0.1)',
+    border: '1px solid rgba(255, 51, 102, 0.3)',
+    color: '#ff6b6b',
+    fontSize: 14,
+  },
+  errorIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#ff3366',
+    flexShrink: 0,
+  },
+  buyCreditsButton: {
+    marginLeft: 'auto',
+    padding: '8px 16px',
+    borderRadius: 8,
+    border: 'none',
+    background: 'linear-gradient(135deg, #ffd700, #ff9500)',
+    color: '#000',
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    flexShrink: 0,
   },
   infoBanner: {
     display: 'flex',
