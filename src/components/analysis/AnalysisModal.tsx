@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { MatchForAnalysis, getScoreColor, getScoreLabel, AnalysisStats } from '@/types/analysis';
-import { getChampionImageUrl, getChampionSplashUrl } from '@/utils/ddragon';
+import { getChampionImageUrl, getChampionCenteredSplashUrl } from '@/utils/ddragon';
 import ErrorsList from './ErrorsList';
 import CoachingTips from './CoachingTips';
 import StatsComparison from './StatsComparison';
@@ -65,7 +65,7 @@ export default function AnalysisModal({
   const scoreLabel = isCompleted ? getScoreLabel(analysisData.stats?.overallScore || 0) : '';
   const isWin = match.result === 'win';
   const performanceSummary = analysisData?.stats?.performanceSummary;
-  const champSplashUrl = match.champion !== 'Unknown' ? getChampionSplashUrl(match.champion) : null;
+  const champSplashUrl = match.champion !== 'Unknown' ? getChampionCenteredSplashUrl(match.champion) : null;
 
   const formatDuration = (seconds: number | null) => {
     if (!seconds) return '--:--';
@@ -426,7 +426,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   hero: {
     position: 'relative',
-    height: 200,
+    height: 240,
     flexShrink: 0,
     overflow: 'hidden',
   },
@@ -436,7 +436,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
-    objectPosition: 'top',
+    objectPosition: 'center top',
   },
   heroOverlay: {
     position: 'absolute',

@@ -39,6 +39,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const [analyzedCache, setAnalyzedCache] = useState<Map<string, any>>(new Map());
   const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const analyzedCacheRef = useRef<Map<string, any>>(new Map());
 
   // Load recent matches
   const loadMatches = useCallback(async () => {
@@ -69,7 +70,8 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         match.queueId === 420
       );
 
-      // Transform to MatchForAnalysis format
+      // Transform to MatchForAnalysis format (use ref to avoid re-renders)
+      const cache = analyzedCacheRef.current;
       const transformedMatches: MatchForAnalysis[] = rankedMatches.map(match => ({
         matchId: match.matchId,
         puuid,
@@ -84,10 +86,10 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         assists: match.assists,
         role: match.teamPosition || match.role || 'UNKNOWN',
         timestamp: match.timestamp,
-        analysisId: analyzedCache.get(match.matchId)?.id || null,
-        analysisStatus: analyzedCache.get(match.matchId) ? 'completed' : 'not_started',
-        overallScore: analyzedCache.get(match.matchId)?.stats?.overallScore || 0,
-        errorsCount: analyzedCache.get(match.matchId)?.errors?.length || 0,
+        analysisId: cache.get(match.matchId)?.id || null,
+        analysisStatus: cache.get(match.matchId) ? 'completed' : 'not_started',
+        overallScore: cache.get(match.matchId)?.stats?.overallScore || 0,
+        errorsCount: cache.get(match.matchId)?.errors?.length || 0,
       }));
 
       setMatches(transformedMatches);
@@ -96,7 +98,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       setMatches([]);
     }
     setLoading(false);
-  }, [puuid, region, gameName, tagLine, analyzedCache]);
+  }, [puuid, region, gameName, tagLine]);
 
   // Initial load
   useEffect(() => {
@@ -126,7 +128,8 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Cache the analysis result
+        // Cache the analysis result (both ref and state)
+        analyzedCacheRef.current.set(matchId, data.data);
         setAnalyzedCache(prev => new Map(prev).set(matchId, data.data));
 
         // Update match with analysis results
