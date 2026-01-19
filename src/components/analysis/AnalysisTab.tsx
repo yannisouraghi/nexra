@@ -40,10 +40,11 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
+  const hasLoadedRef = useRef(false);
 
   // Load recent matches
-  const loadMatches = useCallback(async () => {
-    setLoading(true);
+  const loadMatches = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       // Fetch recent matches from Riot API
       const response = await fetch(
@@ -100,9 +101,12 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     setLoading(false);
   }, [puuid, region, gameName, tagLine]);
 
-  // Initial load
+  // Initial load - only once
   useEffect(() => {
-    loadMatches();
+    if (!hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      loadMatches();
+    }
   }, [loadMatches]);
 
   // Start analysis for a match

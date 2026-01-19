@@ -36,12 +36,13 @@ export default function AnalysisModal({
   const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [imageError, setImageError] = useState(false);
 
-  // Auto-start analysis if not already done
+  // Auto-start analysis if not already done (only on initial mount)
   useEffect(() => {
     if (!analysisData && !isAnalyzing && match.analysisStatus !== 'completed') {
       onStartAnalysis(match.matchId);
     }
-  }, [match.matchId, analysisData, isAnalyzing, match.analysisStatus, onStartAnalysis]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   // Close on escape key
   useEffect(() => {

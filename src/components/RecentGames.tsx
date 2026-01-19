@@ -608,7 +608,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
           {/* Main content avec sidebar */}
           <div className="flex justify-center">
-            <div className="w-full max-w-6xl" key={activeTab}>
+            <div className="w-full max-w-6xl">
           {activeTab === 'summary' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {/* Stats Section avec Menu Vertical */}
