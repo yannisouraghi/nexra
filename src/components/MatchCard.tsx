@@ -855,18 +855,18 @@ export default function MatchCard({ match }: MatchCardProps) {
       className={`match-card relative overflow-visible ${
         match.win ? 'match-card-victory' : 'match-card-defeat'
       } ${match.rank === 1 ? 'match-card-mvp' : ''}`}
-      style={{ padding: '1rem 1.25rem' }}
+      style={{ padding: '0.75rem 1rem' }}
     >
 
       {/* Game Mode Badge en haut à gauche */}
-      <div className="absolute" style={{ top: '0.75rem', left: '1.25rem' }}>
+      <div className="absolute" style={{ top: '0.5rem', left: '1rem' }}>
         <div className={`text-xs font-semibold rounded-lg border backdrop-blur-sm ${getGameModeColor(match.queueId)}`} style={{ padding: '0.25rem 0.75rem' }}>
           {formatGameMode(match.queueId)}
         </div>
       </div>
 
       {/* Duration Badge en haut à droite */}
-      <div className="absolute" style={{ top: '0.75rem', right: '1.25rem' }}>
+      <div className="absolute" style={{ top: '0.5rem', right: '1rem' }}>
         <div className="flex items-center text-xs font-medium rounded-lg border bg-white/5 text-[var(--text-secondary)] border-white/10 backdrop-blur-sm" style={{ gap: '0.375rem', padding: '0.25rem 0.625rem' }}>
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -875,7 +875,7 @@ export default function MatchCard({ match }: MatchCardProps) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '2.25rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', paddingTop: '1.5rem' }}>
         <div className="flex items-center flex-wrap gap-3 sm:gap-4 lg:gap-8">
           {/* Left Section - Champion & KDA */}
           <div className="flex items-center flex-shrink-0 gap-2 sm:gap-3 lg:gap-4">
@@ -1027,7 +1027,7 @@ export default function MatchCard({ match }: MatchCardProps) {
         </div>
 
         {/* Action Button */}
-        <div className="flex justify-end border-t border-white/5" style={{ paddingTop: '0.75rem', marginTop: '1rem' }}>
+        <div className="flex justify-end border-t border-white/5" style={{ paddingTop: '0.5rem', marginTop: '0.5rem' }}>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="glass-button flex items-center hover:scale-105 active:scale-100 transition-transform"
