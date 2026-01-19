@@ -32,8 +32,8 @@ Nexra is an AI-powered coaching platform for League of Legends players. It analy
 - Settings modal (profile, linked accounts, credits, danger zone)
 
 ### Planned
-- [ ] Mobile "not available" page after Riot account linking
-- [ ] Advanced coaching tips based on role/champion
+- [x] Mobile "not available" page after Riot account linking
+- [x] Advanced coaching tips based on role/champion
 - [ ] Video clip analysis (Nexra Vision)
 
 ## Project Structure
@@ -177,9 +177,9 @@ npx wrangler d1 execute nexra-db --file=migrations/XXX_migration.sql --remote
 
 ## TODO
 
-- [ ] Add mobile "not available" page/popup after Riot account linking
+- [x] Add mobile "not available" page/popup after Riot account linking
+- [x] Add more detailed coaching based on lane/role
 - [ ] Implement video analysis (Nexra Vision)
-- [ ] Add more detailed coaching based on lane/role
 - [ ] Implement Stripe payments for credits
 - [ ] Add social features (compare with friends)
 

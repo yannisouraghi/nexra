@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import RecentGames from '@/components/RecentGames';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import OnboardingModal from '@/components/OnboardingModal';
+import MobileNotAvailable from '@/components/MobileNotAvailable';
 
 const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
@@ -214,6 +215,10 @@ function DashboardContent() {
       {showOnboarding && (
         <OnboardingModal onComplete={handleOnboardingComplete} />
       )}
+      <MobileNotAvailable
+        gameName={riotAccount.gameName}
+        tagLine={riotAccount.tagLine}
+      />
     </>
   );
 }
