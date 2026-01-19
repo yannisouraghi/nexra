@@ -141,9 +141,9 @@ export async function GET(request: NextRequest) {
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
 
-            // 2. Get rank info
+            // 2. Get rank info (using summonerId, not puuid)
             fetch(
-              `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-puuid/${participant.puuid}`,
+              `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}`,
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
 

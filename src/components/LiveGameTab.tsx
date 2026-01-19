@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Radio, RefreshCw, Clock, Swords, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
 
 interface RankInfo {
@@ -107,6 +107,8 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const [ddragonVersion, setDdragonVersion] = useState('15.1.1');
   const [championData, setChampionData] = useState<{ [key: number]: string }>({});
+  const inGameRef = useRef(false);
+  const isInitialFetch = useRef(true);
 
   // Fetch Data Dragon version and champion data
   useEffect(() => {
@@ -136,8 +138,11 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
     fetchDDragon();
   }, []);
 
-  const fetchLiveGame = useCallback(async () => {
-    setLoading(true);
+  const fetchLiveGame = useCallback(async (showLoading = false) => {
+    // Only show loading on initial fetch or manual refresh, not on polling
+    if (isInitialFetch.current || showLoading) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -151,6 +156,11 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
       }
 
       const data = await response.json();
+
+      // Update refs for interval timing
+      inGameRef.current = data.inGame;
+      isInitialFetch.current = false;
+
       setInGame(data.inGame);
       setGameData(data.gameData);
       setLastCheck(new Date());
@@ -169,6 +179,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
       console.error('Error fetching live game:', e);
       setError(e instanceof Error ? e.message : 'Failed to check game status');
       setInGame(false);
+      inGameRef.current = false;
       onGameStatusChange?.(false);
     } finally {
       setLoading(false);
@@ -179,13 +190,13 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
   useEffect(() => {
     fetchLiveGame();
 
-    // Poll every 30 seconds when not in game, every 60 seconds when in game
+    // Poll every 30 seconds - use ref to avoid recreating interval when inGame changes
     const interval = setInterval(() => {
       fetchLiveGame();
-    }, inGame ? 60000 : 30000);
+    }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchLiveGame, inGame]);
+  }, [fetchLiveGame]);
 
   // Update game time every second when in game
   useEffect(() => {
@@ -545,7 +556,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
           </div>
 
           <button
-            onClick={fetchLiveGame}
+            onClick={() => fetchLiveGame(true)}
             disabled={loading}
             className="flex items-center rounded-xl font-semibold text-white transition-all duration-300 hover:scale-105"
             style={{
@@ -627,7 +638,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
           </div>
 
           <button
-            onClick={fetchLiveGame}
+            onClick={() => fetchLiveGame(true)}
             className="flex items-center rounded-xl font-semibold text-white transition-all duration-300"
             style={{
               padding: '0.875rem 1.5rem',
@@ -691,7 +702,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
 
             {/* Refresh Button */}
             <button
-              onClick={fetchLiveGame}
+              onClick={() => fetchLiveGame(true)}
               disabled={loading}
               className="rounded-xl transition-all duration-300 hover:bg-white/10"
               style={{

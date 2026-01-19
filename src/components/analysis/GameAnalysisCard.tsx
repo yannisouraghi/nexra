@@ -2,12 +2,12 @@
 
 import { MatchForAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role } from '@/types/analysis';
 import { getChampionSplashUrl } from '@/utils/ddragon';
-import { useState, type JSX } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
 
 interface GameAnalysisCardProps {
   match: MatchForAnalysis;
   onStartAnalysis?: (matchId: string) => void;
+  onCardClick?: (match: MatchForAnalysis) => void;
   isStarting?: boolean;
 }
 
@@ -201,7 +201,7 @@ const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLo
   </button>
 );
 
-export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }: GameAnalysisCardProps) {
+export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, isStarting }: GameAnalysisCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -264,13 +264,6 @@ export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }:
 
   const champion = match.champion || 'Unknown';
   const champSplashUrl = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
-
-  // Handle click - only navigate if completed
-  const handleClick = (e: React.MouseEvent) => {
-    if (!isCompleted) {
-      e.preventDefault();
-    }
-  };
 
   const cardContent = (
     <>
@@ -347,7 +340,7 @@ export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }:
                 </div>
               )}
               <StartAnalysisButton
-                onClick={() => onStartAnalysis?.(match.matchId)}
+                onClick={() => onCardClick?.(match)}
                 isLoading={isStarting}
               />
             </div>
@@ -429,26 +422,27 @@ export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }:
     </>
   );
 
-  // Wrap in Link only if completed
-  if (isCompleted && match.analysisId) {
+  // Completed state - clickable to open modal
+  if (isCompleted) {
     return (
-      <Link
-        href={`/dashboard/analysis/${match.analysisId}`}
+      <div
         style={{
           ...styles.card,
           borderColor: isWin ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 51, 102, 0.4)',
           transform: isHovered ? 'scale(1.05)' : 'scale(1)',
           boxShadow: isHovered ? '0 0 30px rgba(0,212,255,0.3)' : 'none',
+          cursor: 'pointer',
         }}
+        onClick={() => onCardClick?.(match)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {cardContent}
-      </Link>
+      </div>
     );
   }
 
-  // Non-clickable card for other states
+  // Non-clickable card for other states (processing, failed)
   return (
     <div
       style={{
@@ -456,7 +450,6 @@ export default function GameAnalysisCard({ match, onStartAnalysis, isStarting }:
         borderColor: isProcessing ? 'rgba(0, 212, 255, 0.4)' : isFailed ? 'rgba(255, 51, 102, 0.4)' : 'rgba(107, 114, 128, 0.4)',
         cursor: 'default',
       }}
-      onClick={handleClick}
     >
       {cardContent}
     </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { MatchForAnalysis, AnalysisStatus } from '@/types/analysis';
 import AnalysisOverview from './AnalysisOverview';
 import GameAnalysisCard from './GameAnalysisCard';
+import AnalysisModal from './AnalysisModal';
 
 interface AnalysisTabProps {
   puuid: string;
@@ -36,6 +37,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const [filter, setFilter] = useState<FilterType>('all');
   const [analyzingIds, setAnalyzingIds] = useState<Set<string>>(new Set());
   const [analyzedCache, setAnalyzedCache] = useState<Map<string, any>>(new Map());
+  const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load recent matches
@@ -158,6 +160,16 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       });
     }
   }, [puuid, region]);
+
+  // Handle card click - open modal
+  const handleCardClick = useCallback((match: MatchForAnalysis) => {
+    setSelectedMatch(match);
+  }, []);
+
+  // Close modal
+  const handleCloseModal = useCallback(() => {
+    setSelectedMatch(null);
+  }, []);
 
   // Calculate stats from completed analyses
   const completedMatches = matches.filter(m => m.analysisStatus === 'completed');
@@ -309,11 +321,23 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
               <GameAnalysisCard
                 match={match}
                 onStartAnalysis={handleStartAnalysis}
+                onCardClick={handleCardClick}
                 isStarting={analyzingIds.has(match.matchId)}
               />
             </div>
           ))}
         </div>
+      )}
+
+      {/* Analysis Modal */}
+      {selectedMatch && (
+        <AnalysisModal
+          match={selectedMatch}
+          analysisData={analyzedCache.get(selectedMatch.matchId) || null}
+          isAnalyzing={analyzingIds.has(selectedMatch.matchId)}
+          onClose={handleCloseModal}
+          onStartAnalysis={handleStartAnalysis}
+        />
       )}
 
       <style>{`
