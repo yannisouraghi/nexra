@@ -51,17 +51,17 @@ const RoleIcon = ({ role }: { role: Role }) => {
   if (role === 'UNKNOWN' || !imageUrl || imageError) {
     return (
       <div style={{
-        width: 32,
-        height: 32,
+        width: 24,
+        height: 24,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 6,
+        borderRadius: 4,
         backgroundColor: `${color}30`,
         border: `1px solid ${color}50`,
       }}>
         <span style={{
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: 700,
           color: color,
           letterSpacing: '0.05em',
@@ -77,8 +77,8 @@ const RoleIcon = ({ role }: { role: Role }) => {
       src={imageUrl}
       alt={role}
       style={{
-        width: 32,
-        height: 32,
+        width: 24,
+        height: 24,
         filter: 'brightness(1.2)',
       }}
       onError={() => setImageError(true)}
@@ -169,7 +169,7 @@ const ProcessingAnimation = ({ progress }: { progress: number | null }) => {
   );
 };
 
-// Start button component
+// Start button component - Compact version
 const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLoading?: boolean }) => (
   <button
     onClick={(e) => {
@@ -191,11 +191,11 @@ const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLo
       </>
     ) : (
       <>
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span>Start Analysis</span>
+        <span>Analyze</span>
       </>
     )}
   </button>
@@ -586,16 +586,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingTop: 20,
   },
   roleIcon: {
-    width: 64,
-    height: 64,
+    width: 44,
+    height: 44,
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
     backgroundColor: 'rgba(0,0,0,0.5)',
-    border: '2px solid rgba(255,255,255,0.2)',
-    boxShadow: '0 0 20px rgba(255,255,255,0.1)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    boxShadow: '0 0 12px rgba(255,255,255,0.08)',
   },
   scoreBadge: {
     padding: '6px 16px',
@@ -700,26 +700,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 16,
+    gap: 10,
   },
   startButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
-    padding: '10px 20px',
-    borderRadius: 12,
-    fontSize: 14,
+    gap: 6,
+    padding: '8px 14px',
+    borderRadius: 8,
+    fontSize: 12,
     fontWeight: 600,
     color: 'white',
     background: 'linear-gradient(135deg, #00d4ff 0%, #6366f1 100%)',
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 4px 15px rgba(0, 212, 255, 0.3)',
+    boxShadow: '0 2px 10px rgba(0, 212, 255, 0.25)',
   },
   buttonSpinner: {
-    width: 16,
-    height: 16,
+    width: 12,
+    height: 12,
     border: '2px solid rgba(255,255,255,0.3)',
     borderTopColor: 'white',
     borderRadius: '50%',
