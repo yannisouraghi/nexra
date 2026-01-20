@@ -267,6 +267,9 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
     const gamesOnChamp = participant.gamesOnChampion || 0;
     const champWinrate = participant.winrateOnChampion || 50;
     const champMastery = participant.championMastery || 0;
+    const champPoints = participant.championPoints || 0;
+    // A player is NOT first time if they have mastery points OR recent games on the champion
+    const isFirstTime = champPoints === 0 && gamesOnChamp === 0;
     const recentForm = participant.recentForm || [];
 
     return (
@@ -366,14 +369,36 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
 
             {/* Champion Stats */}
             <div className="flex items-center flex-wrap" style={{ gap: '0.5rem', marginTop: '0.375rem' }}>
-              {gamesOnChamp > 0 ? (
+              {!isFirstTime ? (
                 <>
-                  <span className={`text-xs font-semibold ${champWinrate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                    {champWinrate}% WR
-                  </span>
-                  <span className="text-xs text-white/40">
-                    ({gamesOnChamp} game{gamesOnChamp > 1 ? 's' : ''})
-                  </span>
+                  {/* Mastery badge */}
+                  {champMastery > 0 && (
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                      champMastery >= 7 ? 'bg-purple-500/20 text-purple-400' :
+                      champMastery >= 5 ? 'bg-red-500/20 text-red-400' :
+                      champMastery >= 4 ? 'bg-blue-500/20 text-blue-400' :
+                      'bg-white/10 text-white/60'
+                    }`}>
+                      M{champMastery}
+                    </span>
+                  )}
+                  {/* Winrate if we have recent games data */}
+                  {gamesOnChamp > 0 && (
+                    <>
+                      <span className={`text-xs font-semibold ${champWinrate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                        {champWinrate}% WR
+                      </span>
+                      <span className="text-xs text-white/40">
+                        ({gamesOnChamp} recent)
+                      </span>
+                    </>
+                  )}
+                  {/* If only mastery points but no recent games */}
+                  {gamesOnChamp === 0 && champPoints > 0 && (
+                    <span className="text-xs text-white/40">
+                      {champPoints >= 100000 ? `${Math.floor(champPoints / 1000)}k pts` : `${champPoints.toLocaleString()} pts`}
+                    </span>
+                  )}
                 </>
               ) : (
                 <span className="text-xs text-yellow-500/80 font-medium">
@@ -459,7 +484,8 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
     const avgWinrate = calculateTeamWinrate(team);
     const autofillCount = team.filter(p => p.isAutofill).length;
     const loseStreakCount = team.filter(p => (p.currentStreak || 0) < -2).length;
-    const firstTimeCount = team.filter(p => (p.gamesOnChampion || 0) === 0).length;
+    // First time = no mastery points AND no recent games on champion
+    const firstTimeCount = team.filter(p => (p.championPoints || 0) === 0 && (p.gamesOnChampion || 0) === 0).length;
 
     return (
       <div className="flex-1">
