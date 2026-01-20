@@ -99,23 +99,10 @@ export async function GET(request: NextRequest) {
 
     const summonerData = await summonerResponse.json();
 
-    console.log('====== DEBUG SUMMONER DATA ======');
-    console.log('Summoner response:', JSON.stringify(summonerData, null, 2));
-    console.log('summonerData.id:', summonerData.id);
-    console.log('summonerData keys:', Object.keys(summonerData));
-    console.log('====== END SUMMONER DEBUG ======');
-
-    // 3. Récupérer le rank du joueur (UTILISER PUUID AU LIEU DU SUMMONER ID)
+    // 3. Récupérer le rank du joueur via PUUID
     let rankedData = null;
     try {
-      // NOUVEAU ENDPOINT : by-puuid au lieu de by-summoner
       const rankedUrl = `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-puuid/${summonerData.puuid}`;
-
-      console.log('====== DEBUG RANK REQUEST ======');
-      console.log('URL appelée:', rankedUrl);
-      console.log('API Key présente:', RIOT_API_KEY ? 'OUI' : 'NON');
-      console.log('PUUID utilisé:', summonerData.puuid);
-      console.log('Platform Region:', platformRegion);
 
       const rankedResponse = await fetch(rankedUrl, {
         headers: {
@@ -126,24 +113,10 @@ export async function GET(request: NextRequest) {
       if (rankedResponse.ok) {
         const rankedArray = await rankedResponse.json();
 
-        // LOG: Afficher toutes les données reçues
-        console.log('====== DEBUG RANK API ======');
-        console.log('Summoner ID:', summonerData.id);
-        console.log('Platform Region:', platformRegion);
-        console.log('Ranked data received:', JSON.stringify(rankedArray, null, 2));
-        console.log('Number of queue entries:', rankedArray.length);
-
-        // Afficher tous les queueTypes disponibles
-        if (rankedArray.length > 0) {
-          console.log('Available queueTypes:', rankedArray.map((entry: any) => entry.queueType));
-        }
-
         // Chercher le rank en Solo/Duo
         const soloQueue = rankedArray.find(
           (entry: any) => entry.queueType === 'RANKED_SOLO_5x5'
         );
-
-        console.log('Solo/Duo queue found:', soloQueue ? 'YES' : 'NO');
 
         if (soloQueue) {
           rankedData = {
@@ -153,16 +126,10 @@ export async function GET(request: NextRequest) {
             wins: soloQueue.wins,
             losses: soloQueue.losses,
           };
-          console.log('Rank data extracted:', rankedData);
         }
-        console.log('====== END DEBUG ======');
-      } else {
-        console.error('Ranked API failed with status:', rankedResponse.status);
-        const errorBody = await rankedResponse.text();
-        console.error('Error body:', errorBody);
       }
     } catch (err) {
-      console.error('Erreur lors de la récupération du rank:', err);
+      // Silently fail for rank - player might be unranked
     }
 
     return NextResponse.json({

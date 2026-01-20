@@ -74,8 +74,6 @@ function DashboardContent() {
         const userName = (user as any).name;
         const userImage = (user as any).image;
 
-        console.log('Syncing user with backend:', currentUserId, userEmail);
-
         const response = await fetch(`${NEXRA_API_URL}/users/auth`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -89,7 +87,6 @@ function DashboardContent() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('User data from /users/auth:', data);
 
           // Check for Riot account (fields are snake_case from DB)
           if (data.success && data.user?.riot_game_name && data.user?.riot_tag_line) {
@@ -122,7 +119,6 @@ function DashboardContent() {
         }
 
         // No account found anywhere, redirect to link-riot page
-        console.log('No Riot account found, redirecting to link-riot');
         router.push('/link-riot');
       } catch (err) {
         console.error('Error fetching user data:', err);

@@ -58,24 +58,40 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Fallback to mock data if API fails or no data
-    console.log('Using mock data (API unavailable or no data)');
-    const paginatedGames = mockAnalyzedGames.slice(offset, offset + limit);
+    // Only use mock data in development
+    if (process.env.NODE_ENV === 'development') {
+      const paginatedGames = mockAnalyzedGames.slice(offset, offset + limit);
+      return NextResponse.json({
+        games: paginatedGames,
+        total: mockAnalyzedGames.length,
+        hasMore: offset + limit < mockAnalyzedGames.length,
+        _isMockData: true,
+      });
+    }
+
     return NextResponse.json({
-      games: paginatedGames,
-      total: mockAnalyzedGames.length,
-      hasMore: offset + limit < mockAnalyzedGames.length,
+      games: [],
+      total: 0,
+      hasMore: false,
     });
 
   } catch (error) {
     console.error('Failed to fetch from API:', error);
 
-    // Fallback to mock data
-    const paginatedGames = mockAnalyzedGames.slice(offset, offset + limit);
-    return NextResponse.json({
-      games: paginatedGames,
-      total: mockAnalyzedGames.length,
-      hasMore: offset + limit < mockAnalyzedGames.length,
-    });
+    // Only use mock data in development
+    if (process.env.NODE_ENV === 'development') {
+      const paginatedGames = mockAnalyzedGames.slice(offset, offset + limit);
+      return NextResponse.json({
+        games: paginatedGames,
+        total: mockAnalyzedGames.length,
+        hasMore: offset + limit < mockAnalyzedGames.length,
+        _isMockData: true,
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'Service temporarily unavailable' },
+      { status: 503 }
+    );
   }
 }

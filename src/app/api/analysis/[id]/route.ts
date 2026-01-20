@@ -59,11 +59,14 @@ export async function GET(
       }
     }
 
-    // If API returns 404 or fails, try mock data
+    // If API returns 404
     if (response.status === 404) {
-      const mockAnalysis = getMockAnalysisById(id);
-      if (mockAnalysis) {
-        return NextResponse.json(mockAnalysis);
+      // Only use mock data in development
+      if (process.env.NODE_ENV === 'development') {
+        const mockAnalysis = getMockAnalysisById(id);
+        if (mockAnalysis) {
+          return NextResponse.json({ ...mockAnalysis, _isMockData: true });
+        }
       }
       return NextResponse.json(
         { error: 'Analysis not found' },
@@ -71,30 +74,26 @@ export async function GET(
       );
     }
 
-    // Fallback to mock data for other errors
-    console.log('Using mock data (API unavailable)');
-    const mockAnalysis = getMockAnalysisById(id);
-    if (mockAnalysis) {
-      return NextResponse.json(mockAnalysis);
-    }
-
+    // API returned error
     return NextResponse.json(
-      { error: 'Analysis not found' },
-      { status: 404 }
+      { error: 'Failed to fetch analysis' },
+      { status: response.status }
     );
 
   } catch (error) {
     console.error('Failed to fetch from API:', error);
 
-    // Fallback to mock data
-    const mockAnalysis = getMockAnalysisById(id);
-    if (mockAnalysis) {
-      return NextResponse.json(mockAnalysis);
+    // Only use mock data in development
+    if (process.env.NODE_ENV === 'development') {
+      const mockAnalysis = getMockAnalysisById(id);
+      if (mockAnalysis) {
+        return NextResponse.json({ ...mockAnalysis, _isMockData: true });
+      }
     }
 
     return NextResponse.json(
-      { error: 'Analysis not found' },
-      { status: 404 }
+      { error: 'Service temporarily unavailable' },
+      { status: 503 }
     );
   }
 }

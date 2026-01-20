@@ -65,12 +65,21 @@ export async function POST(request: NextRequest) {
         });
 
         if (!response.ok) {
-          console.error('Failed to add credits:', await response.text());
-        } else {
-          console.log(`Added ${credits} credits to user ${userId}`);
+          const errorText = await response.text();
+          console.error('Failed to add credits:', errorText);
+          // Return error so Stripe will retry the webhook
+          return NextResponse.json(
+            { error: 'Failed to add credits', details: errorText },
+            { status: 500 }
+          );
         }
       } catch (error) {
         console.error('Error adding credits:', error);
+        // Return error so Stripe will retry the webhook
+        return NextResponse.json(
+          { error: 'Error processing payment', details: String(error) },
+          { status: 500 }
+        );
       }
     }
   }

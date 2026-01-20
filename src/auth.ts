@@ -69,7 +69,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
-        console.log('[AUTH] First login - userId:', token.id, 'email:', token.email, 'provider:', account.provider);
       }
 
       // Always fetch latest user data from backend (on login and session refresh)
@@ -96,7 +95,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               // This ensures consistency with foreign key references
               if (data.user.id) {
                 token.id = data.user.id;
-                console.log('[AUTH] Using database ID:', token.id);
               }
               token.riotPuuid = data.user.riot_puuid || null;
               token.riotGameName = data.user.riot_game_name || null;

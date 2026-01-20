@@ -72,8 +72,6 @@ export default function LinkRiotPage() {
         const userName = (session.user as any).name;
         const userImage = (session.user as any).image;
 
-        console.log('Syncing user and checking Riot account for:', userId, userEmail);
-
         // Call /users/auth which creates user if not exists and returns their data
         const response = await fetch(`${NEXRA_API_URL}/users/auth`, {
           method: 'POST',
@@ -88,11 +86,9 @@ export default function LinkRiotPage() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('User data from /users/auth:', data);
 
           // Check if user has Riot account (fields are snake_case from DB)
           if (data.success && data.user?.riot_game_name && data.user?.riot_tag_line) {
-            console.log('User has Riot account, redirecting to dashboard');
             const accountData = {
               gameName: data.user.riot_game_name,
               tagLine: data.user.riot_tag_line,
@@ -107,7 +103,6 @@ export default function LinkRiotPage() {
         }
 
         // No Riot account found - stay on this page
-        console.log('No Riot account found, staying on link page');
         localStorage.removeItem('nexra_riot_account');
         setCheckingAccount(false);
       } catch (err) {
@@ -134,7 +129,6 @@ export default function LinkRiotPage() {
 
     try {
       // Step 1: Validate the Riot account exists via Riot API
-      console.log('Validating Riot account...', { gameName, tagLine, region });
       const validateResponse = await fetch(
         `/api/riot/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${region}`
       );
@@ -145,11 +139,9 @@ export default function LinkRiotPage() {
       }
 
       const summonerData = await validateResponse.json();
-      console.log('Riot account validated:', summonerData.puuid);
 
       // Step 2: Link the Riot account to the user in the database
       const userEmail = (session?.user as { email?: string })?.email;
-      console.log('Linking Riot account - userId:', userId, 'email:', userEmail);
 
       const linkResponse = await fetch(`${NEXRA_API_URL}/users/${userId}/link-riot`, {
         method: 'POST',
@@ -163,7 +155,6 @@ export default function LinkRiotPage() {
       });
 
       const linkData = await linkResponse.json();
-      console.log('Link Riot response:', linkResponse.status, linkData);
 
       if (!linkResponse.ok) {
         throw new Error(linkData.error || 'Failed to link account');
@@ -181,11 +172,6 @@ export default function LinkRiotPage() {
         }),
       });
       const verifyData = await verifyResponse.json();
-      console.log('Verify after link - user data:', verifyData);
-
-      if (!verifyData.user?.riot_game_name) {
-        console.error('WARNING: Riot account not saved correctly!');
-      }
 
       // Step 3: Store in localStorage as backup (with userId for verification)
       localStorage.setItem('nexra_riot_account', JSON.stringify({
@@ -198,7 +184,6 @@ export default function LinkRiotPage() {
       }));
 
       // Step 4: Redirect to dashboard
-      console.log('Redirecting to dashboard...');
       const redirectUrl = `/dashboard?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${region}`;
       window.location.href = redirectUrl;
     } catch (err) {
