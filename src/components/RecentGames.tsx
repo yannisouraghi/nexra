@@ -104,10 +104,6 @@ const CACHE_DURATION = 5 * 60 * 1000;
 // PUUID cache duration: 7 days (PUUID never changes)
 const PUUID_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
-// Global flag to track if initial page load check was done (persists across component remounts)
-// This resets on actual page refresh since the JS context reloads
-let initialLoadHandled = false;
-
 export default function RecentGames({ riotAccount }: RecentGamesProps) {
   // All hooks must be at the top level (before any conditional returns)
   const router = useRouter();
@@ -138,6 +134,11 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     } | null;
   } | null>(null);
 
+  // Ref to track if data has been loaded (prevents double loading in Strict Mode)
+  const dataLoadedRef = useRef(false);
+  // Ref to track current matches count for infinite scroll
+  const matchesCountRef = useRef(0);
+
   // Generate cache key based on riot account
   const getCacheKey = useCallback(() => {
     return `nexra_dashboard_cache_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
@@ -160,46 +161,47 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   // Ref for infinite scroll sentinel
   const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // Keep matchesCountRef in sync with matches
   useEffect(() => {
+    matchesCountRef.current = matches.length;
+  }, [matches.length]);
+
+  useEffect(() => {
+    // Prevent double loading in Strict Mode
+    if (dataLoadedRef.current) return;
+
     const cacheKey = getCacheKey();
 
-    // On first load of the SPA session, check if this is a page refresh
-    // The global `initialLoadHandled` flag resets on actual page refresh (JS context reloads)
-    if (!initialLoadHandled) {
-      initialLoadHandled = true;
-
-      // Detect if page was refreshed (browser F5, Ctrl+R, etc.)
-      const isPageRefresh = (() => {
-        try {
-          const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
-          if (navEntries.length > 0) {
-            return navEntries[0].type === 'reload';
-          }
-          // Fallback for older browsers
-          return performance.navigation?.type === 1;
-        } catch {
-          return false;
+    // Detect if page was refreshed (browser F5, Ctrl+R, etc.)
+    const isPageRefresh = (() => {
+      try {
+        const navEntries = performance.getEntriesByType('navigation') as PerformanceNavigationTiming[];
+        if (navEntries.length > 0) {
+          return navEntries[0].type === 'reload';
         }
-      })();
-
-      // If page was refreshed, clear cache to get fresh data
-      if (isPageRefresh) {
-        sessionStorage.removeItem(cacheKey);
-        loadAllData();
-        return;
+        // Fallback for older browsers
+        return performance.navigation?.type === 1;
+      } catch {
+        return false;
       }
+    })();
+
+    // If page was refreshed, clear cache to get fresh data
+    if (isPageRefresh) {
+      sessionStorage.removeItem(cacheKey);
     }
 
     // Check cache for SPA navigation
     const cachedDataStr = sessionStorage.getItem(cacheKey);
 
-    if (cachedDataStr) {
+    if (cachedDataStr && !isPageRefresh) {
       try {
         const cachedData: CachedData = JSON.parse(cachedDataStr);
         const isExpired = Date.now() - cachedData.timestamp > CACHE_DURATION;
 
         if (!isExpired) {
           // Use cached data - set all state at once
+          dataLoadedRef.current = true;
           setSummonerData(cachedData.summonerData);
           setMatches(cachedData.matches);
           setPlayerStats(cachedData.playerStats);
@@ -213,18 +215,21 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     }
 
     // No valid cache, load fresh data
+    dataLoadedRef.current = true;
     loadAllData();
   }, [riotAccount, getCacheKey]);
 
-  // Load more matches function for infinite scroll
+  // Load more matches function for infinite scroll - uses ref for stable closure
   const loadMoreData = useCallback(async () => {
     if (!summonerData?.puuid || isLoadingMore || !hasMoreMatches) return;
 
+    const currentCount = matchesCountRef.current;
     setIsLoadingMore(true);
+
     try {
       // Récupérer 20 matchs supplémentaires
       const matchesResponse = await fetch(
-        `/api/riot/matches?puuid=${encodeURIComponent(summonerData.puuid)}&region=${encodeURIComponent(riotAccount.region)}&start=${matches.length}&count=20`
+        `/api/riot/matches?puuid=${encodeURIComponent(summonerData.puuid)}&region=${encodeURIComponent(riotAccount.region)}&start=${currentCount}&count=20`
       );
 
       if (matchesResponse.ok) {
@@ -234,6 +239,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         } else {
           setMatches(prev => {
             const updatedMatches = [...prev, ...newMatches];
+            matchesCountRef.current = updatedMatches.length;
 
             // Update cache with new matches
             try {
@@ -267,7 +273,13 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [summonerData?.puuid, isLoadingMore, hasMoreMatches, matches.length, riotAccount.region, getCacheKey]);
+  }, [summonerData?.puuid, isLoadingMore, hasMoreMatches, riotAccount.region, getCacheKey]);
+
+  // Ref to store the loadMoreData function for stable closure in IntersectionObserver
+  const loadMoreDataRef = useRef(loadMoreData);
+  useEffect(() => {
+    loadMoreDataRef.current = loadMoreData;
+  }, [loadMoreData]);
 
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
@@ -276,13 +288,14 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && hasMoreMatches && !isLoadingMore && !isLoading && matches.length > 0) {
-          loadMoreData();
+        if (entry.isIntersecting) {
+          // Call the current version of loadMoreData via ref
+          loadMoreDataRef.current();
         }
       },
       {
         root: null,
-        rootMargin: '200px', // Increased for earlier trigger
+        rootMargin: '300px', // Trigger well before reaching the bottom
         threshold: 0,
       }
     );
@@ -290,7 +303,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     observer.observe(sentinelRef.current);
 
     return () => observer.disconnect();
-  }, [hasMoreMatches, isLoadingMore, isLoading, activeTab, matches.length, loadMoreData]);
+  }, [activeTab]); // Only recreate when tab changes
 
   // Helper to get/set PUUID from localStorage
   const getPuuidCacheKey = () => `nexra_puuid_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
@@ -481,6 +494,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
   // Force refresh - clears cache and reloads
   const forceRefresh = useCallback(() => {
     sessionStorage.removeItem(getCacheKey());
+    setHasMoreMatches(true); // Reset infinite scroll state
     loadAllData(0, true);
   }, [getCacheKey]);
 
