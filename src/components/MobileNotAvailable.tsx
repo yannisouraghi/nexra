@@ -7,6 +7,36 @@ interface MobileNotAvailableProps {
   tagLine?: string;
 }
 
+// Detect if the user is on a real mobile device (not just a small screen)
+const detectMobileDevice = (): boolean => {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return false;
+  }
+
+  // Check user agent for mobile devices
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+  const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS/i;
+  const isMobileUserAgent = mobileRegex.test(userAgent);
+
+  // Check for touch capability combined with small screen (tablets excluded by screen size)
+  const hasTouchScreen = (
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    (navigator as any).msMaxTouchPoints > 0
+  );
+
+  // Check if it's a mobile device based on screen characteristics
+  // Mobile phones typically have width < 768 AND are touch devices
+  const isSmallTouchDevice = hasTouchScreen && window.screen.width < 768;
+
+  // Also check for mobile platform
+  const isMobilePlatform = /Android|iPhone|iPad|iPod/i.test(navigator.platform || '');
+
+  // Return true only if user agent suggests mobile OR it's a small touch device
+  // This prevents false positives when desktop users resize their browser
+  return isMobileUserAgent || isMobilePlatform || isSmallTouchDevice;
+};
+
 export default function MobileNotAvailable({ gameName, tagLine }: MobileNotAvailableProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -20,20 +50,15 @@ export default function MobileNotAvailable({ gameName, tagLine }: MobileNotAvail
       return;
     }
 
-    // Check if mobile on mount
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-      if (mobile) {
-        setTimeout(() => setIsVisible(true), 100);
-      }
-    };
+    // Check if actually on a mobile device (not just small window)
+    const mobile = detectMobileDevice();
+    setIsMobile(mobile);
+    if (mobile) {
+      setTimeout(() => setIsVisible(true), 100);
+    }
 
-    checkMobile();
-
-    // Listen for resize
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // No need for resize listener since we're detecting actual mobile devices
+    // not just screen width
   }, []);
 
   const handleDismiss = () => {
