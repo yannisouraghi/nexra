@@ -258,8 +258,9 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
             return updatedMatches;
           });
 
-          // If we got less than requested, no more matches available
-          if (newMatches.length < 20) {
+          // Only stop if we got very few matches (likely end of history)
+          // Don't stop just because some matches failed to load
+          if (newMatches.length < 5) {
             setHasMoreMatches(false);
           }
         }
@@ -476,10 +477,10 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       // Step 5: Set ALL state at once so UI renders everything together
       setSummonerData(newSummonerData);
       setMatches(matchesData);
+      matchesCountRef.current = matchesData.length;
       setPlayerStats(playerStatsData);
-      if (matchesData.length < 20) {
-        setHasMoreMatches(false);
-      }
+      // Don't set hasMoreMatches to false here - some matches may have failed to load
+      // We'll only set it to false when load more returns 0 matches
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to retrieve recent games');
     } finally {
