@@ -133,6 +133,14 @@ export async function GET(request: NextRequest) {
             recentForm: [] as boolean[],
           };
 
+          // First, get summoner data to ensure we have the correct summonerId
+          const summonerResponse = await fetch(
+            `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${participant.puuid}`,
+            { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
+          );
+          const summonerData = summonerResponse.ok ? await summonerResponse.json() : null;
+          const summonerId = summonerData?.id || participant.summonerId;
+
           // Parallel fetch: account info, rank info, champion mastery, recent matches
           const [accountResult, rankResult, masteryResult, matchesResult] = await Promise.allSettled([
             // 1. Get account info (gameName, tagLine)
@@ -141,9 +149,9 @@ export async function GET(request: NextRequest) {
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
 
-            // 2. Get rank info (using summonerId, not puuid)
+            // 2. Get rank info (using summonerId from summoner API)
             fetch(
-              `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-summoner/${participant.summonerId}`,
+              `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`,
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
 

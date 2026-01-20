@@ -419,7 +419,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
           {/* Right Side Stats */}
           <div className="flex flex-col items-end flex-shrink-0" style={{ gap: '0.375rem' }}>
             {/* Overall Winrate */}
-            {rankInfo && (
+            {rankInfo ? (
               <div className="text-right">
                 <div className={`text-sm font-bold ${winrate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                   {winrate}%
@@ -428,7 +428,16 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
                   {rankInfo.wins}W {rankInfo.losses}L
                 </div>
               </div>
-            )}
+            ) : participant.recentWinrate !== undefined && recentForm.length > 0 ? (
+              <div className="text-right">
+                <div className={`text-sm font-bold ${participant.recentWinrate >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                  {participant.recentWinrate}%
+                </div>
+                <div className="text-xs text-white/40">
+                  Recent
+                </div>
+              </div>
+            ) : null}
 
             {/* Recent Form + Streak */}
             <div className="flex items-center" style={{ gap: '0.375rem' }}>
