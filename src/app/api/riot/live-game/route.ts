@@ -117,8 +117,9 @@ export async function GET(request: NextRequest) {
         try {
           const enrichedData: any = {
             ...participant,
-            gameName: participant.summonerId,
-            tagLine: '',
+            // Try to get name from spectator data first
+            gameName: participant.riotId?.gameName || participant.summonerName || participant.summonerId,
+            tagLine: participant.riotId?.tagLine || '',
             rankInfo: null,
             championMastery: 0,
             championPoints: 0,
@@ -133,13 +134,18 @@ export async function GET(request: NextRequest) {
             recentForm: [] as boolean[],
           };
 
-          // First, get summoner data to ensure we have the correct summonerId
+          // First, get summoner data to ensure we have the correct summonerId and name
           const summonerResponse = await fetch(
             `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${participant.puuid}`,
             { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
           );
           const summonerData = summonerResponse.ok ? await summonerResponse.json() : null;
           const summonerId = summonerData?.id || participant.summonerId;
+
+          // Use summoner name as fallback
+          if (summonerData?.name) {
+            enrichedData.gameName = summonerData.name;
+          }
 
           // Parallel fetch: account info, rank info, champion mastery, recent matches
           const [accountResult, rankResult, masteryResult, matchesResult] = await Promise.allSettled([
@@ -161,9 +167,9 @@ export async function GET(request: NextRequest) {
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
 
-            // 4. Get recent match IDs (last 10 ranked)
+            // 4. Get recent match IDs (all types, not just ranked)
             fetch(
-              `https://${routingRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${participant.puuid}/ids?type=ranked&start=0&count=10`,
+              `https://${routingRegion}.api.riotgames.com/lol/match/v5/matches/by-puuid/${participant.puuid}/ids?start=0&count=10`,
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
             ).then(r => r.ok ? r.json() : null),
           ]);
