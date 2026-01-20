@@ -392,11 +392,13 @@ export async function GET(request: NextRequest) {
         // Récupérer les coéquipiers (même team, sans le joueur lui-même)
         const teammates = match.info.participants
           .filter((p) => p.teamId === playerTeamId && p.puuid !== puuid)
-          .map((p) => ({
+          .map((p: any) => ({
             puuid: p.puuid,
             participantId: p.participantId,
             championName: p.championName,
             summonerName: p.summonerName || p.riotIdGameName || 'Unknown',
+            riotIdGameName: p.riotIdGameName,
+            riotIdTagline: p.riotIdTagline,
             kills: p.kills,
             deaths: p.deaths,
             assists: p.assists,
@@ -419,11 +421,13 @@ export async function GET(request: NextRequest) {
         // Récupérer les ennemis (team adverse)
         const enemies = match.info.participants
           .filter((p) => p.teamId !== playerTeamId)
-          .map((p) => ({
+          .map((p: any) => ({
             puuid: p.puuid,
             participantId: p.participantId,
             championName: p.championName,
             summonerName: p.summonerName || p.riotIdGameName || 'Unknown',
+            riotIdGameName: p.riotIdGameName,
+            riotIdTagline: p.riotIdTagline,
             kills: p.kills,
             deaths: p.deaths,
             assists: p.assists,

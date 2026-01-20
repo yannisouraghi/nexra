@@ -13,6 +13,8 @@ interface Participant {
   puuid?: string;
   championName: string;
   summonerName: string;
+  riotIdGameName?: string;
+  riotIdTagline?: string;
   kills?: number;
   deaths?: number;
   assists?: number;

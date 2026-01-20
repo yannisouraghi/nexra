@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getChampionImageUrl, getLatestDDragonVersion } from '@/utils/ddragon';
+import { createPortal } from 'react-dom';
+import { getChampionImageUrl } from '@/utils/ddragon';
 
 interface Participant {
   puuid?: string;
   championName: string;
   summonerName: string;
+  riotIdGameName?: string;
+  riotIdTagline?: string;
   kills?: number;
   deaths?: number;
   assists?: number;
@@ -114,18 +117,6 @@ const getGameModeName = (queueId: number): string => {
   return queueMap[queueId] || 'Normal';
 };
 
-// Get role icon
-const getRoleIcon = (role: string): string => {
-  const roleIcons: { [key: string]: string } = {
-    'TOP': 'M3 3h18v18H3V3zm2 2v14h14V5H5z',
-    'JUNGLE': 'M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.5L18 8v8l-6 3.5L6 16V8l6-3.5z',
-    'MIDDLE': 'M12 2L2 12l10 10 10-10L12 2zm0 3.5L18.5 12 12 18.5 5.5 12 12 5.5z',
-    'BOTTOM': 'M3 3h18v18H3V3zm2 16h14V5H5v14z',
-    'UTILITY': 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z',
-  };
-  return roleIcons[role] || roleIcons['MIDDLE'];
-};
-
 // Get rank badge info
 const getRankBadge = (rank: number) => {
   if (rank === 1) {
@@ -146,8 +137,8 @@ const formatDuration = (seconds: number): string => {
 };
 
 // Cache key for player data
-const getCacheKey = (gameName: string, tagLine: string, region: string) => {
-  return `nexra_player_popup_${gameName}_${tagLine}_${region}`;
+const getCacheKey = (puuid: string, region: string) => {
+  return `nexra_player_popup_${puuid}_${region}`;
 };
 
 export default function PlayerDetailPopup({
@@ -165,26 +156,47 @@ export default function PlayerDetailPopup({
   const [recentMatches, setRecentMatches] = useState<PlayerMatch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const currentPlayer = players[currentIndex];
 
-  // Parse summoner name to extract gameName and tagLine
-  const parseSummonerName = useCallback((summonerName: string) => {
-    // Handle formats like "Name#TAG" or just "Name"
-    if (summonerName.includes('#')) {
-      const [gameName, tagLine] = summonerName.split('#');
-      return { gameName, tagLine };
+  // Mount check for Portal
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  // Get player identification info
+  const getPlayerInfo = useCallback((player: Participant) => {
+    // Best case: we have puuid
+    if (player.puuid) {
+      return { puuid: player.puuid, gameName: player.riotIdGameName || player.summonerName, tagLine: player.riotIdTagline };
     }
-    // If no tag, assume default tagLine based on region
-    return { gameName: summonerName, tagLine: region.toUpperCase().replace(/[0-9]/g, '') || 'EUW' };
+
+    // Second best: we have riotIdGameName and riotIdTagline
+    if (player.riotIdGameName && player.riotIdTagline) {
+      return { puuid: null, gameName: player.riotIdGameName, tagLine: player.riotIdTagline };
+    }
+
+    // Last resort: parse summonerName
+    if (player.summonerName.includes('#')) {
+      const [gameName, tagLine] = player.summonerName.split('#');
+      return { puuid: null, gameName, tagLine };
+    }
+
+    // Default tagLine based on region
+    const defaultTagLine = region.toUpperCase().replace(/[0-9]/g, '') || 'EUW';
+    return { puuid: null, gameName: player.summonerName, tagLine: defaultTagLine };
   }, [region]);
 
   // Fetch player data when popup opens or player changes
   const fetchPlayerData = useCallback(async () => {
     if (!currentPlayer) return;
 
-    const { gameName, tagLine } = parseSummonerName(currentPlayer.summonerName);
-    const cacheKey = getCacheKey(gameName, tagLine, region);
+    const playerInfo = getPlayerInfo(currentPlayer);
+    const cacheKey = playerInfo.puuid
+      ? getCacheKey(playerInfo.puuid, region)
+      : getCacheKey(`${playerInfo.gameName}_${playerInfo.tagLine}`, region);
 
     // Check session storage cache
     const cached = sessionStorage.getItem(cacheKey);
@@ -208,34 +220,58 @@ export default function PlayerDetailPopup({
     setError(null);
 
     try {
-      // 1. Get summoner data (includes PUUID and rank)
-      const summonerResponse = await fetch(
-        `/api/riot/summoner?gameName=${encodeURIComponent(gameName)}&tagLine=${encodeURIComponent(tagLine)}&region=${encodeURIComponent(region)}`
-      );
+      let puuid = playerInfo.puuid;
+      let summonerData: any = null;
 
-      if (!summonerResponse.ok) {
-        if (summonerResponse.status === 404) {
-          throw new Error('Player not found');
+      // If we have puuid, we can skip the summoner lookup for name resolution
+      // but we still need to get rank info
+      if (puuid) {
+        // Fetch summoner data by puuid to get rank
+        const summonerResponse = await fetch(
+          `/api/riot/summoner?gameName=${encodeURIComponent(playerInfo.gameName || '')}&tagLine=${encodeURIComponent(playerInfo.tagLine || '')}&region=${encodeURIComponent(region)}`
+        );
+
+        if (summonerResponse.ok) {
+          summonerData = await summonerResponse.json();
         }
-        if (summonerResponse.status === 429) {
-          throw new Error('Rate limited. Please wait a moment.');
+      } else {
+        // Need to look up by gameName/tagLine
+        if (!playerInfo.gameName || !playerInfo.tagLine) {
+          throw new Error('Unable to identify player');
         }
-        throw new Error('Failed to fetch player data');
+
+        const summonerResponse = await fetch(
+          `/api/riot/summoner?gameName=${encodeURIComponent(playerInfo.gameName)}&tagLine=${encodeURIComponent(playerInfo.tagLine)}&region=${encodeURIComponent(region)}`
+        );
+
+        if (!summonerResponse.ok) {
+          if (summonerResponse.status === 404) {
+            throw new Error('Player not found');
+          }
+          if (summonerResponse.status === 429) {
+            throw new Error('Rate limited. Please wait a moment.');
+          }
+          throw new Error('Failed to fetch player data');
+        }
+
+        summonerData = await summonerResponse.json();
+        puuid = summonerData.puuid;
       }
 
-      const summonerData = await summonerResponse.json();
-      const puuid = summonerData.puuid;
+      if (!puuid) {
+        throw new Error('Unable to get player PUUID');
+      }
 
       setPlayerData({
-        gameName,
-        tagLine,
+        gameName: playerInfo.gameName || summonerData?.gameName || currentPlayer.summonerName,
+        tagLine: playerInfo.tagLine || summonerData?.tagLine || '',
         puuid,
-        profileIconId: summonerData.profileIconId,
-        summonerLevel: summonerData.summonerLevel,
-        rank: summonerData.rank,
+        profileIconId: summonerData?.profileIconId || 1,
+        summonerLevel: summonerData?.summonerLevel || 0,
+        rank: summonerData?.rank || null,
       });
 
-      // 2. Fetch matches and player stats in parallel
+      // Fetch matches and player stats in parallel
       const routingRegion = getRoutingValue(region);
 
       const [matchesResponse, statsResponse] = await Promise.all([
@@ -264,12 +300,12 @@ export default function PlayerDetailPopup({
       // Cache the data
       const cacheData = {
         playerData: {
-          gameName,
-          tagLine,
+          gameName: playerInfo.gameName || summonerData?.gameName || currentPlayer.summonerName,
+          tagLine: playerInfo.tagLine || summonerData?.tagLine || '',
           puuid,
-          profileIconId: summonerData.profileIconId,
-          summonerLevel: summonerData.summonerLevel,
-          rank: summonerData.rank,
+          profileIconId: summonerData?.profileIconId || 1,
+          summonerLevel: summonerData?.summonerLevel || 0,
+          rank: summonerData?.rank || null,
         },
         playerStats: stats,
         recentMatches: matches,
@@ -278,11 +314,12 @@ export default function PlayerDetailPopup({
       sessionStorage.setItem(cacheKey, JSON.stringify(cacheData));
 
     } catch (err) {
+      console.error('Error fetching player data:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
-  }, [currentPlayer, region, parseSummonerName]);
+  }, [currentPlayer, region, getPlayerInfo]);
 
   // Fetch data when popup opens or player changes
   useEffect(() => {
@@ -317,7 +354,19 @@ export default function PlayerDetailPopup({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, currentIndex, players.length, onNavigate, onClose]);
 
-  if (!isOpen) return null;
+  // Prevent body scroll when popup is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < players.length - 1;
@@ -340,12 +389,15 @@ export default function PlayerDetailPopup({
       })()
     : '0';
 
-  return (
+  const displayName = playerData?.gameName || currentPlayer?.riotIdGameName || currentPlayer?.summonerName || 'Unknown';
+  const displayTag = playerData?.tagLine || currentPlayer?.riotIdTagline || '';
+
+  const popupContent = (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
+        zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -369,8 +421,8 @@ export default function PlayerDetailPopup({
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(0, 212, 255, 0.1)',
           display: 'flex',
           flexDirection: 'column',
+          animation: 'fadeInScale 0.2s ease-out',
         }}
-        className="animate-fadeInScale"
       >
         {/* Header with Navigation */}
         <div style={{
@@ -417,14 +469,14 @@ export default function PlayerDetailPopup({
             </div>
             <div style={{ textAlign: 'center' }}>
               <div style={{ color: 'white', fontWeight: 600, fontSize: '1rem', fontFamily: 'Rajdhani, sans-serif' }}>
-                {currentPlayer?.summonerName || 'Unknown'}
+                {displayName}{displayTag && <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>#{displayTag}</span>}
               </div>
               {playerData?.rank && (
                 <div style={{ color: 'rgba(0, 212, 255, 0.8)', fontSize: '0.75rem', fontWeight: 500 }}>
                   {playerData.rank.tier} {playerData.rank.rank} - {playerData.rank.leaguePoints} LP
                 </div>
               )}
-              {!playerData?.rank && !isLoading && (
+              {!playerData?.rank && !isLoading && !error && (
                 <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.75rem' }}>
                   Unranked
                 </div>
@@ -479,8 +531,8 @@ export default function PlayerDetailPopup({
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
                 {[1, 2, 3].map(i => (
                   <div key={i} style={{ padding: '1rem', borderRadius: '0.75rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <div className="skeleton-pulse" style={{ width: '60%', height: '0.75rem', marginBottom: '0.5rem', borderRadius: '0.25rem' }} />
-                    <div className="skeleton-pulse" style={{ width: '40%', height: '1.5rem', borderRadius: '0.25rem' }} />
+                    <div style={{ width: '60%', height: '0.75rem', marginBottom: '0.5rem', borderRadius: '0.25rem', background: 'rgba(255, 255, 255, 0.1)', animation: 'pulse 2s infinite' }} />
+                    <div style={{ width: '40%', height: '1.5rem', borderRadius: '0.25rem', background: 'rgba(255, 255, 255, 0.1)', animation: 'pulse 2s infinite' }} />
                   </div>
                 ))}
               </div>
@@ -488,7 +540,7 @@ export default function PlayerDetailPopup({
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {[1, 2, 3, 4, 5].map(i => (
                   <div key={i} style={{ padding: '0.75rem', borderRadius: '0.5rem', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <div className="skeleton-pulse" style={{ width: '100%', height: '2rem', borderRadius: '0.25rem' }} />
+                    <div style={{ width: '100%', height: '2rem', borderRadius: '0.25rem', background: 'rgba(255, 255, 255, 0.1)', animation: 'pulse 2s infinite' }} />
                   </div>
                 ))}
               </div>
@@ -612,7 +664,7 @@ export default function PlayerDetailPopup({
                 )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {recentMatches.map((match, index) => {
+                  {recentMatches.map((match) => {
                     const rankBadge = getRankBadge(match.rank || 10);
                     const kda = match.deaths === 0
                       ? 'Perfect'
@@ -679,7 +731,10 @@ export default function PlayerDetailPopup({
                           borderRadius: '0.25rem',
                           fontSize: '0.6875rem',
                           fontWeight: 600,
-                        }} className={`${rankBadge.bgColor} ${rankBadge.textColor} border ${rankBadge.borderColor}`}>
+                          background: rankBadge.label === 'MVP' ? 'rgba(234, 179, 8, 0.2)' : rankBadge.label === '#2' ? 'rgba(156, 163, 175, 0.2)' : rankBadge.label === '#3' ? 'rgba(217, 119, 6, 0.2)' : 'rgba(75, 85, 99, 0.2)',
+                          color: rankBadge.label === 'MVP' ? 'rgb(250, 204, 21)' : rankBadge.label === '#2' ? 'rgb(209, 213, 219)' : rankBadge.label === '#3' ? 'rgb(251, 191, 36)' : 'rgb(156, 163, 175)',
+                          border: `1px solid ${rankBadge.label === 'MVP' ? 'rgba(234, 179, 8, 0.4)' : rankBadge.label === '#2' ? 'rgba(156, 163, 175, 0.4)' : rankBadge.label === '#3' ? 'rgba(217, 119, 6, 0.4)' : 'rgba(75, 85, 99, 0.4)'}`,
+                        }}>
                           {rankBadge.label}
                         </div>
 
@@ -775,6 +830,30 @@ export default function PlayerDetailPopup({
           ))}
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 0.4;
+          }
+          50% {
+            opacity: 0.8;
+          }
+        }
+      `}</style>
     </div>
   );
+
+  // Use Portal to render at document body level
+  return createPortal(popupContent, document.body);
 }
