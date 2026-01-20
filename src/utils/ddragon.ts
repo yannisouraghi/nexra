@@ -91,8 +91,13 @@ export function getChampionImageUrl(championName: string, version?: string): str
 
 /**
  * Gets the item image URL using the latest Data Dragon version
+ * Returns null for invalid item IDs (0, -1, negative numbers)
  */
-export function getItemImageUrl(itemId: number, version?: string): string {
+export function getItemImageUrl(itemId: number, version?: string): string | null {
+  // Validate item ID - return null for invalid IDs
+  if (itemId <= 0) {
+    return null;
+  }
   const v = version || cachedVersion || DDRAGON_CONFIG.FALLBACK_VERSION;
   return `${DDRAGON_CONFIG.BASE_URL}/cdn/${v}/img/item/${itemId}.png`;
 }

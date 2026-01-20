@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { BarChart3, Swords, Coins, TrendingUp, Trophy, Flame, Castle, Droplets, Star, Sparkles, Zap } from 'lucide-react';
 import WinProbabilityBadge from './WinProbabilityBadge';
@@ -351,6 +352,9 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
   // Player detail popup state
   const [showPlayerPopup, setShowPlayerPopup] = useState(false);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
+
+  // Probability info popup state
+  const [showProbabilityInfo, setShowProbabilityInfo] = useState(false);
 
   // Fetch latest DDragon version on mount
   useEffect(() => {
@@ -932,7 +936,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                   {match.rank && (() => {
                     const badge = getRankBadge(match.rank);
                     return (
-                      <div className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-full ${badge.container} ${badge.text} ${badge.glow ? 'rank-mvp-shimmer glow-mvp' : ''} shadow-lg`}>
+                      <div className={`relative flex items-center gap-1.5 px-4 py-1.5 rounded-full ${badge.container} ${badge.text} ${badge.glow ? 'rank-mvp-shimmer glow-mvp' : ''} shadow-lg`}>
                         {badge.showIcon && (
                           <svg className="w-3.5 h-3.5 relative z-10" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
@@ -964,7 +968,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
 
               <div className="text-center">
                 <p className={`text-base sm:text-lg lg:text-xl font-bold tracking-tight ${kdaColor} font-['Rajdhani'] mb-0.5`}>
-                  {kda}:1
+                  {kda}
                 </p>
                 <p className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
               </div>
@@ -1086,7 +1090,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             >
               <span className="flex items-center" style={{ gap: '0.5rem' }}>
                 <BarChart3 className="w-4 h-4" />
-                Vue d'ensemble
+                Overview
               </span>
             </button>
             <button
@@ -1113,7 +1117,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             >
               <span className="flex items-center" style={{ gap: '0.5rem' }}>
                 <TrendingUp className="w-4 h-4" />
-                Graphiques
+                Charts
               </span>
             </button>
             <button
@@ -1131,7 +1135,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             >
               <span className="flex items-center" style={{ gap: '0.5rem' }}>
                 <Sparkles className="w-4 h-4" />
-                Probabilité
+                Probability
               </span>
             </button>
           </div>
@@ -1449,8 +1453,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                   <div className="bg-white/5 p-4 rounded-lg border border-white/10">
                     <div className="flex gap-2 items-center">
                       {match.items && match.items.map((itemId, index) => (
-                        <div key={index} className={`w-12 h-12 rounded-lg overflow-hidden border-2 ${itemId === 0 ? 'border-white/5 bg-black/40' : 'border-yellow-500/30 bg-black/60'}`}>
-                          {itemId !== 0 && (
+                        <div key={index} className={`w-12 h-12 rounded-lg overflow-hidden border-2 ${!itemId || itemId <= 0 ? 'border-white/5 bg-black/40' : 'border-yellow-500/30 bg-black/60'}`}>
+                          {itemId && itemId > 0 && (
                             <img
                               src={`${getItemImageUrl(itemId, ddragonVersion)}`}
                               alt={`Item ${itemId}`}
@@ -1752,12 +1756,12 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                           <div
                             key={index}
                             className={`relative w-14 h-14 rounded-lg overflow-hidden border-2 transition-all ${
-                              itemId === 0
+                              !itemId || itemId <= 0
                                 ? 'border-white/5 bg-black/40'
                                 : 'border-purple-500/30 bg-black/60 hover:border-purple-500 hover:scale-110'
                             }`}
                           >
-                            {itemId !== 0 ? (
+                            {itemId && itemId > 0 ? (
                               <>
                                 <img
                                   src={`${getItemImageUrl(itemId, ddragonVersion)}`}
@@ -1784,12 +1788,12 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                     </div>
 
                     {/* Trinket */}
-                    {match.items && match.items[6] && (
+                    {match.items && match.items[6] && match.items[6] > 0 && (
                       <div style={{ marginBottom: '0.5rem' }}>
                         <div className="text-xs text-gray-400 font-semibold" style={{ marginBottom: '0.5rem' }}>Trinket</div>
                         <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-blue-500/30 bg-black/60">
                           <img
-                            src={getItemImageUrl(match.items[6], ddragonVersion)}
+                            src={getItemImageUrl(match.items[6], ddragonVersion) || ''}
                             alt="Trinket"
                             className="w-full h-full object-cover"
                           />
@@ -1803,13 +1807,13 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         <div className="text-center">
                           <div className="text-xs text-gray-400" style={{ marginBottom: '0.25rem' }}>Completed Items</div>
                           <div className="text-lg font-bold text-white">
-                            {match.items?.filter(id => id !== 0).length || 0}/6
+                            {match.items?.filter(id => id && id > 0).length || 0}/7
                           </div>
                         </div>
                         <div className="text-center">
                           <div className="text-xs text-gray-400" style={{ marginBottom: '0.25rem' }}>Build Complet</div>
                           <div className="text-lg font-bold">
-                            {match.items?.filter(id => id !== 0).length === 6 ? (
+                            {match.items?.filter(id => id && id > 0).length === 7 ? (
                               <span className="text-green-400">✓ Yes</span>
                             ) : (
                               <span className="text-orange-400">Partial</span>
@@ -1819,7 +1823,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         <div className="text-center">
                           <div className="text-xs text-gray-400" style={{ marginBottom: '0.25rem' }}>Slots Vides</div>
                           <div className="text-lg font-bold text-gray-400">
-                            {6 - (match.items?.filter(id => id !== 0).length || 0)}
+                            {7 - (match.items?.filter(id => id && id > 0).length || 0)}
                           </div>
                         </div>
                       </div>
@@ -1953,7 +1957,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                     <div className="flex border-b border-white/10" style={{ gap: '0.5rem', paddingBottom: '0.5rem' }}>
                       <button
                         onClick={() => setChartMetric('gold')}
-                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none ${
+                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none text-center ${
                           chartMetric === 'gold'
                             ? 'bg-yellow-500/20 text-yellow-400 border-b-2 border-yellow-500'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -1963,7 +1967,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       </button>
                       <button
                         onClick={() => setChartMetric('cs')}
-                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none ${
+                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none text-center ${
                           chartMetric === 'cs'
                             ? 'bg-blue-500/20 text-blue-400 border-b-2 border-blue-500'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -1973,7 +1977,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       </button>
                       <button
                         onClick={() => setChartMetric('xp')}
-                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none ${
+                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none text-center ${
                           chartMetric === 'xp'
                             ? 'bg-purple-500/20 text-purple-400 border-b-2 border-purple-500'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -1983,7 +1987,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       </button>
                       <button
                         onClick={() => setChartMetric('level')}
-                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none ${
+                        className={`px-3 py-1.5 rounded-t-lg text-xs font-medium transition-none text-center ${
                           chartMetric === 'level'
                             ? 'bg-green-500/20 text-green-400 border-b-2 border-green-500'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -2328,7 +2332,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         isTopThree ? 'from-blue-500/10 to-blue-500/5 border-blue-500/20' :
                         'from-blue-500/5 to-transparent border-blue-500/10'
                       }`}>
-                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-1.5 items-center">
+                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
                           <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
                             <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
@@ -2427,10 +2431,10 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                               <div
                                 key={idx}
                                 className={`w-6 h-6 rounded ${idx === 6 ? 'border border-purple-500/30' : ''} overflow-hidden ${
-                                  itemId === 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
+                                  !itemId || itemId <= 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
                                 }`}
                               >
-                                {itemId !== 0 ? (
+                                {itemId && itemId > 0 ? (
                                   <img
                                     src={`${getItemImageUrl(itemId, ddragonVersion)}`}
                                     alt={`Item ${itemId}`}
@@ -2460,7 +2464,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         isTopThree ? 'from-blue-500/10 to-blue-500/5 border-blue-500/20' :
                         'from-blue-500/5 to-transparent border-blue-500/10'
                       }`}>
-                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-1.5 items-center">
+                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
                           <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
                             <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
@@ -2565,10 +2569,10 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                               <div
                                 key={idx}
                                 className={`w-6 h-6 rounded ${idx === 6 ? 'border border-purple-500/30' : ''} overflow-hidden ${
-                                  itemId === 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
+                                  !itemId || itemId <= 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
                                 }`}
                               >
-                                {itemId !== 0 ? (
+                                {itemId && itemId > 0 ? (
                                   <img
                                     src={`${getItemImageUrl(itemId, ddragonVersion)}`}
                                     alt={`Item ${itemId}`}
@@ -2602,7 +2606,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         isTopThree ? 'from-red-500/10 to-red-500/5 border-red-500/20' :
                         'from-red-500/5 to-transparent border-red-500/10'
                       }`}>
-                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto_auto] gap-1.5 items-center">
+                        <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
                           <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
                             <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
@@ -2707,10 +2711,10 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                               <div
                                 key={idx}
                                 className={`w-6 h-6 rounded ${idx === 6 ? 'border border-purple-500/30' : ''} overflow-hidden ${
-                                  itemId === 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
+                                  !itemId || itemId <= 0 ? 'bg-black/40 border border-white/10' : 'bg-black/60'
                                 }`}
                               >
-                                {itemId !== 0 ? (
+                                {itemId && itemId > 0 ? (
                                   <img
                                     src={`${getItemImageUrl(itemId, ddragonVersion)}`}
                                     alt={`Item ${itemId}`}
@@ -2746,96 +2750,26 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                           <p className="text-sm text-[var(--text-secondary)]" style={{ lineHeight: '1.6' }}>
                             Calculate the win probability based on player statistics, champion mastery, recent form, and team composition.
                           </p>
-                          {/* Info Icon with Tooltip */}
-                          <div className="relative group">
-                            <div
-                              className="cursor-help rounded-full border border-white/20 hover:border-purple-400/50 hover:bg-purple-400/10 transition-all duration-200"
-                              style={{ padding: '0.25rem' }}
+                          {/* Info Icon Button */}
+                          <button
+                            onClick={() => setShowProbabilityInfo(true)}
+                            className="cursor-pointer rounded-full border border-white/20 hover:border-purple-400/50 hover:bg-purple-400/10 transition-all duration-200"
+                            style={{ padding: '0.25rem' }}
+                          >
+                            <svg
+                              className="w-4 h-4 text-white/50 hover:text-purple-400 transition-colors"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
                             >
-                              <svg
-                                className="w-4 h-4 text-white/50 group-hover:text-purple-400 transition-colors"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                              </svg>
-                            </div>
-                            {/* Tooltip */}
-                            <div
-                              className="absolute z-50 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none"
-                              style={{
-                                bottom: 'calc(100% + 0.5rem)',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                width: '320px',
-                              }}
-                            >
-                              <div
-                                className="rounded-xl border border-purple-500/30 text-left"
-                                style={{
-                                  padding: '1rem',
-                                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%)',
-                                  backdropFilter: 'blur(12px)',
-                                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-                                }}
-                              >
-                                <p className="text-xs font-bold text-purple-300 uppercase tracking-wider" style={{ marginBottom: '0.75rem' }}>
-                                  Algorithm Factors
-                                </p>
-                                <ul className="text-xs text-white/80" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">35%</span>
-                                    <span><strong>ELO Score</strong> — Rank, division, LP</span>
-                                  </li>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">20%</span>
-                                    <span><strong>Champion Mastery</strong> — Level, winrate, KDA, games played</span>
-                                  </li>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">15%</span>
-                                    <span><strong>Recent Performance</strong> — Last 10 games winrate</span>
-                                  </li>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">15%</span>
-                                    <span><strong>Role Fit</strong> — Main role vs autofill penalty</span>
-                                  </li>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">10%</span>
-                                    <span><strong>Activity</strong> — Days since last game</span>
-                                  </li>
-                                  <li className="flex items-start" style={{ gap: '0.5rem' }}>
-                                    <span className="text-purple-400 font-bold">5%</span>
-                                    <span><strong>Streak</strong> — Win/lose streak bonus</span>
-                                  </li>
-                                </ul>
-                                <div className="border-t border-white/10" style={{ marginTop: '0.75rem', paddingTop: '0.75rem' }}>
-                                  <p className="text-xs text-white/60">
-                                    <strong className="text-white/80">Role Impact:</strong> Jungle (1.15x) &gt; Support (1.10x) &gt; Mid (1.05x) &gt; ADC (1.00x) &gt; Top (0.95x)
-                                  </p>
-                                </div>
-                              </div>
-                              {/* Arrow */}
-                              <div
-                                style={{
-                                  position: 'absolute',
-                                  bottom: '-6px',
-                                  left: '50%',
-                                  transform: 'translateX(-50%) rotate(45deg)',
-                                  width: '12px',
-                                  height: '12px',
-                                  background: 'rgba(139, 92, 246, 0.15)',
-                                  borderRight: '1px solid rgba(139, 92, 246, 0.3)',
-                                  borderBottom: '1px solid rgba(139, 92, 246, 0.3)',
-                                }}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                               />
-                            </div>
-                          </div>
+                            </svg>
+                          </button>
                         </div>
                         <button
                           onClick={calculateProbability}
@@ -3070,6 +3004,73 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
         ddragonVersion={ddragonVersion}
         matchChampion={clickablePlayers[selectedPlayerIndex]?.championName || match.champion}
       />
+
+      {/* Probability Info Popup - Rendered via Portal */}
+      {showProbabilityInfo && typeof document !== 'undefined' && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
+          onClick={() => setShowProbabilityInfo(false)}
+        >
+          <div
+            className="rounded-2xl border border-purple-500/30 max-w-md w-full mx-4"
+            style={{
+              padding: '1.5rem',
+              background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.15) 100%)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 16px 64px rgba(0, 0, 0, 0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
+              <h3 className="text-lg font-bold text-white flex items-center" style={{ gap: '0.5rem' }}>
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                Algorithm Factors
+              </h3>
+              <button
+                onClick={() => setShowProbabilityInfo(false)}
+                className="text-white/50 hover:text-white transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <ul className="text-sm text-white/90" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">35%</span>
+                <span><strong>ELO Score</strong> — Rank, division, LP</span>
+              </li>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">20%</span>
+                <span><strong>Champion Mastery</strong> — Level, winrate, KDA, games played</span>
+              </li>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">15%</span>
+                <span><strong>Recent Performance</strong> — Last 10 games winrate</span>
+              </li>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">15%</span>
+                <span><strong>Role Fit</strong> — Main role vs autofill penalty</span>
+              </li>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">10%</span>
+                <span><strong>Activity</strong> — Days since last game</span>
+              </li>
+              <li className="flex items-start" style={{ gap: '0.75rem' }}>
+                <span className="text-purple-400 font-bold min-w-[40px]">5%</span>
+                <span><strong>Streak</strong> — Win/lose streak bonus</span>
+              </li>
+            </ul>
+            <div className="border-t border-white/10" style={{ marginTop: '1rem', paddingTop: '1rem' }}>
+              <p className="text-sm text-white/70">
+                <strong className="text-white/90">Role Impact:</strong> Jungle (1.15x) &gt; Support (1.10x) &gt; Mid (1.05x) &gt; ADC (1.00x) &gt; Top (0.95x)
+              </p>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
