@@ -5,6 +5,10 @@ export const revalidate = 3600;
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
+// Batch fetch configuration - optimized for Riot API rate limits
+const BATCH_SIZE = 5; // Fetch 5 matches concurrently
+const BATCH_DELAY_MS = 50; // 50ms delay between batches
+
 interface RiotMatch {
   metadata: {
     matchId: string;
@@ -337,18 +341,11 @@ export async function GET(request: NextRequest) {
 
     const matchIds: string[] = await matchlistResponse.json();
 
-    // 3. Récupérer les détails de chaque match de manière séquentielle
-    const limitedMatchIds = matchIds;
+    // 3. Récupérer les détails de chaque match en batch (parallélisation optimisée)
     const matchDetails: (RiotMatch | null)[] = [];
 
-    for (let i = 0; i < limitedMatchIds.length; i++) {
-      const matchId = limitedMatchIds[i];
-
-      // Ajouter un délai entre chaque requête pour respecter le rate limit
-      if (i > 0) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
+    // Helper function to fetch a single match
+    const fetchSingleMatch = async (matchId: string): Promise<RiotMatch | null> => {
       try {
         const matchResponse = await fetch(
           `https://${region}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -361,15 +358,30 @@ export async function GET(request: NextRequest) {
 
         if (!matchResponse.ok) {
           console.error(`Erreur pour le match ${matchId}: ${matchResponse.status}`);
-          matchDetails.push(null);
-          continue;
+          return null;
         }
 
-        const matchData = await matchResponse.json();
-        matchDetails.push(matchData);
+        return await matchResponse.json();
       } catch (error) {
         console.error(`Erreur lors de la récupération du match ${matchId}:`, error);
-        matchDetails.push(null);
+        return null;
+      }
+    };
+
+    // Fetch matches in batches of BATCH_SIZE concurrently
+    for (let i = 0; i < matchIds.length; i += BATCH_SIZE) {
+      const batch = matchIds.slice(i, i + BATCH_SIZE);
+
+      // Fetch all matches in this batch concurrently
+      const batchResults = await Promise.all(
+        batch.map(matchId => fetchSingleMatch(matchId))
+      );
+
+      matchDetails.push(...batchResults);
+
+      // Add delay between batches (not after the last batch)
+      if (i + BATCH_SIZE < matchIds.length) {
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
       }
     }
 

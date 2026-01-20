@@ -7,8 +7,7 @@ import RecentGames from '@/components/RecentGames';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import OnboardingModal from '@/components/OnboardingModal';
 import MobileNotAvailable from '@/components/MobileNotAvailable';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL } from '@/config/api';
 
 function DashboardContent() {
   const router = useRouter();

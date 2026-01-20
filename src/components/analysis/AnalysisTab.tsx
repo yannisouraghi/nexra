@@ -6,8 +6,7 @@ import { MatchForAnalysis, AnalysisStatus } from '@/types/analysis';
 import AnalysisOverview from './AnalysisOverview';
 import GameAnalysisCard from './GameAnalysisCard';
 import AnalysisModal from './AnalysisModal';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL } from '@/config/api';
 
 interface AnalysisTabProps {
   puuid: string;

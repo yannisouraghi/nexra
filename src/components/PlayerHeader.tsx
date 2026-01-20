@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { getChampionImageUrl } from '@/utils/ddragon';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL, DDRAGON_CONFIG } from '@/config/api';
 
 function getAuthHeaders(userId?: string, email?: string): HeadersInit {
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -53,12 +52,12 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   const { data: session } = useSession();
   const [currentSeason, setCurrentSeason] = useState<{ year: number; split: number } | null>(null);
   const [unlinkingAccount, setUnlinkingAccount] = useState(false);
-  const [ddragonVersion, setDdragonVersion] = useState('15.1.1');
+  const [ddragonVersion, setDdragonVersion] = useState(DDRAGON_CONFIG.FALLBACK_VERSION);
 
   useEffect(() => {
     const fetchCurrentSeason = async () => {
       try {
-        const response = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+        const response = await fetch(`${DDRAGON_CONFIG.BASE_URL}/api/versions.json`);
         const versions = await response.json();
 
         if (versions && versions.length > 0) {
@@ -88,7 +87,7 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   };
 
   const profileIconUrl = profileIconId
-    ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`
+    ? `${DDRAGON_CONFIG.BASE_URL}/cdn/${ddragonVersion}/img/profileicon/${profileIconId}.png`
     : null;
 
   const getRankImageUrl = () => {

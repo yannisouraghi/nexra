@@ -1,8 +1,7 @@
 import NextAuth from 'next-auth';
 import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL } from '@/config/api';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [

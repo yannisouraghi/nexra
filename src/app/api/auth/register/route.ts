@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL } from '@/config/api';
 
 export async function POST(request: NextRequest) {
   try {

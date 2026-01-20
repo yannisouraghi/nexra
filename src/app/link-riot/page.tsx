@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Link from 'next/link';
+import { NEXRA_API_URL } from '@/config/api';
 
 const REGIONS = [
   { value: 'euw1', label: 'Europe West (EUW)' },
@@ -24,8 +25,6 @@ const REGIONS = [
   { value: 'tw2', label: 'Taiwan (TW)' },
   { value: 'vn2', label: 'Vietnam (VN)' },
 ];
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
 // Generate auth header from session
 function getAuthHeaders(userId?: string, email?: string): HeadersInit {

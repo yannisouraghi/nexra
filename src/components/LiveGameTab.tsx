@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Radio, RefreshCw, Clock, Swords, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { DDRAGON_CONFIG } from '@/config/api';
 
 interface RankInfo {
   tier: string;
@@ -114,14 +115,14 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
   useEffect(() => {
     const fetchDDragon = async () => {
       try {
-        const versionsResponse = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+        const versionsResponse = await fetch(`${DDRAGON_CONFIG.BASE_URL}/api/versions.json`);
         const versions = await versionsResponse.json();
         const latestVersion = versions[0];
         setDdragonVersion(latestVersion);
 
         // Fetch champion data
         const champResponse = await fetch(
-          `https://ddragon.leagueoflegends.com/cdn/${latestVersion}/data/en_US/champion.json`
+          `${DDRAGON_CONFIG.BASE_URL}/cdn/${latestVersion}/data/en_US/champion.json`
         );
         const champData = await champResponse.json();
 
@@ -211,7 +212,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
 
   const getChampionImageUrl = (championId: number): string => {
     const championName = championData[championId] || 'Unknown';
-    return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${championName}.png`;
+    return `${DDRAGON_CONFIG.BASE_URL}/cdn/${ddragonVersion}/img/champion/${championName}.png`;
   };
 
   const getSummonerSpellUrl = (spellId: number): string => {
@@ -229,7 +230,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
       32: 'SummonerSnowball',  // Mark (ARAM)
     };
     const spellName = spellMap[spellId] || 'SummonerFlash';
-    return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/spell/${spellName}.png`;
+    return `${DDRAGON_CONFIG.BASE_URL}/cdn/${ddragonVersion}/img/spell/${spellName}.png`;
   };
 
   // Split participants by team
@@ -289,7 +290,7 @@ export default function LiveGameTab({ puuid, region, gameName, tagLine, onGameSt
               className="rounded-lg"
               style={{ width: '52px', height: '52px' }}
               onError={(e) => {
-                e.currentTarget.src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/Unknown.png`;
+                e.currentTarget.src = `${DDRAGON_CONFIG.BASE_URL}/cdn/${ddragonVersion}/img/champion/Unknown.png`;
               }}
             />
             {/* Champion Mastery Badge */}

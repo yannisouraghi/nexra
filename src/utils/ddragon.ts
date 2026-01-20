@@ -1,5 +1,7 @@
 // Data Dragon version management and image URL utilities
 
+import { DDRAGON_CONFIG } from '@/config/api';
+
 let cachedVersion: string | null = null;
 
 /**
@@ -11,7 +13,7 @@ export async function getLatestDDragonVersion(): Promise<string> {
   }
 
   try {
-    const response = await fetch('https://ddragon.leagueoflegends.com/api/versions.json');
+    const response = await fetch(`${DDRAGON_CONFIG.BASE_URL}/api/versions.json`);
     const versions = await response.json();
     if (versions && versions.length > 0) {
       cachedVersion = versions[0];
@@ -22,8 +24,8 @@ export async function getLatestDDragonVersion(): Promise<string> {
   }
 
   // Fallback version
-  cachedVersion = '15.1.1';
-  return '15.1.1';
+  cachedVersion = DDRAGON_CONFIG.FALLBACK_VERSION;
+  return DDRAGON_CONFIG.FALLBACK_VERSION;
 }
 
 /**
@@ -83,24 +85,24 @@ export function normalizeChampionName(name: string): string {
  */
 export function getChampionImageUrl(championName: string, version?: string): string {
   const normalized = normalizeChampionName(championName);
-  const v = version || cachedVersion || '15.1.1';
-  return `https://ddragon.leagueoflegends.com/cdn/${v}/img/champion/${normalized}.png`;
+  const v = version || cachedVersion || DDRAGON_CONFIG.FALLBACK_VERSION;
+  return `${DDRAGON_CONFIG.BASE_URL}/cdn/${v}/img/champion/${normalized}.png`;
 }
 
 /**
  * Gets the item image URL using the latest Data Dragon version
  */
 export function getItemImageUrl(itemId: number, version?: string): string {
-  const v = version || cachedVersion || '15.1.1';
-  return `https://ddragon.leagueoflegends.com/cdn/${v}/img/item/${itemId}.png`;
+  const v = version || cachedVersion || DDRAGON_CONFIG.FALLBACK_VERSION;
+  return `${DDRAGON_CONFIG.BASE_URL}/cdn/${v}/img/item/${itemId}.png`;
 }
 
 /**
  * Gets the summoner spell image URL using the latest Data Dragon version
  */
 export function getSummonerSpellImageUrl(spellName: string, version?: string): string {
-  const v = version || cachedVersion || '15.1.1';
-  return `https://ddragon.leagueoflegends.com/cdn/${v}/img/spell/${spellName}.png`;
+  const v = version || cachedVersion || DDRAGON_CONFIG.FALLBACK_VERSION;
+  return `${DDRAGON_CONFIG.BASE_URL}/cdn/${v}/img/spell/${spellName}.png`;
 }
 
 /**
@@ -108,7 +110,7 @@ export function getSummonerSpellImageUrl(spellName: string, version?: string): s
  */
 export function getChampionSplashUrl(championName: string, skinNum: number = 0): string {
   const normalized = normalizeChampionName(championName);
-  return `https://ddragon.leagueoflegends.com/cdn/img/champion/loading/${normalized}_${skinNum}.jpg`;
+  return `${DDRAGON_CONFIG.BASE_URL}/cdn/img/champion/loading/${normalized}_${skinNum}.jpg`;
 }
 
 /**
@@ -116,5 +118,5 @@ export function getChampionSplashUrl(championName: string, skinNum: number = 0):
  */
 export function getChampionCenteredSplashUrl(championName: string): string {
   const normalized = normalizeChampionName(championName);
-  return `https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${normalized}_0.jpg`;
+  return `${DDRAGON_CONFIG.BASE_URL}/cdn/img/champion/splash/${normalized}_0.jpg`;
 }

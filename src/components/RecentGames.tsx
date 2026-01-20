@@ -99,8 +99,10 @@ interface RecentGamesProps {
   riotAccount: RiotAccount;
 }
 
-// Cache duration: 5 minutes
+// Cache duration: 5 minutes for session cache
 const CACHE_DURATION = 5 * 60 * 1000;
+// PUUID cache duration: 7 days (PUUID never changes)
+const PUUID_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
 // Global flag to track if initial page load check was done (persists across component remounts)
 // This resets on actual page refresh since the JS context reloads
@@ -237,41 +239,108 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     return () => observer.disconnect();
   }, [hasMoreMatches, isLoadingMore, isLoading, activeTab]);
 
+  // Helper to get/set PUUID from localStorage
+  const getPuuidCacheKey = () => `nexra_puuid_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
+
+  const getCachedPuuid = (): string | null => {
+    try {
+      const cached = localStorage.getItem(getPuuidCacheKey());
+      if (cached) {
+        const { puuid, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < PUUID_CACHE_DURATION) {
+          return puuid;
+        }
+      }
+    } catch {
+      // Ignore cache errors
+    }
+    return null;
+  };
+
+  const cachePuuid = (puuid: string) => {
+    try {
+      localStorage.setItem(getPuuidCacheKey(), JSON.stringify({
+        puuid,
+        timestamp: Date.now(),
+      }));
+    } catch {
+      // Ignore cache errors
+    }
+  };
+
   const loadAllData = async (retryCount = 0, forceRefresh = false) => {
     setIsLoading(true);
     setError('');
 
+    const regionMap: { [key: string]: string } = {
+      'euw1': 'europe', 'eun1': 'europe', 'na1': 'americas', 'br1': 'americas',
+      'la1': 'americas', 'la2': 'americas', 'oc1': 'sea', 'ru': 'europe',
+      'tr1': 'europe', 'jp1': 'asia', 'kr': 'asia', 'ph2': 'sea',
+      'sg2': 'sea', 'th2': 'sea', 'tw2': 'sea', 'vn2': 'sea',
+    };
+    const routingRegion = regionMap[riotAccount.region] || 'europe';
+
     try {
-      // Step 1: Fetch summoner data first (needed for puuid)
-      const summonerResponse = await fetch(
-        `/api/riot/summoner?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}`
-      );
+      // Check for cached PUUID to enable full parallelization
+      const cachedPuuid = getCachedPuuid();
 
-      if (!summonerResponse.ok) {
-        const errorData = await summonerResponse.json();
-        throw new Error(errorData.error || 'Error retrieving profile');
+      let puuid: string;
+      let summonerDataResponse: any;
+      let matchesResponse: Response;
+      let playerStatsResponse: Response;
+
+      if (cachedPuuid) {
+        // OPTIMIZATION: We have cached PUUID - fetch ALL data in parallel
+        const [summonerResp, matchesResp, playerStatsResp] = await Promise.all([
+          fetch(
+            `/api/riot/summoner?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}`
+          ),
+          fetch(
+            `/api/riot/matches?puuid=${encodeURIComponent(cachedPuuid)}&region=${encodeURIComponent(riotAccount.region)}`
+          ),
+          fetch(
+            `/api/riot/player-stats?puuid=${encodeURIComponent(cachedPuuid)}&region=${routingRegion}`
+          ),
+        ]);
+
+        summonerDataResponse = summonerResp.ok ? await summonerResp.json() : null;
+        matchesResponse = matchesResp;
+        playerStatsResponse = playerStatsResp;
+
+        // Use PUUID from summoner response if available, otherwise use cached
+        puuid = summonerDataResponse?.puuid || cachedPuuid;
+
+        // If summoner request failed, log but continue with cached data
+        if (!summonerResp.ok) {
+          console.warn('Summoner request failed, using cached PUUID');
+        }
+      } else {
+        // No cached PUUID - fetch summoner first, then matches/stats in parallel
+        const summonerResp = await fetch(
+          `/api/riot/summoner?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}`
+        );
+
+        if (!summonerResp.ok) {
+          const errorData = await summonerResp.json();
+          throw new Error(errorData.error || 'Error retrieving profile');
+        }
+
+        summonerDataResponse = await summonerResp.json();
+        puuid = summonerDataResponse.puuid;
+
+        // Cache the PUUID for future requests
+        cachePuuid(puuid);
+
+        // Now fetch matches and player stats in parallel
+        [matchesResponse, playerStatsResponse] = await Promise.all([
+          fetch(
+            `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(riotAccount.region)}`
+          ),
+          fetch(
+            `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
+          ),
+        ]);
       }
-
-      const summonerDataResponse = await summonerResponse.json();
-      const puuid = summonerDataResponse.puuid;
-
-      // Step 2: Fetch matches and player stats in parallel
-      const regionMap: { [key: string]: string } = {
-        'euw1': 'europe', 'eun1': 'europe', 'na1': 'americas', 'br1': 'americas',
-        'la1': 'americas', 'la2': 'americas', 'oc1': 'sea', 'ru': 'europe',
-        'tr1': 'europe', 'jp1': 'asia', 'kr': 'asia', 'ph2': 'sea',
-        'sg2': 'sea', 'th2': 'sea', 'tw2': 'sea', 'vn2': 'sea',
-      };
-      const routingRegion = regionMap[riotAccount.region] || 'europe';
-
-      const [matchesResponse, playerStatsResponse] = await Promise.all([
-        fetch(
-          `/api/riot/matches?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}&puuid=${encodeURIComponent(puuid)}`
-        ),
-        fetch(
-          `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
-        ),
-      ]);
 
       // Handle matches response
       if (!matchesResponse.ok) {
@@ -315,12 +384,19 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       }
 
       // Step 3: Prepare all data
-      const newSummonerData = {
+      // If we don't have summonerDataResponse (cached PUUID + failed summoner request),
+      // create minimal data or reuse existing summonerData
+      const newSummonerData = summonerDataResponse ? {
         profileIconId: summonerDataResponse.profileIconId,
         summonerLevel: summonerDataResponse.summonerLevel,
         puuid: summonerDataResponse.puuid,
         rank: summonerDataResponse.rank || null,
-      };
+      } : (summonerData || {
+        profileIconId: 0,
+        summonerLevel: 0,
+        puuid: puuid,
+        rank: null,
+      });
 
       // Step 4: Save to cache
       const cacheData: CachedData = {

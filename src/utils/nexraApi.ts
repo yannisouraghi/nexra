@@ -8,8 +8,7 @@ import {
   getScoreColor as _getScoreColor,
   getScoreLabel as _getScoreLabel,
 } from '@/types/analysis';
-
-const API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'http://localhost:8787';
+import { NEXRA_API_URL as API_URL } from '@/config/api';
 
 interface ApiResponse<T = unknown> {
   success: boolean;

@@ -222,20 +222,39 @@ export default function PlayerDetailPopup({
     try {
       let puuid = playerInfo.puuid;
       let summonerData: any = null;
+      let matches: PlayerMatch[] = [];
+      let stats: PlayerStats | null = null;
+      const routingRegion = getRoutingValue(region);
 
-      // If we have puuid, we can skip the summoner lookup for name resolution
-      // but we still need to get rank info
       if (puuid) {
-        // Fetch summoner data by puuid to get rank
-        const summonerResponse = await fetch(
-          `/api/riot/summoner?gameName=${encodeURIComponent(playerInfo.gameName || '')}&tagLine=${encodeURIComponent(playerInfo.tagLine || '')}&region=${encodeURIComponent(region)}`
-        );
+        // OPTIMIZATION: We have puuid - fetch ALL data in parallel
+        const [summonerResponse, matchesResponse, statsResponse] = await Promise.all([
+          fetch(
+            `/api/riot/summoner?gameName=${encodeURIComponent(playerInfo.gameName || '')}&tagLine=${encodeURIComponent(playerInfo.tagLine || '')}&region=${encodeURIComponent(region)}`
+          ),
+          fetch(
+            `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(region)}&count=10`
+          ),
+          fetch(
+            `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
+          ),
+        ]);
 
         if (summonerResponse.ok) {
           summonerData = await summonerResponse.json();
         }
+
+        if (matchesResponse.ok) {
+          matches = await matchesResponse.json();
+          setRecentMatches(matches);
+        }
+
+        if (statsResponse.ok) {
+          stats = await statsResponse.json();
+          setPlayerStats(stats);
+        }
       } else {
-        // Need to look up by gameName/tagLine
+        // Need to look up by gameName/tagLine first
         if (!playerInfo.gameName || !playerInfo.tagLine) {
           throw new Error('Unable to identify player');
         }
@@ -256,6 +275,30 @@ export default function PlayerDetailPopup({
 
         summonerData = await summonerResponse.json();
         puuid = summonerData.puuid;
+
+        if (!puuid) {
+          throw new Error('Unable to get player PUUID');
+        }
+
+        // Now fetch matches and player stats in parallel
+        const [matchesResponse, statsResponse] = await Promise.all([
+          fetch(
+            `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(region)}&count=10`
+          ),
+          fetch(
+            `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
+          ),
+        ]);
+
+        if (matchesResponse.ok) {
+          matches = await matchesResponse.json();
+          setRecentMatches(matches);
+        }
+
+        if (statsResponse.ok) {
+          stats = await statsResponse.json();
+          setPlayerStats(stats);
+        }
       }
 
       if (!puuid) {
@@ -270,32 +313,6 @@ export default function PlayerDetailPopup({
         summonerLevel: summonerData?.summonerLevel || 0,
         rank: summonerData?.rank || null,
       });
-
-      // Fetch matches and player stats in parallel
-      const routingRegion = getRoutingValue(region);
-
-      const [matchesResponse, statsResponse] = await Promise.all([
-        fetch(
-          `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(region)}&count=10`
-        ),
-        fetch(
-          `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
-        ),
-      ]);
-
-      // Handle matches
-      let matches: PlayerMatch[] = [];
-      if (matchesResponse.ok) {
-        matches = await matchesResponse.json();
-        setRecentMatches(matches);
-      }
-
-      // Handle player stats
-      let stats: PlayerStats | null = null;
-      if (statsResponse.ok) {
-        stats = await statsResponse.json();
-        setPlayerStats(stats);
-      }
 
       // Cache the data
       const cacheData = {

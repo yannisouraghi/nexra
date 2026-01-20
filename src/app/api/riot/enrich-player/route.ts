@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { DDRAGON_CONFIG } from '@/config/api';
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Récupérer l'ID du champion depuis Data Dragon
     try {
       const championsResponse = await fetch(
-        'https://ddragon.leagueoflegends.com/cdn/15.1.1/data/en_US/champion.json'
+        `${DDRAGON_CONFIG.BASE_URL}/cdn/${DDRAGON_CONFIG.FALLBACK_VERSION}/data/en_US/champion.json`
       );
       const championsData = await championsResponse.json();
 

@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import AnimatedBackground from '@/components/AnimatedBackground';
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
+import { NEXRA_API_URL } from '@/config/api';
 
 // Generate auth header from session
 function getAuthHeaders(userId?: string, email?: string): HeadersInit {

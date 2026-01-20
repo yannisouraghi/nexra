@@ -83,15 +83,25 @@ export async function GET(request: NextRequest) {
     const accountData = await accountResponse.json();
     const puuid = accountData.puuid;
 
-    // 2. Récupérer les informations du summoner via PUUID
-    const summonerResponse = await fetch(
-      `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
-      {
-        headers: {
-          'X-Riot-Token': RIOT_API_KEY as string,
-        },
-      }
-    );
+    // 2. Fetch summoner info and rank in parallel (both use PUUID)
+    const [summonerResponse, rankedResponse] = await Promise.all([
+      fetch(
+        `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${puuid}`,
+        {
+          headers: {
+            'X-Riot-Token': RIOT_API_KEY as string,
+          },
+        }
+      ),
+      fetch(
+        `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-puuid/${puuid}`,
+        {
+          headers: {
+            'X-Riot-Token': RIOT_API_KEY as string,
+          },
+        }
+      ),
+    ]);
 
     if (!summonerResponse.ok) {
       throw new Error(`Erreur API Riot Summoner: ${summonerResponse.status}`);
@@ -99,21 +109,11 @@ export async function GET(request: NextRequest) {
 
     const summonerData = await summonerResponse.json();
 
-    // 3. Récupérer le rank du joueur via PUUID
+    // Process rank data
     let rankedData = null;
-    try {
-      const rankedUrl = `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-puuid/${summonerData.puuid}`;
-
-      const rankedResponse = await fetch(rankedUrl, {
-        headers: {
-          'X-Riot-Token': RIOT_API_KEY as string,
-        },
-      });
-
-      if (rankedResponse.ok) {
+    if (rankedResponse.ok) {
+      try {
         const rankedArray = await rankedResponse.json();
-
-        // Chercher le rank en Solo/Duo
         const soloQueue = rankedArray.find(
           (entry: any) => entry.queueType === 'RANKED_SOLO_5x5'
         );
@@ -127,9 +127,9 @@ export async function GET(request: NextRequest) {
             losses: soloQueue.losses,
           };
         }
+      } catch (err) {
+        // Silently fail for rank - player might be unranked
       }
-    } catch (err) {
-      // Silently fail for rank - player might be unranked
     }
 
     return NextResponse.json({

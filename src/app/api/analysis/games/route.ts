@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { mockAnalyzedGames } from '@/utils/mockAnalysisData';
-
-const NEXRA_API_URL = process.env.NEXRA_API_URL || 'http://localhost:8787';
+import { NEXRA_API_URL } from '@/config/api';
 
 // GET: Return list of analyzed games
 export async function GET(request: NextRequest) {

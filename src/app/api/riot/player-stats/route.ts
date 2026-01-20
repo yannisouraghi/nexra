@@ -5,6 +5,10 @@ export const revalidate = 7200;
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY;
 
+// Batch fetch configuration
+const BATCH_SIZE = 5;
+const BATCH_DELAY_MS = 50;
+
 if (!RIOT_API_KEY) {
   throw new Error('RIOT_API_KEY is not defined in environment variables');
 }
@@ -59,8 +63,8 @@ export async function GET(request: NextRequest) {
     const roleCount: { [key: string]: number } = {};
     const recentMatchResults: boolean[] = [];
 
-    // Récupérer les détails de chaque match
-    for (const matchId of matchIds) {
+    // Helper function to fetch a single match
+    const fetchSingleMatch = async (matchId: string): Promise<any | null> => {
       try {
         const matchResponse = await fetch(
           `https://${region}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -70,35 +74,55 @@ export async function GET(request: NextRequest) {
         );
 
         if (matchResponse.ok) {
-          const matchData = await matchResponse.json();
-          const participant = matchData.info.participants.find(
-            (p: any) => p.puuid === puuid
-          );
-
-          if (participant) {
-            // Tracker les champions
-            const championName = participant.championName;
-            if (!championStats[championName]) {
-              championStats[championName] = { games: 0, wins: 0 };
-            }
-            championStats[championName].games++;
-            if (participant.win) {
-              championStats[championName].wins++;
-            }
-
-            // Tracker les rôles
-            const role = participant.teamPosition || participant.individualPosition || 'UNKNOWN';
-            roleCount[role] = (roleCount[role] || 0) + 1;
-
-            // Tracker les résultats récents
-            recentMatchResults.push(participant.win);
-          }
+          return await matchResponse.json();
         }
-
-        // Petit délai pour éviter le rate limit
-        await new Promise(resolve => setTimeout(resolve, 50));
+        return null;
       } catch (error) {
         console.error(`Error fetching match ${matchId}:`, error);
+        return null;
+      }
+    };
+
+    // Fetch matches in batches concurrently
+    const matchDataList: any[] = [];
+    for (let i = 0; i < matchIds.length; i += BATCH_SIZE) {
+      const batch = matchIds.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map((matchId: string) => fetchSingleMatch(matchId))
+      );
+      matchDataList.push(...batchResults);
+
+      // Add delay between batches (not after the last batch)
+      if (i + BATCH_SIZE < matchIds.length) {
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
+      }
+    }
+
+    // Process all match data
+    for (const matchData of matchDataList) {
+      if (!matchData) continue;
+
+      const participant = matchData.info.participants.find(
+        (p: any) => p.puuid === puuid
+      );
+
+      if (participant) {
+        // Tracker les champions
+        const championName = participant.championName;
+        if (!championStats[championName]) {
+          championStats[championName] = { games: 0, wins: 0 };
+        }
+        championStats[championName].games++;
+        if (participant.win) {
+          championStats[championName].wins++;
+        }
+
+        // Tracker les rôles
+        const role = participant.teamPosition || participant.individualPosition || 'UNKNOWN';
+        roleCount[role] = (roleCount[role] || 0) + 1;
+
+        // Tracker les résultats récents
+        recentMatchResults.push(participant.win);
       }
     }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { NEXRA_API_URL } from '@/config/api';
 
 // Initialize Stripe lazily
 let stripeInstance: Stripe | null = null;
@@ -13,8 +14,6 @@ const getStripe = () => {
   }
   return stripeInstance;
 };
-
-const NEXRA_API_URL = process.env.NEXT_PUBLIC_NEXRA_API_URL || 'https://nexra-api.nexra-api.workers.dev';
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
