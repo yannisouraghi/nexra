@@ -8,6 +8,15 @@ import GameAnalysisCard from './GameAnalysisCard';
 import AnalysisModal from './AnalysisModal';
 import { NEXRA_API_URL } from '@/config/api';
 
+// Generate auth header from session
+function getAuthHeaders(userId?: string, email?: string): HeadersInit {
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (userId && email) {
+    headers['Authorization'] = `Bearer ${userId}:${email}`;
+  }
+  return headers;
+}
+
 interface AnalysisTabProps {
   puuid: string;
   region: string;
@@ -43,9 +52,34 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const [analyzedCache, setAnalyzedCache] = useState<Map<string, any>>(new Map());
   const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
   const [creditError, setCreditError] = useState<string | null>(null);
+  const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
+
+  // Fetch user registration date
+  useEffect(() => {
+    const fetchUserCreatedAt = async () => {
+      const user = session?.user as { id?: string; email?: string };
+      if (!user?.id) return;
+
+      try {
+        const response = await fetch(`${NEXRA_API_URL}/users/${user.id}`, {
+          headers: getAuthHeaders(user.id, user.email),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data?.createdAt) {
+            setUserCreatedAt(data.data.createdAt);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchUserCreatedAt();
+  }, [session]);
 
   // Load recent matches
   const loadMatches = useCallback(async (showLoading = true) => {
@@ -71,10 +105,13 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
 
       const recentMatches: RecentMatch[] = await response.json();
 
-      // Filter only Ranked Solo/Duo games (queueId: 420)
-      const rankedMatches = recentMatches.filter(match =>
-        match.queueId === 420
-      );
+      // Filter only Ranked Solo/Duo games (queueId: 420) played AFTER user registration
+      const registrationTime = userCreatedAt ? new Date(userCreatedAt).getTime() : 0;
+      const rankedMatches = recentMatches.filter(match => {
+        const isRankedSolo = match.queueId === 420;
+        const isAfterRegistration = registrationTime === 0 || match.timestamp >= registrationTime;
+        return isRankedSolo && isAfterRegistration;
+      });
 
       // Transform to MatchForAnalysis format (use ref to avoid re-renders)
       const cache = analyzedCacheRef.current;
@@ -104,15 +141,16 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
       setMatches([]);
     }
     setLoading(false);
-  }, [puuid, region, gameName, tagLine]);
+  }, [puuid, region, gameName, tagLine, userCreatedAt]);
 
-  // Initial load - only once
+  // Initial load - wait for userCreatedAt to be fetched first
   useEffect(() => {
-    if (!hasLoadedRef.current) {
+    // Only load if userCreatedAt has been fetched (or if no session/user)
+    if (!hasLoadedRef.current && (userCreatedAt || !session?.user)) {
       hasLoadedRef.current = true;
       loadMatches();
     }
-  }, [loadMatches]);
+  }, [loadMatches, userCreatedAt, session]);
 
   // Start analysis for a match
   const handleStartAnalysis = useCallback(async (matchId: string) => {
@@ -324,7 +362,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         <div>
           <h3 style={styles.infoTitle}>AI Analysis</h3>
           <p style={styles.infoText}>
-            Analyze your recent <strong style={{ color: '#00d4ff' }}>Ranked Solo/Duo</strong> games. Click "Analyze" on any match to get detailed insights about your deaths, CS, vision, and objectives. <strong style={{ color: '#ffd700' }}>1 credit per analysis.</strong>
+            Your <strong style={{ color: '#00d4ff' }}>Ranked Solo/Duo</strong> games played since you joined Nexra. Click <strong>"Analyze"</strong> on any match to get detailed insights about your deaths, CS, vision, and objectives. <strong style={{ color: '#ffd700' }}>1 credit per analysis.</strong>
           </p>
         </div>
       </div>
@@ -383,14 +421,14 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
             </svg>
           </div>
           <h3 style={styles.emptyTitle}>
-            {filter === 'all' ? 'No recent games found' :
+            {filter === 'all' ? 'No games to analyze yet' :
               filter === 'ready' ? 'No games to analyze' :
                 filter === 'processing' ? 'No analysis in progress' :
                   'No completed analyses'}
           </h3>
           <p style={styles.emptyText}>
             {filter === 'all'
-              ? 'Play some games and come back to analyze them!'
+              ? 'Play Ranked Solo/Duo games and they will appear here for analysis. Only games played since you joined Nexra are shown.'
               : 'No games match this filter.'}
           </p>
         </div>

@@ -134,17 +134,25 @@ export async function GET(request: NextRequest) {
             recentForm: [] as boolean[],
           };
 
-          // First, get summoner data to ensure we have the correct summonerId and name
-          const summonerResponse = await fetch(
-            `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${participant.puuid}`,
-            { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
-          );
-          const summonerData = summonerResponse.ok ? await summonerResponse.json() : null;
-          const summonerId = summonerData?.id || participant.summonerId;
-
-          // Use summoner name as fallback
-          if (summonerData?.name) {
-            enrichedData.gameName = summonerData.name;
+          // First, get summoner data to ensure we have the correct summonerId
+          let summonerId = participant.summonerId;
+          try {
+            const summonerResponse = await fetch(
+              `https://${platformRegion}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/${participant.puuid}`,
+              { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
+            );
+            if (summonerResponse.ok) {
+              const summonerData = await summonerResponse.json();
+              summonerId = summonerData.id;
+              // Use summoner name as fallback for gameName
+              if (summonerData.name) {
+                enrichedData.gameName = summonerData.name;
+              }
+            } else {
+              console.error(`Summoner API error for ${participant.puuid}: ${summonerResponse.status}`);
+            }
+          } catch (e) {
+            console.error('Error fetching summoner data:', e);
           }
 
           // Parallel fetch: account info, rank info, champion mastery, recent matches
@@ -156,10 +164,16 @@ export async function GET(request: NextRequest) {
             ).then(r => r.ok ? r.json() : null),
 
             // 2. Get rank info (using summonerId from summoner API)
-            fetch(
+            summonerId ? fetch(
               `https://${platformRegion}.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerId}`,
               { headers: { 'X-Riot-Token': RIOT_API_KEY as string } }
-            ).then(r => r.ok ? r.json() : null),
+            ).then(r => {
+              if (!r.ok) {
+                console.error(`League API error for ${summonerId}: ${r.status}`);
+                return null;
+              }
+              return r.json();
+            }) : Promise.resolve(null),
 
             // 3. Get champion mastery
             fetch(
@@ -181,18 +195,28 @@ export async function GET(request: NextRequest) {
           }
 
           // Process rank info
-          if (rankResult.status === 'fulfilled' && rankResult.value) {
+          if (rankResult.status === 'fulfilled' && rankResult.value && Array.isArray(rankResult.value)) {
+            // Try solo queue first, then flex
             const soloQueue = rankResult.value.find((entry: any) => entry.queueType === 'RANKED_SOLO_5x5');
-            if (soloQueue) {
+            const flexQueue = rankResult.value.find((entry: any) => entry.queueType === 'RANKED_FLEX_SR');
+            const rankedData = soloQueue || flexQueue;
+
+            if (rankedData) {
               enrichedData.rankInfo = {
-                tier: soloQueue.tier,
-                rank: soloQueue.rank,
-                leaguePoints: soloQueue.leaguePoints,
-                wins: soloQueue.wins,
-                losses: soloQueue.losses,
-                winrate: Math.round((soloQueue.wins / (soloQueue.wins + soloQueue.losses)) * 100),
+                tier: rankedData.tier,
+                rank: rankedData.rank,
+                leaguePoints: rankedData.leaguePoints,
+                wins: rankedData.wins,
+                losses: rankedData.losses,
+                winrate: Math.round((rankedData.wins / (rankedData.wins + rankedData.losses)) * 100),
+                queueType: rankedData.queueType === 'RANKED_SOLO_5x5' ? 'Solo/Duo' : 'Flex',
               };
+            } else if (rankResult.value.length === 0) {
+              // Player has no ranked data (unranked in both queues)
+              // This is expected for unranked players
             }
+          } else if (rankResult.status === 'rejected') {
+            console.error(`Rank fetch rejected for ${summonerId}:`, rankResult.reason);
           }
 
           // Process champion mastery
