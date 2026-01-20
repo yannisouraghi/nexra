@@ -158,9 +158,6 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     localStorage.setItem('nexra_active_tab', tab);
   }, []);
 
-  // Ref for infinite scroll sentinel
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
   // Keep matchesCountRef in sync with matches
   useEffect(() => {
     matchesCountRef.current = matches.length;
@@ -282,29 +279,44 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     loadMoreDataRef.current = loadMoreData;
   }, [loadMoreData]);
 
-  // Infinite scroll with IntersectionObserver
-  useEffect(() => {
-    if (!sentinelRef.current || activeTab !== 'summary') return;
+  // Ref to store the IntersectionObserver
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting) {
-          // Call the current version of loadMoreData via ref
-          loadMoreDataRef.current();
+  // Callback ref for the sentinel - creates observer when element is available
+  const sentinelCallbackRef = useCallback((node: HTMLDivElement | null) => {
+    // Cleanup previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    // If node exists and we should observe
+    if (node && activeTab === 'summary' && hasMoreMatches) {
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            loadMoreDataRef.current();
+          }
+        },
+        {
+          root: null,
+          rootMargin: '300px',
+          threshold: 0,
         }
-      },
-      {
-        root: null,
-        rootMargin: '300px', // Trigger well before reaching the bottom
-        threshold: 0,
+      );
+      observerRef.current.observe(node);
+    }
+  }, [activeTab, hasMoreMatches]);
+
+  // Cleanup observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
       }
-    );
-
-    observer.observe(sentinelRef.current);
-
-    return () => observer.disconnect();
-  }, [activeTab]); // Only recreate when tab changes
+    };
+  }, []);
 
   // Helper to get/set PUUID from localStorage
   const getPuuidCacheKey = () => `nexra_puuid_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
@@ -842,7 +854,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                         </div>
                       )}
                       {/* Sentinel element for IntersectionObserver */}
-                      <div ref={sentinelRef} style={{ height: '20px', width: '100%' }} />
+                      <div ref={sentinelCallbackRef} style={{ height: '20px', width: '100%', background: 'transparent' }} />
                     </>
                   ) : (
                     /* End of matches message */
