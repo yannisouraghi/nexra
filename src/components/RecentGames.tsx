@@ -702,7 +702,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     className="animate-fadeIn"
                     style={{ animationDelay: `${50 + index * 30}ms` }}
                   >
-                    <MatchCard match={match} />
+                    <MatchCard match={match} region={riotAccount.region} />
                   </div>
                 ))}
               </div>

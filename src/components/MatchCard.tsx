@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BarChart3, Swords, Coins, TrendingUp, Trophy, Flame, Castle, Droplets, Star, Sparkles, Zap } from 'lucide-react';
 import WinProbabilityBadge from './WinProbabilityBadge';
+import PlayerDetailPopup from './PlayerDetailPopup';
 import { calculateMatchWinProbability, PlayerData, TeamData } from '@/utils/winProbabilityCalculator';
 import { detectPlayerRole, isPlayerAutofilled } from '@/utils/roleDetection';
 import { getLatestDDragonVersion, getChampionImageUrl, getItemImageUrl, getSummonerSpellImageUrl } from '@/utils/ddragon';
@@ -120,6 +121,7 @@ interface Match {
 
 interface MatchCardProps {
   match: Match;
+  region?: string;
 }
 
 interface TimelineFrame {
@@ -331,7 +333,7 @@ function calculateProbabilityForMatch(match: Match): { winProbability: number; c
   }
 }
 
-export default function MatchCard({ match }: MatchCardProps) {
+export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'combat' | 'economy' | 'charts' | 'scoreboard' | 'probability'>('overview');
@@ -343,6 +345,10 @@ export default function MatchCard({ match }: MatchCardProps) {
   const [loadingMessage, setLoadingMessage] = useState('');
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [ddragonVersion, setDdragonVersion] = useState('15.1.1');
+
+  // Player detail popup state
+  const [showPlayerPopup, setShowPlayerPopup] = useState(false);
+  const [selectedPlayerIndex, setSelectedPlayerIndex] = useState(0);
 
   // Fetch latest DDragon version on mount
   useEffect(() => {
@@ -384,6 +390,22 @@ export default function MatchCard({ match }: MatchCardProps) {
     // Les ennemis
     ...(match.enemies || []).map(p => ({ ...p, team: 'enemy' as const, isMainPlayer: false }))
   ];
+
+  // Players list for popup (excluding main player - teammates first, then enemies)
+  const clickablePlayers: Participant[] = [
+    ...(match.teammates || []),
+    ...(match.enemies || []),
+  ];
+
+  // Handle player name click
+  const handlePlayerClick = (player: Participant, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const index = clickablePlayers.findIndex(p => p.summonerName === player.summonerName);
+    if (index !== -1) {
+      setSelectedPlayerIndex(index);
+      setShowPlayerPopup(true);
+    }
+  };
 
   // Fonction pour obtenir la couleur d'un joueur basée sur son équipe et son index
   const getPlayerColor = (participantId: number): { hex: string; border: string; bg: string } => {
@@ -977,9 +999,13 @@ export default function MatchCard({ match }: MatchCardProps) {
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-300 truncate">
+                        <button
+                          onClick={(e) => handlePlayerClick(teammate, e)}
+                          className="text-xs text-gray-300 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          title={`View ${teammate.summonerName}'s profile`}
+                        >
                           {teammate.summonerName}
-                        </span>
+                        </button>
                       </div>
                     );
                   })}
@@ -1013,9 +1039,13 @@ export default function MatchCard({ match }: MatchCardProps) {
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-300 truncate">
+                        <button
+                          onClick={(e) => handlePlayerClick(enemy, e)}
+                          className="text-xs text-gray-300 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          title={`View ${enemy.summonerName}'s profile`}
+                        >
                           {enemy.summonerName}
-                        </span>
+                        </button>
                       </div>
                     );
                   })}
@@ -2480,7 +2510,13 @@ export default function MatchCard({ match }: MatchCardProps) {
 
                           {/* Nom + KDA */}
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs text-white font-semibold truncate">{teammate.summonerName}</span>
+                            <button
+                              onClick={(e) => handlePlayerClick(teammate, e)}
+                              className="text-xs text-white font-semibold truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                              title={`View ${teammate.summonerName}'s profile`}
+                            >
+                              {teammate.summonerName}
+                            </button>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] text-gray-400">{teammate.championName}</span>
                               <div className="text-[11px] text-white font-semibold whitespace-nowrap">
@@ -2616,7 +2652,13 @@ export default function MatchCard({ match }: MatchCardProps) {
 
                           {/* Nom + KDA */}
                           <div className="flex flex-col min-w-0">
-                            <span className="text-xs text-white font-semibold truncate">{enemy.summonerName}</span>
+                            <button
+                              onClick={(e) => handlePlayerClick(enemy, e)}
+                              className="text-xs text-white font-semibold truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                              title={`View ${enemy.summonerName}'s profile`}
+                            >
+                              {enemy.summonerName}
+                            </button>
                             <div className="flex items-center gap-2">
                               <span className="text-[10px] text-gray-400">{enemy.championName}</span>
                               <div className="text-[11px] text-white font-semibold whitespace-nowrap">
@@ -3014,6 +3056,18 @@ export default function MatchCard({ match }: MatchCardProps) {
           </div>
         </div>
       )}
+
+      {/* Player Detail Popup */}
+      <PlayerDetailPopup
+        isOpen={showPlayerPopup}
+        onClose={() => setShowPlayerPopup(false)}
+        players={clickablePlayers}
+        currentIndex={selectedPlayerIndex}
+        onNavigate={setSelectedPlayerIndex}
+        region={region}
+        ddragonVersion={ddragonVersion}
+        matchChampion={clickablePlayers[selectedPlayerIndex]?.championName || match.champion}
+      />
     </div>
   );
 }
