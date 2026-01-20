@@ -216,6 +216,59 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     loadAllData();
   }, [riotAccount, getCacheKey]);
 
+  // Load more matches function for infinite scroll
+  const loadMoreData = useCallback(async () => {
+    if (!summonerData?.puuid || isLoadingMore || !hasMoreMatches) return;
+
+    setIsLoadingMore(true);
+    try {
+      // Récupérer 20 matchs supplémentaires
+      const matchesResponse = await fetch(
+        `/api/riot/matches?puuid=${encodeURIComponent(summonerData.puuid)}&region=${encodeURIComponent(riotAccount.region)}&start=${matches.length}&count=20`
+      );
+
+      if (matchesResponse.ok) {
+        const newMatches = await matchesResponse.json();
+        if (newMatches.length === 0) {
+          setHasMoreMatches(false);
+        } else {
+          setMatches(prev => {
+            const updatedMatches = [...prev, ...newMatches];
+
+            // Update cache with new matches
+            try {
+              const cacheKey = getCacheKey();
+              const cachedDataStr = sessionStorage.getItem(cacheKey);
+              if (cachedDataStr) {
+                const cachedData: CachedData = JSON.parse(cachedDataStr);
+                cachedData.matches = updatedMatches;
+                cachedData.timestamp = Date.now();
+                sessionStorage.setItem(cacheKey, JSON.stringify(cachedData));
+              }
+            } catch {
+              // Ignore cache errors
+            }
+
+            return updatedMatches;
+          });
+
+          // If we got less than requested, no more matches available
+          if (newMatches.length < 20) {
+            setHasMoreMatches(false);
+          }
+        }
+      } else {
+        // On error, stop trying to load more
+        setHasMoreMatches(false);
+      }
+    } catch (err) {
+      console.error('Erreur lors du chargement de matchs supplémentaires:', err);
+      setHasMoreMatches(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [summonerData?.puuid, isLoadingMore, hasMoreMatches, matches.length, riotAccount.region, getCacheKey]);
+
   // Infinite scroll with IntersectionObserver
   useEffect(() => {
     if (!sentinelRef.current || activeTab !== 'summary') return;
@@ -223,21 +276,21 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
-        if (entry.isIntersecting && hasMoreMatches && !isLoadingMore && !isLoading) {
+        if (entry.isIntersecting && hasMoreMatches && !isLoadingMore && !isLoading && matches.length > 0) {
           loadMoreData();
         }
       },
       {
         root: null,
-        rootMargin: '100px',
-        threshold: 0.1,
+        rootMargin: '200px', // Increased for earlier trigger
+        threshold: 0,
       }
     );
 
     observer.observe(sentinelRef.current);
 
     return () => observer.disconnect();
-  }, [hasMoreMatches, isLoadingMore, isLoading, activeTab]);
+  }, [hasMoreMatches, isLoadingMore, isLoading, activeTab, matches.length, loadMoreData]);
 
   // Helper to get/set PUUID from localStorage
   const getPuuidCacheKey = () => `nexra_puuid_${riotAccount.gameName}_${riotAccount.tagLine}_${riotAccount.region}`;
@@ -296,7 +349,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
             `/api/riot/summoner?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}`
           ),
           fetch(
-            `/api/riot/matches?puuid=${encodeURIComponent(cachedPuuid)}&region=${encodeURIComponent(riotAccount.region)}`
+            `/api/riot/matches?puuid=${encodeURIComponent(cachedPuuid)}&region=${encodeURIComponent(riotAccount.region)}&count=20`
           ),
           fetch(
             `/api/riot/player-stats?puuid=${encodeURIComponent(cachedPuuid)}&region=${routingRegion}`
@@ -334,7 +387,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         // Now fetch matches and player stats in parallel
         [matchesResponse, playerStatsResponse] = await Promise.all([
           fetch(
-            `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(riotAccount.region)}`
+            `/api/riot/matches?puuid=${encodeURIComponent(puuid)}&region=${encodeURIComponent(riotAccount.region)}&count=20`
           ),
           fetch(
             `/api/riot/player-stats?puuid=${encodeURIComponent(puuid)}&region=${routingRegion}`
@@ -430,30 +483,6 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     sessionStorage.removeItem(getCacheKey());
     loadAllData(0, true);
   }, [getCacheKey]);
-
-  const loadMoreData = async () => {
-    if (!summonerData?.puuid || isLoadingMore) return;
-
-    setIsLoadingMore(true);
-    try {
-      // Récupérer 10 matchs supplémentaires
-      const matchesResponse = await fetch(
-        `/api/riot/matches?gameName=${encodeURIComponent(riotAccount.gameName)}&tagLine=${encodeURIComponent(riotAccount.tagLine)}&region=${encodeURIComponent(riotAccount.region)}&puuid=${encodeURIComponent(summonerData.puuid)}&start=${matches.length}&count=10`
-      );
-
-      if (matchesResponse.ok) {
-        const newMatches = await matchesResponse.json();
-        if (newMatches.length === 0 || newMatches.length < 10) {
-          setHasMoreMatches(false);
-        }
-        setMatches(prev => [...prev, ...newMatches]);
-      }
-    } catch (err) {
-      console.error('Erreur lors du chargement de matchs supplémentaires:', err);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
 
   const filteredMatches = matches.filter((match) => {
     if (selectedMode === 'all') return true;
@@ -784,7 +813,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
               </div>
 
               {/* Infinite Scroll Sentinel & Loading Indicator */}
-              {filteredMatches.length > 0 && (
+              {matches.length > 0 && (
                 <div style={{ marginTop: '1.5rem', marginBottom: '4rem' }}>
                   {hasMoreMatches ? (
                     <>
@@ -798,7 +827,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                         </div>
                       )}
                       {/* Sentinel element for IntersectionObserver */}
-                      <div ref={sentinelRef} style={{ height: '1px', width: '100%' }} />
+                      <div ref={sentinelRef} style={{ height: '20px', width: '100%' }} />
                     </>
                   ) : (
                     /* End of matches message */
@@ -807,7 +836,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                         <svg className="w-4 h-4 text-[var(--text-quaternary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        <span className="text-[var(--text-quaternary)] text-sm">All matches loaded</span>
+                        <span className="text-[var(--text-quaternary)] text-sm">All matches loaded ({matches.length} total)</span>
                       </div>
                     </div>
                   )}
