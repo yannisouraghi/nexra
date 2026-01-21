@@ -755,8 +755,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   gamesGridCards: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
-    gap: 16,
+    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+    gap: 20,
     paddingBottom: 60,
   },
   debugButton: {
