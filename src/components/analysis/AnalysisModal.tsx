@@ -36,8 +36,13 @@ export default function AnalysisModal({
   const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [imageError, setImageError] = useState(false);
 
-  // Note: Analysis is started from the card, not auto-started here
-  // The modal just displays the analysis results or loading state
+  // Auto-start analysis when modal opens if not already done
+  useEffect(() => {
+    if (!analysisData && !isAnalyzing && match.analysisStatus !== 'completed') {
+      onStartAnalysis(match.matchId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   // Close on escape key
   useEffect(() => {

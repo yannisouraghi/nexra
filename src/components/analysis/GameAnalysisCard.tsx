@@ -340,7 +340,7 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
                 </div>
               )}
               <StartAnalysisButton
-                onClick={() => onStartAnalysis?.(match.matchId)}
+                onClick={() => onCardClick?.(match)}
                 isLoading={isStarting}
               />
             </div>
@@ -366,20 +366,6 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
               }}>
                 {match.overallScore} pts
               </div>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onCardClick?.(match);
-                }}
-                style={styles.seeAnalysisButton}
-              >
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span>See Analysis</span>
-              </button>
             </>
           )}
         </div>
@@ -748,21 +734,5 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: 14,
     fontWeight: 600,
     color: '#ff3366',
-  },
-  seeAnalysisButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '8px 14px',
-    borderRadius: 8,
-    fontSize: 12,
-    fontWeight: 600,
-    color: 'white',
-    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 10px rgba(34, 197, 94, 0.25)',
-    marginTop: 8,
   },
 };
