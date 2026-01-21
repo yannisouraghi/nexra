@@ -973,25 +973,25 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10 gap-3 pl-3">
+            <div className="flex items-center border-l border-white/10 gap-4 pl-4 ml-2">
               <div className="text-center">
-                <div className="text-sm sm:text-base font-bold text-white tracking-tight">
+                <div className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {match.kills}
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
                   <span className="text-red-400">{match.deaths}</span>
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
                   {match.assists}
                 </div>
-                <p className="text-[9px] text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
               </div>
 
-              <div className="h-8 w-px bg-white/10"></div>
+              <div className="h-10 w-px bg-white/10"></div>
 
               <div className="text-center">
-                <p className={`text-lg font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
+                <p className={`text-xl sm:text-2xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
-                <p className="text-[9px] text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
               </div>
             </div>
           </div>
@@ -1036,18 +1036,18 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
           </div>
 
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden xl:flex items-start border-l border-white/10 gap-3 pl-4" style={{ marginRight: '1rem' }}>
+          <div className="hidden xl:flex items-start border-l border-white/10 gap-4 pl-4" style={{ marginRight: '2.5rem' }}>
             {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
-              <div style={{ width: '120px' }}>
-                <div className="text-[9px] text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.25rem' }}>Allies</div>
-                <div className="flex flex-col" style={{ gap: '0.125rem' }}>
+              <div style={{ width: '130px' }}>
+                <div className="text-[10px] text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Allies</div>
+                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
                   {match.teammates.map((teammate, index) => {
                     const teammateChampionUrl = getChampionImageUrl(teammate.championName, ddragonVersion);
                     const isMVP = teammate.rank === 1;
                     return (
-                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.25rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
-                        <div className={`w-3.5 h-3.5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-blue-500/40'}`}>
+                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-5 h-5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-blue-500/40'}`}>
                           <img
                             src={teammateChampionUrl}
                             alt={teammate.championName}
@@ -1059,8 +1059,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(teammate, e)}
-                          className="text-[10px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          style={{ maxWidth: '90px' }}
+                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '100px' }}
                         >
                           {teammate.summonerName}
                         </button>
@@ -1073,15 +1073,15 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
 
             {/* Enemies (Red team) - Compact grid */}
             {match.enemies && match.enemies.length > 0 && (
-              <div style={{ width: '120px' }}>
-                <div className="text-[9px] text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.25rem' }}>Enemies</div>
-                <div className="flex flex-col" style={{ gap: '0.125rem' }}>
+              <div style={{ width: '130px' }}>
+                <div className="text-[10px] text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Enemies</div>
+                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
                   {match.enemies.map((enemy, index) => {
                     const enemyChampionUrl = getChampionImageUrl(enemy.championName, ddragonVersion);
                     const isMVP = enemy.rank === 1;
                     return (
-                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.25rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
-                        <div className={`w-3.5 h-3.5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-red-500/40'}`}>
+                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-5 h-5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-red-500/40'}`}>
                           <img
                             src={enemyChampionUrl}
                             alt={enemy.championName}
@@ -1093,8 +1093,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(enemy, e)}
-                          className="text-[10px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          style={{ maxWidth: '90px' }}
+                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '100px' }}
                         >
                           {enemy.summonerName}
                         </button>
