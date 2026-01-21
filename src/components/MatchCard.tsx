@@ -1045,7 +1045,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
           </div>
 
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden xl:flex items-start border-l border-white/10 gap-4 pl-4" style={{ marginRight: '4rem' }}>
+          <div className="hidden xl:flex items-start border-l border-white/10 gap-4" style={{ marginRight: '4rem', paddingLeft: '1.5rem' }}>
             {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
               <div style={{ width: '130px' }}>
