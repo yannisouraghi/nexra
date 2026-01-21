@@ -130,7 +130,7 @@ export default function LandingPage() {
           return;
         }
 
-        window.location.href = '/dashboard';
+        router.push('/dashboard');
       } else {
         // Login - first check with backend for verification status
         const checkResponse = await fetch('/api/auth/check-login', {
@@ -170,7 +170,7 @@ export default function LandingPage() {
           return;
         }
 
-        window.location.href = '/dashboard';
+        router.push('/dashboard');
       }
     } catch {
       setAuthError('Something went wrong. Please try again.');
@@ -216,7 +216,7 @@ export default function LandingPage() {
         return;
       }
 
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
     } catch {
       setAuthError('Verification failed. Please try again.');
       setAuthLoading(false);
@@ -876,7 +876,7 @@ export default function LandingPage() {
                       required
                       maxLength={6}
                       disabled={authLoading}
-                      className="!text-center !text-2xl !tracking-[8px] !font-mono"
+                      className="!text-center !text-lg !tracking-[4px] !font-mono placeholder:!text-sm placeholder:!tracking-normal"
                     />
                   </div>
                   <button
