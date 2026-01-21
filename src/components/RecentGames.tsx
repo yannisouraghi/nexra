@@ -529,15 +529,15 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
           <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {/* Player Header Skeleton */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-6xl">
+            <div>
+              <div className="w-full">
                 <PlayerHeaderSkeleton />
               </div>
             </div>
 
             {/* Main content with sidebar skeleton */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-6xl">
+            <div>
+              <div className="w-full">
                 <div style={{ display: 'flex', gap: '2rem' }}>
                   {/* Sidebar Navigation Skeleton - Desktop only */}
                   <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
@@ -563,8 +563,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
             </div>
 
             {/* Match History Skeleton */}
-            <div className="flex justify-center">
-              <div className="w-full max-w-6xl">
+            <div>
+              <div className="w-full">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                   <div className="skeleton-pulse" style={{ width: '180px', height: '2rem', borderRadius: '0.5rem' }} />
                   <div className="skeleton-pulse" style={{ width: '200px', height: '2.5rem', borderRadius: '0.5rem' }} />
@@ -585,8 +585,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
           <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div className="flex justify-center">
-              <div className="w-full max-w-6xl">
+            <div>
+              <div className="w-full">
                 <PlayerHeader
                   gameName={riotAccount.gameName}
                   tagLine={riotAccount.tagLine}
@@ -600,8 +600,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 />
               </div>
             </div>
-            <div className="flex justify-center">
-              <div className="glass-card border-red-500/20 animate-fadeInScale w-full max-w-3xl" style={{ padding: '2.5rem' }}>
+            <div>
+              <div className="glass-card border-red-500/20 animate-fadeInScale w-full" style={{ padding: '2.5rem' }}>
                 <div className="text-center" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div className="w-16 h-16 mx-auto rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
                     <svg className="w-8 h-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -724,8 +724,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Player Header */}
-          <div className="flex justify-center animate-fadeIn">
-            <div className="w-full max-w-6xl">
+          <div className="animate-fadeIn">
+            <div className="w-full">
               <PlayerHeader
                 gameName={riotAccount.gameName}
                 tagLine={riotAccount.tagLine}
@@ -741,8 +741,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
           </div>
 
           {/* Main content with sidebar */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-6xl">
+          <div>
+            <div className="w-full">
           {activeTab === 'summary' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {/* Stats Section with Vertical Menu */}
