@@ -2,24 +2,7 @@
 
 import { useState } from 'react';
 import { Skull, Clock, AlertTriangle, CheckCircle, XCircle, ChevronDown, ChevronUp, Swords, TrendingDown, TrendingUp, Minus } from 'lucide-react';
-
-interface DeathAnalysisEntry {
-  deathNumber: number;
-  timestamp: number;
-  gamePhase: 'early' | 'mid' | 'late';
-  situationContext: string;
-  fightAnalysis: {
-    wasWinnable: boolean;
-    reason: string;
-    goldState: string;
-    levelState: string;
-    cooldownsAvailable: string;
-  };
-  whatWentWrong: string;
-  whatShouldHaveDone: string;
-  deathCost: string;
-  coachVerdict: 'critical' | 'avoidable' | 'unlucky' | 'acceptable';
-}
+import { DeathAnalysisEntry } from '@/types/analysis';
 
 interface DeathsAnalysisProps {
   deathsAnalysis: DeathAnalysisEntry[];

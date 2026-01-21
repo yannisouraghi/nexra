@@ -89,6 +89,25 @@ export interface PerformanceSummary {
   rankUpTip?: string;
 }
 
+// Detailed death analysis from AI
+export interface DeathAnalysisEntry {
+  deathNumber: number;
+  timestamp: number;
+  gamePhase: 'early' | 'mid' | 'late';
+  situationContext: string;
+  fightAnalysis: {
+    wasWinnable: boolean;
+    reason: string;
+    goldState: string;
+    levelState: string;
+    cooldownsAvailable: string;
+  };
+  whatWentWrong: string;
+  whatShouldHaveDone: string;
+  deathCost: string;
+  coachVerdict: 'critical' | 'avoidable' | 'unlucky' | 'acceptable';
+}
+
 export interface AnalysisStats {
   overallScore: number;     // 0-100
   csScore: number;
@@ -101,6 +120,8 @@ export interface AnalysisStats {
   comparedToRank?: RankComparison[];  // Optional - may not be available for all analyses
   // Performance summary from AI coach
   performanceSummary?: PerformanceSummary;
+  // Detailed death analysis from AI
+  deathsAnalysis?: DeathAnalysisEntry[];
 }
 
 export interface RankComparison {

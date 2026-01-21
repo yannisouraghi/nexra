@@ -72,7 +72,7 @@ export default function AnalysisModal({
     ? ((match.kills + match.assists) / match.deaths).toFixed(2)
     : 'Perfect';
 
-  const deathsAnalysis = analysisData?.stats?.deathsAnalysis as any[] | undefined;
+  const deathsAnalysis = analysisData?.stats?.deathsAnalysis;
 
   const tabs: { id: TabType; label: string; count?: number }[] = [
     { id: 'summary', label: 'Summary' },
