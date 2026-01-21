@@ -291,9 +291,29 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
     }
   }, [puuid, region, session, onInsufficientCredits]);
 
-  // Handle card click - open modal
-  const handleCardClick = useCallback((match: MatchForAnalysis) => {
+  // Handle card click - open modal and fetch full analysis if cache is incomplete
+  const handleCardClick = useCallback(async (match: MatchForAnalysis) => {
     setSelectedMatch(match);
+
+    // Check if cache has complete data (with performanceSummary)
+    const cachedData = analyzedCacheRef.current.get(match.matchId);
+    const hasCompleteData = cachedData?.stats?.performanceSummary;
+
+    // If completed but cache is incomplete, fetch full analysis
+    if (match.analysisStatus === 'completed' && !hasCompleteData && match.analysisId) {
+      try {
+        const response = await fetch(`/api/analysis/${match.analysisId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            analyzedCacheRef.current.set(match.matchId, data.data);
+            setAnalyzedCache(prev => new Map(prev).set(match.matchId, data.data));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching full analysis:', error);
+      }
+    }
   }, []);
 
   // Close modal
