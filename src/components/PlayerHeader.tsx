@@ -532,12 +532,12 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           )}
         </div>
 
-        {/* Row 2: Stats organized in sections with titles */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+        {/* Row 2: Stats organized in sections with titles - aligned horizontally */}
+        <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
           {/* LP Evolution Section */}
           {rank && playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
             <>
-              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>LP Evolution</div>
                 <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.375rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
@@ -595,7 +595,7 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Ranked Stats Section */}
           {rank && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Ranked Stats</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <div style={{ textAlign: 'center' }}>
@@ -620,7 +620,7 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Recent Games Section */}
           {playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
-            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Recent Games</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.1875rem' }}>
                 {playerStats.recentMatchResults.slice(0, 10).map((isWin, idx) => (
@@ -652,7 +652,7 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Top Champions Section */}
           {playerStats?.topChampions && playerStats.topChampions.length > 0 && (
-            <div className="hidden xl:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="hidden xl:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Top Champions</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                 {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
