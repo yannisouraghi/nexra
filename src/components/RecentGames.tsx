@@ -527,7 +527,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <AnimatedBackground />
 
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-          <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {/* Player Header Skeleton */}
             <div>
               <div className="w-full">
@@ -584,7 +584,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <AnimatedBackground />
 
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-          <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div>
               <div className="w-full">
                 <PlayerHeader
@@ -722,7 +722,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
       {/* Main content */}
       <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-        <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Player Header */}
           <div className="animate-fadeIn">
             <div className="w-full">
@@ -746,138 +746,136 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
           {activeTab === 'summary' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {/* Stats Section with Vertical Menu */}
-              <div style={{ display: 'flex', gap: '2rem' }} className="animate-fadeIn">
+              <div style={{ display: 'flex', gap: '2rem', alignItems: 'stretch' }} className="animate-fadeIn">
                 {/* Sidebar Navigation - Desktop only */}
-                <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
-                  <div style={{ position: 'sticky', top: '2rem' }}>
-                    <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
-                    <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
-                  </div>
+                <aside className="hidden lg:flex" style={{ width: '240px', flexShrink: 0, flexDirection: 'column' }}>
+                  <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
+                  <CreditsDisplay onBuyCredits={() => setShowPricingModal(true)} />
                 </aside>
 
                 {/* Stats Overview - Grid Layout */}
-                <div className="flex-1">
+                <div className="flex-1" style={{ display: 'flex', flexDirection: 'column' }}>
                   {/* Mobile Navigation - Horizontal */}
                   <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '2rem' }}>
-                  {/* Performance Stats Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" style={{ gap: '1rem' }}>
-                    {/* Win Rate */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        Win Rate
+                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Performance Stats Grid - 2x3 layout */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: '1rem', flex: 1 }}>
+                      {/* Win Rate */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          Win Rate
+                        </div>
+                        <div className={`text-4xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                          {winRate}%
+                        </div>
+                        <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
+                          {wins}W {losses}L
+                        </div>
                       </div>
-                      <div className={`text-3xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                        {winRate}%
-                      </div>
-                      <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
-                        {wins}W {losses}L
-                      </div>
-                    </div>
 
-                    {/* Average KDA */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        Avg KDA
+                      {/* Average KDA */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          Avg KDA
+                        </div>
+                        {(() => {
+                          const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
+                          return (
+                            <>
+                              <div className={`text-4xl font-bold font-['Rajdhani'] ${parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white'}`}>
+                                {kda}
+                              </div>
+                              <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
+                                {avgKills}/{avgDeaths}/{avgAssists}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
-                      {(() => {
-                        const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
-                        return (
-                          <>
-                            <div className={`text-3xl font-bold font-['Rajdhani'] ${parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white'}`}>
-                              {kda}
+
+                      {/* CS/min */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          Avg CS/min
+                        </div>
+                        {(() => {
+                          const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
+                          const avgCSMin = matchesWithCS.length > 0
+                            ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
+                            : '0';
+                          return (
+                            <div className={`text-4xl font-bold font-['Rajdhani'] ${parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white'}`}>
+                              {avgCSMin}
                             </div>
-                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
-                              {avgKills}/{avgDeaths}/{avgAssists}
+                          );
+                        })()}
+                      </div>
+
+                      {/* MVP Count */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          MVP
+                        </div>
+                        {(() => {
+                          const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
+                          return (
+                            <>
+                              <div className="text-4xl font-bold font-['Rajdhani'] text-yellow-400">
+                                {mvpCount}
+                              </div>
+                              <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
+                                /{totalGames} games
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+
+                      {/* Current Streak */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          Streak
+                        </div>
+                        {(() => {
+                          if (filteredMatches.length === 0) return <div className="text-4xl font-bold font-['Rajdhani'] text-white">-</div>;
+                          let streak = 0;
+                          const firstResult = filteredMatches[0]?.win;
+                          for (const match of filteredMatches) {
+                            if (match.win === firstResult) streak++;
+                            else break;
+                          }
+                          return (
+                            <div className={`text-4xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
+                              {streak}{firstResult ? 'W' : 'L'}
                             </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-
-                    {/* CS/min */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        Avg CS/min
+                          );
+                        })()}
                       </div>
-                      {(() => {
-                        const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
-                        const avgCSMin = matchesWithCS.length > 0
-                          ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
-                          : '0';
-                        return (
-                          <div className={`text-3xl font-bold font-['Rajdhani'] ${parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white'}`}>
-                            {avgCSMin}
-                          </div>
-                        );
-                      })()}
-                    </div>
 
-                    {/* MVP Count */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        MVP
-                      </div>
-                      {(() => {
-                        const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
-                        return (
-                          <>
-                            <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">
-                              {mvpCount}
+                      {/* Avg Damage */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                          Avg Damage
+                        </div>
+                        {(() => {
+                          const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
+                          const avgDmg = matchesWithDmg.length > 0
+                            ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
+                            : '0';
+                          return (
+                            <div className="text-4xl font-bold font-['Rajdhani'] text-orange-400">
+                              {avgDmg}k
                             </div>
-                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
-                              /{totalGames} games
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Current Streak */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        Streak
+                          );
+                        })()}
                       </div>
-                      {(() => {
-                        if (filteredMatches.length === 0) return <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>;
-                        let streak = 0;
-                        const firstResult = filteredMatches[0]?.win;
-                        for (const match of filteredMatches) {
-                          if (match.win === firstResult) streak++;
-                          else break;
-                        }
-                        return (
-                          <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
-                            {streak}{firstResult ? 'W' : 'L'}
-                          </div>
-                        );
-                      })()}
                     </div>
-
-                    {/* Kill Participation */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                        Avg Damage
-                      </div>
-                      {(() => {
-                        const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
-                        const avgDmg = matchesWithDmg.length > 0
-                          ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
-                          : '0';
-                        return (
-                          <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">
-                            {avgDmg}k
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
                   </div>
                 </div>
               </div>

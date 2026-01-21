@@ -487,6 +487,109 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           {/* Separator */}
           {rank && <div style={{ width: '1px', height: '60px', backgroundColor: 'rgba(255, 255, 255, 0.1)', flexShrink: 0 }} className="hidden lg:block" />}
 
+          {/* LP Evolution Graph */}
+          {rank && playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
+            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.375rem' }}>
+                LP Evolution
+              </div>
+              <div style={{ position: 'relative', width: '140px', height: '50px' }}>
+                {(() => {
+                  // Calculate LP history going backwards from current LP
+                  const recentResults = playerStats.recentMatchResults.slice(0, 10);
+                  const lpPerGame = 18; // Average LP gain/loss per game
+                  let lpHistory: number[] = [rank.leaguePoints];
+
+                  // Go backwards through recent matches to estimate previous LP values
+                  for (let i = 0; i < recentResults.length; i++) {
+                    const wasWin = recentResults[i];
+                    const prevLp = lpHistory[0] + (wasWin ? -lpPerGame : lpPerGame);
+                    lpHistory.unshift(Math.max(0, Math.min(100, prevLp)));
+                  }
+
+                  // Normalize for graph (0-100 LP range)
+                  const minLp = Math.min(...lpHistory);
+                  const maxLp = Math.max(...lpHistory);
+                  const range = maxLp - minLp || 1;
+
+                  const graphWidth = 140;
+                  const graphHeight = 50;
+                  const padding = 4;
+                  const innerWidth = graphWidth - padding * 2;
+                  const innerHeight = graphHeight - padding * 2;
+
+                  // Generate SVG path
+                  const points = lpHistory.map((lp, i) => {
+                    const x = padding + (i / (lpHistory.length - 1 || 1)) * innerWidth;
+                    const y = graphHeight - padding - ((lp - minLp) / range) * innerHeight;
+                    return { x, y, lp };
+                  });
+
+                  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                  const areaD = `${pathD} L ${points[points.length - 1].x} ${graphHeight - padding} L ${padding} ${graphHeight - padding} Z`;
+
+                  // Determine trend color
+                  const lpChange = lpHistory[lpHistory.length - 1] - lpHistory[0];
+                  const trendColor = lpChange >= 0 ? '#22c55e' : '#ef4444';
+
+                  return (
+                    <svg width={graphWidth} height={graphHeight} style={{ overflow: 'visible' }}>
+                      {/* Background gradient area */}
+                      <defs>
+                        <linearGradient id="lpGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={trendColor} stopOpacity="0.3" />
+                          <stop offset="100%" stopColor={trendColor} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+
+                      {/* Area fill */}
+                      <path d={areaD} fill="url(#lpGradient)" />
+
+                      {/* Line */}
+                      <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+                      {/* Current LP dot */}
+                      <circle
+                        cx={points[points.length - 1].x}
+                        cy={points[points.length - 1].y}
+                        r="4"
+                        fill={trendColor}
+                        stroke="white"
+                        strokeWidth="1.5"
+                      />
+                    </svg>
+                  );
+                })()}
+                {/* LP change indicator */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  right: '0',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  color: (() => {
+                    const recentResults = playerStats.recentMatchResults.slice(0, 10);
+                    const wins = recentResults.filter(r => r).length;
+                    const losses = recentResults.length - wins;
+                    const lpChange = (wins - losses) * 18;
+                    return lpChange >= 0 ? '#22c55e' : '#ef4444';
+                  })(),
+                }}>
+                  {(() => {
+                    const recentResults = playerStats.recentMatchResults.slice(0, 10);
+                    const wins = recentResults.filter(r => r).length;
+                    const losses = recentResults.length - wins;
+                    const lpChange = (wins - losses) * 18;
+                    return lpChange >= 0 ? `+${lpChange}` : lpChange;
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Separator */}
+          {rank && playerStats?.recentMatchResults && <div style={{ width: '1px', height: '60px', backgroundColor: 'rgba(255, 255, 255, 0.1)', flexShrink: 0 }} className="hidden lg:block" />}
+
           {/* Ranked Stats */}
           {rank && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }} className="hidden lg:flex">
