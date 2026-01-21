@@ -1,11 +1,11 @@
 'use client';
 
-import { MatchForAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role } from '@/types/analysis';
+import { MatchForAnalysis, getScoreColor, getStatusColor, Role } from '@/types/analysis';
 import { getChampionSplashUrl } from '@/utils/ddragon';
 import { useState, useEffect } from 'react';
 
-// Language types
 type AnalysisLanguage = 'en' | 'fr' | 'es' | 'de' | 'pt';
+
 const LANGUAGES: { code: AnalysisLanguage; flag: string }[] = [
   { code: 'en', flag: '🇬🇧' },
   { code: 'fr', flag: '🇫🇷' },
@@ -21,101 +21,76 @@ interface GameAnalysisCardProps {
   isStarting?: boolean;
 }
 
-// Role display config
-const roleConfig: Record<Role, { label: string; color: string; imageUrl: string }> = {
-  TOP: {
-    label: 'TOP',
-    color: '#f59e0b',
-    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png',
-  },
-  JUNGLE: {
-    label: 'JGL',
-    color: '#22c55e',
-    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png',
-  },
-  MID: {
-    label: 'MID',
-    color: '#8b5cf6',
-    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png',
-  },
-  ADC: {
-    label: 'ADC',
-    color: '#ef4444',
-    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png',
-  },
-  SUPPORT: {
-    label: 'SUP',
-    color: '#06b6d4',
-    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png',
-  },
-  UNKNOWN: {
-    label: '?',
-    color: '#6b7280',
-    imageUrl: '',
-  },
+const roleConfig: Record<Role, { label: string; color: string; img: string }> = {
+  TOP: { label: 'TOP', color: '#f59e0b', img: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png' },
+  JUNGLE: { label: 'JGL', color: '#22c55e', img: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png' },
+  MID: { label: 'MID', color: '#8b5cf6', img: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png' },
+  ADC: { label: 'ADC', color: '#ef4444', img: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png' },
+  SUPPORT: { label: 'SUP', color: '#06b6d4', img: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png' },
+  UNKNOWN: { label: '?', color: '#6b7280', img: '' },
 };
 
-// Normalize role string to Role type
-function normalizeRole(roleStr?: string): Role {
+function normalizeRole(str?: string): Role {
   const map: Record<string, Role> = {
     TOP: 'TOP', JUNGLE: 'JUNGLE', MID: 'MID', MIDDLE: 'MID',
     ADC: 'ADC', BOTTOM: 'ADC', BOT: 'ADC',
     SUPPORT: 'SUPPORT', UTILITY: 'SUPPORT', SUP: 'SUPPORT',
   };
-  return map[roleStr?.toUpperCase() || ''] || 'UNKNOWN';
+  return map[str?.toUpperCase() || ''] || 'UNKNOWN';
 }
 
-// Format game mode
-function formatGameMode(mode: string | null): string {
-  if (!mode) return 'Ranked';
-  if (mode.includes('Ranked') || mode.includes('Normal') || mode.includes('ARAM')) return mode;
-  const m = mode.toUpperCase();
-  if (m === 'CLASSIC' || m === 'MATCHED_GAME') return 'Ranked';
-  if (m === 'ARAM') return 'ARAM';
-  return mode;
+function formatDuration(s: number | null): string {
+  if (!s) return '--:--';
+  return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`;
 }
 
-// Format duration
-function formatDuration(seconds: number | null): string {
-  if (!seconds) return '--:--';
-  return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+function formatTimeAgo(ts: number | null): string {
+  if (!ts) return '';
+  const diff = Math.floor((Date.now() - ts) / 60000);
+  if (diff < 60) return `${diff}m`;
+  if (diff < 1440) return `${Math.floor(diff / 60)}h`;
+  return `${Math.floor(diff / 1440)}d`;
 }
 
-// Format time ago
-function formatTimeAgo(timestamp: number | null): string {
-  if (!timestamp) return '';
-  const diffMs = Date.now() - timestamp;
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h`;
-  return `${Math.floor(hours / 24)}d`;
-}
-
-// Role Icon component
 function RoleIcon({ role }: { role: Role }) {
-  const [error, setError] = useState(false);
-  const config = roleConfig[role];
+  const [err, setErr] = useState(false);
+  const cfg = roleConfig[role];
 
-  if (role === 'UNKNOWN' || !config.imageUrl || error) {
+  if (role === 'UNKNOWN' || !cfg.img || err) {
     return (
-      <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold"
-        style={{ backgroundColor: `${config.color}30`, border: `1px solid ${config.color}50`, color: config.color }}>
-        {config.label}
+      <div style={{
+        width: 28,
+        height: 28,
+        borderRadius: 6,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: `${cfg.color}25`,
+        border: `1px solid ${cfg.color}40`,
+        color: cfg.color,
+        fontSize: 10,
+        fontWeight: 700,
+      }}>
+        {cfg.label}
       </div>
     );
   }
 
   return (
-    <img src={config.imageUrl} alt={role} className="w-6 h-6 brightness-110" onError={() => setError(true)} />
+    <img
+      src={cfg.img}
+      alt={role}
+      style={{ width: 28, height: 28, filter: 'brightness(1.1)' }}
+      onError={() => setErr(true)}
+    />
   );
 }
 
 export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, isStarting }: GameAnalysisCardProps) {
-  const [imgError, setImgError] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [language, setLanguage] = useState<AnalysisLanguage>('en');
+  const [lang, setLang] = useState<AnalysisLanguage>('en');
 
   const status = match.analysisStatus;
   const isCompleted = status === 'completed';
@@ -126,149 +101,215 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const role = normalizeRole(match.role);
   const isWin = match.result === 'win';
   const champion = match.champion || 'Unknown';
-  const splashUrl = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
+  const splash = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
   const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
   const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
 
-  // Simulated progress for processing state
   useEffect(() => {
     if (isProcessing) {
       setProgress(0);
-      const interval = setInterval(() => {
-        setProgress(p => {
-          if (p < 30) return p + 3;
-          if (p < 60) return p + 1.5;
-          if (p < 85) return p + 0.5;
-          if (p < 95) return p + 0.2;
-          return p;
-        });
+      const iv = setInterval(() => {
+        setProgress(p => p < 30 ? p + 3 : p < 60 ? p + 1.5 : p < 85 ? p + 0.5 : p < 95 ? p + 0.2 : p);
       }, 200);
-      return () => clearInterval(interval);
+      return () => clearInterval(iv);
     }
     setProgress(isCompleted ? 100 : 0);
   }, [isProcessing, isCompleted]);
 
-  const handleAnalyze = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onStartAnalysis?.(match.matchId, language);
-  };
-
-  const handleView = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onCardClick?.(match);
-  };
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    e.stopPropagation();
-    setLanguage(e.target.value as AnalysisLanguage);
-  };
-
-  // Card border color based on state
   const borderColor = isCompleted
-    ? (isWin ? 'rgba(0,255,136,0.4)' : 'rgba(255,51,102,0.4)')
-    : isProcessing
-    ? 'rgba(0,212,255,0.5)'
-    : isFailed
-    ? 'rgba(255,51,102,0.4)'
-    : 'rgba(255,255,255,0.1)';
+    ? (isWin ? 'rgba(0,255,136,0.5)' : 'rgba(255,51,102,0.5)')
+    : isProcessing ? 'rgba(0,212,255,0.6)' : isFailed ? 'rgba(255,51,102,0.5)' : 'rgba(255,255,255,0.12)';
 
   return (
     <div
-      className="relative w-full min-w-[180px] max-w-[220px] h-[300px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300"
       style={{
-        background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)',
+        position: 'relative',
+        width: '100%',
+        minWidth: 200,
+        maxWidth: 240,
+        height: 340,
+        borderRadius: 16,
+        overflow: 'hidden',
+        background: 'linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%)',
         border: `2px solid ${borderColor}`,
-        transform: hovered && isCompleted ? 'scale(1.03)' : 'scale(1)',
-        boxShadow: hovered && isCompleted ? '0 8px 32px rgba(0,212,255,0.2)' : 'none',
+        cursor: isCompleted ? 'pointer' : 'default',
+        transform: hovered && isCompleted ? 'scale(1.02)' : 'scale(1)',
+        boxShadow: hovered && isCompleted ? '0 12px 40px rgba(0,212,255,0.25)' : '0 4px 20px rgba(0,0,0,0.3)',
+        transition: 'all 0.25s ease',
       }}
       onClick={() => isCompleted && onCardClick?.(match)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Background Image */}
-      {splashUrl && !imgError ? (
-        <div className="absolute inset-0">
+      {/* Background */}
+      {splash && !imgErr ? (
+        <div style={{ position: 'absolute', inset: 0 }}>
           <img
-            src={splashUrl}
+            src={splash}
             alt={champion}
-            className="w-full h-full object-cover object-top transition-all duration-300"
-            style={{ opacity: isProcessing ? 0.25 : 0.6, filter: isProcessing ? 'blur(2px)' : 'none' }}
-            onError={() => setImgError(true)}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'top',
+              opacity: isProcessing ? 0.2 : 0.55,
+              filter: isProcessing ? 'blur(3px)' : 'none',
+              transition: 'all 0.3s',
+            }}
+            onError={() => setImgErr(true)}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.4) 100%)',
+          }} />
         </div>
       ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-cyan-900/30" />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.2) 0%, rgba(0,212,255,0.2) 100%)',
+        }} />
       )}
 
-      {/* Top Bar: Time & Result */}
-      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 z-10">
-        <span className="px-2 py-1 rounded-md text-[11px] font-medium bg-black/60 text-white/70 backdrop-blur-sm">
+      {/* Top: Time + Result */}
+      <div style={{
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        right: 12,
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10,
+      }}>
+        <span style={{
+          padding: '5px 10px',
+          borderRadius: 8,
+          fontSize: 11,
+          fontWeight: 600,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          color: 'rgba(255,255,255,0.8)',
+          backdropFilter: 'blur(8px)',
+        }}>
           {formatTimeAgo(match.timestamp)}
         </span>
         {match.result && (
-          <span
-            className="px-2 py-1 rounded-md text-[10px] font-bold backdrop-blur-sm"
-            style={{
-              backgroundColor: isWin ? 'rgba(0,255,136,0.2)' : 'rgba(255,51,102,0.2)',
-              color: isWin ? '#00ff88' : '#ff3366',
-            }}
-          >
+          <span style={{
+            padding: '5px 10px',
+            borderRadius: 8,
+            fontSize: 10,
+            fontWeight: 700,
+            backgroundColor: isWin ? 'rgba(0,255,136,0.2)' : 'rgba(255,51,102,0.2)',
+            color: isWin ? '#00ff88' : '#ff3366',
+            backdropFilter: 'blur(8px)',
+          }}>
             {isWin ? 'WIN' : 'LOSS'}
           </span>
         )}
       </div>
 
-      {/* Completed Check Icon */}
+      {/* Completed badge */}
       {isCompleted && (
-        <div className="absolute -top-1 -right-1 z-20 w-5 h-5 rounded-full bg-green-500 border-2 border-[#1a1a2e] flex items-center justify-center">
-          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+        <div style={{
+          position: 'absolute',
+          top: -2,
+          right: -2,
+          zIndex: 20,
+          width: 24,
+          height: 24,
+          borderRadius: '50%',
+          backgroundColor: '#22c55e',
+          border: '3px solid #1a1a2e',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
       )}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col p-4 pt-12">
-        {/* Middle Section */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-3">
+      <div style={{
+        position: 'relative',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 16,
+        paddingTop: 52,
+      }}>
+        {/* Middle */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+        }}>
           {isProcessing ? (
-            /* Processing State */
-            <div className="flex flex-col items-center gap-2">
-              <div className="relative w-16 h-16">
-                <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
-                  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(0,212,255,0.15)" strokeWidth="4" />
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <div style={{ position: 'relative', width: 70, height: 70 }}>
+                <svg width="70" height="70" viewBox="0 0 70 70" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="35" cy="35" r="30" fill="none" stroke="rgba(0,212,255,0.15)" strokeWidth="5" />
                   <circle
-                    cx="32" cy="32" r="28" fill="none" stroke="#00d4ff" strokeWidth="4" strokeLinecap="round"
-                    strokeDasharray={2 * Math.PI * 28}
-                    strokeDashoffset={2 * Math.PI * 28 * (1 - progress / 100)}
-                    className="transition-all duration-500"
+                    cx="35" cy="35" r="30" fill="none" stroke="#00d4ff" strokeWidth="5" strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 30}
+                    strokeDashoffset={2 * Math.PI * 30 * (1 - progress / 100)}
+                    style={{ transition: 'stroke-dashoffset 0.4s ease' }}
                   />
                 </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-cyan-400">
+                <span style={{
+                  position: 'absolute',
+                  inset: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: '#00d4ff',
+                }}>
                   {Math.round(progress)}%
                 </span>
               </div>
-              <span className="text-xs font-semibold text-cyan-400">Analyzing...</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#00d4ff' }}>Analyzing...</span>
             </div>
           ) : isReady ? (
-            /* Ready State - Analyze Button + Language */
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
                 <RoleIcon role={role} />
               </div>
 
-              {/* Language Selector */}
+              {/* Language */}
               <select
-                value={language}
-                onChange={handleLanguageChange}
+                value={lang}
+                onChange={(e) => { e.stopPropagation(); setLang(e.target.value as AnalysisLanguage); }}
                 onClick={(e) => e.stopPropagation()}
-                className="px-2 py-1 rounded-md text-xs font-medium bg-white/5 border border-white/10 text-white/80 cursor-pointer outline-none hover:bg-white/10 transition-colors"
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  outline: 'none',
+                }}
               >
                 {LANGUAGES.map((l) => (
-                  <option key={l.code} value={l.code} className="bg-[#1a1a2e]">
+                  <option key={l.code} value={l.code} style={{ backgroundColor: '#1a1a2e' }}>
                     {l.flag} {l.code.toUpperCase()}
                   </option>
                 ))}
@@ -276,22 +317,40 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
 
               {/* Analyze Button */}
               <button
-                onClick={handleAnalyze}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onStartAnalysis?.(match.matchId, lang); }}
                 disabled={isStarting}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-105 hover:shadow-lg"
                 style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: 'white',
                   background: 'linear-gradient(135deg, #00d4ff 0%, #6366f1 100%)',
-                  boxShadow: '0 4px 15px rgba(0,212,255,0.3)',
+                  border: 'none',
+                  cursor: isStarting ? 'not-allowed' : 'pointer',
+                  opacity: isStarting ? 0.6 : 1,
+                  boxShadow: '0 4px 20px rgba(0,212,255,0.4)',
+                  transition: 'all 0.2s',
                 }}
               >
                 {isStarting ? (
                   <>
-                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div style={{
+                      width: 14,
+                      height: 14,
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.8s linear infinite',
+                    }} />
                     <span>Starting...</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                    <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
                     </svg>
                     <span>Analyze</span>
@@ -300,36 +359,65 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
               </button>
             </div>
           ) : isFailed ? (
-            /* Failed State */
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 50,
+                height: 50,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(255,51,102,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <svg width="24" height="24" fill="none" stroke="#ff3366" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <span className="text-xs font-semibold text-red-500">Failed</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#ff3366' }}>Failed</span>
             </div>
           ) : (
-            /* Completed State */
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 48,
+                height: 48,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
                 <RoleIcon role={role} />
               </div>
-              <div
-                className="px-4 py-1.5 rounded-full text-sm font-bold border"
-                style={{
-                  backgroundColor: `${scoreColor}20`,
-                  color: scoreColor,
-                  borderColor: `${scoreColor}50`,
-                }}
-              >
+              <div style={{
+                padding: '8px 18px',
+                borderRadius: 20,
+                fontSize: 15,
+                fontWeight: 700,
+                backgroundColor: `${scoreColor}20`,
+                color: scoreColor,
+                border: `1px solid ${scoreColor}50`,
+              }}>
                 {match.overallScore} pts
               </div>
               <button
-                onClick={handleView}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 transition-all duration-200 hover:scale-105"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); onCardClick?.(match); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  padding: '8px 16px',
+                  borderRadius: 8,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: 'white',
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
               >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
@@ -339,30 +427,59 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
           )}
         </div>
 
-        {/* Bottom Section */}
-        <div className="flex flex-col items-center gap-1.5 mt-auto">
-          <h3 className="text-lg font-bold text-white text-center truncate w-full">{champion}</h3>
+        {/* Bottom */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 6,
+          marginTop: 'auto',
+          paddingTop: 12,
+        }}>
+          <h3 style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: 'white',
+            margin: 0,
+            textAlign: 'center',
+            textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+          }}>
+            {champion}
+          </h3>
 
           {match.result && (
-            <div className="flex items-center gap-0.5 text-base font-semibold">
-              <span className="text-green-400">{match.kills}</span>
-              <span className="text-white/30">/</span>
-              <span className="text-red-400">{match.deaths}</span>
-              <span className="text-white/30">/</span>
-              <span className="text-cyan-400">{match.assists}</span>
-              <span className="ml-2 text-xs text-white/40">({kda})</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 16, fontWeight: 600 }}>
+              <span style={{ color: '#4ade80' }}>{match.kills}</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+              <span style={{ color: '#f87171' }}>{match.deaths}</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+              <span style={{ color: '#22d3ee' }}>{match.assists}</span>
+              <span style={{ marginLeft: 8, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>({kda})</span>
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-[11px] text-white/50">
-            <span>{formatGameMode(match.gameMode)}</span>
-            <span className="text-white/30">•</span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 11,
+            color: 'rgba(255,255,255,0.5)',
+          }}>
+            <span>Ranked</span>
+            <span style={{ color: 'rgba(255,255,255,0.25)' }}>•</span>
             <span>{formatDuration(match.gameDuration)}</span>
           </div>
 
           {isCompleted && match.errorsCount > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-orange-400">
-              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4,
+              fontSize: 11,
+              color: '#fb923c',
+              marginTop: 2,
+            }}>
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <span>{match.errorsCount} errors</span>
@@ -371,20 +488,46 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
         </div>
       </div>
 
-      {/* Hover Overlay for Completed */}
+      {/* Hover Overlay */}
       {isCompleted && (
-        <div
-          className="absolute inset-0 bg-black/70 flex items-center justify-center transition-opacity duration-300 rounded-2xl"
-          style={{ opacity: hovered ? 1 : 0, pointerEvents: hovered ? 'auto' : 'none' }}
-        >
-          <div className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white text-sm bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-500/50">
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.75)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: hovered ? 1 : 0,
+          pointerEvents: hovered ? 'auto' : 'none',
+          transition: 'opacity 0.25s ease',
+          borderRadius: 14,
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '12px 24px',
+            borderRadius: 10,
+            fontSize: 14,
+            fontWeight: 600,
+            color: 'white',
+            background: 'linear-gradient(135deg, rgba(0,212,255,0.25) 0%, rgba(99,102,241,0.25) 100%)',
+            border: '1px solid rgba(0,212,255,0.5)',
+          }}>
             <span>View Analysis</span>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
