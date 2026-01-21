@@ -45,9 +45,11 @@ interface PlayerHeaderProps {
   } | null;
   playerStats?: PlayerStats | null;
   onRefresh?: () => void;
+  onOpenSettings?: () => void;
+  onLogout?: () => void;
 }
 
-export default function PlayerHeader({ gameName, tagLine, region, profileIconId, summonerLevel, puuid, rank, playerStats, onRefresh }: PlayerHeaderProps) {
+export default function PlayerHeader({ gameName, tagLine, region, profileIconId, summonerLevel, puuid, rank, playerStats, onRefresh, onOpenSettings, onLogout }: PlayerHeaderProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const [currentSeason, setCurrentSeason] = useState<{ year: number; split: number } | null>(null);
@@ -403,6 +405,59 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
   return (
     <div className="glass-card" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* Settings & Logout Buttons - Top left corner */}
+      <div style={{ position: 'absolute', top: '1rem', left: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
+        {onOpenSettings && (
+          <button
+            onClick={onOpenSettings}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              border: '1px solid rgba(168, 85, 247, 0.4)',
+              backgroundColor: 'rgba(168, 85, 247, 0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              color: '#c084fc',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.25)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)'; }}
+            title="Settings"
+          >
+            <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        )}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              color: '#f87171',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)'; }}
+            title="Logout"
+          >
+            <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        )}
+      </div>
+
       {/* Action Buttons - Top right corner */}
       <div style={{ position: 'absolute', top: '1rem', right: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 10 }}>
         <button
@@ -513,12 +568,12 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                 <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(2.2)', transformOrigin: 'center' }} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.625rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>
                   {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
                 </h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
-                  <span style={{ fontSize: '2.25rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{rank.leaguePoints}</span>
-                  <span style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>LP</span>
+                  <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{rank.leaguePoints}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>LP</span>
                 </div>
               </div>
             </div>
@@ -533,12 +588,12 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
         </div>
 
         {/* Row 2: Stats organized in sections with titles - aligned horizontally */}
-        <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
           {/* LP Evolution Section */}
           {rank && playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
             <>
-              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>LP Evolution</div>
+              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.75rem' }}>LP Evolution</div>
                 <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.375rem' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
                     <span>100</span>
@@ -595,8 +650,8 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Ranked Stats Section */}
           {rank && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Ranked Stats</div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.75rem' }}>Ranked Stats</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{totalGames}</div>
@@ -620,8 +675,8 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Recent Games Section */}
           {playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
-            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Recent Games</div>
+            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.75rem' }}>Recent Games</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.1875rem' }}>
                 {playerStats.recentMatchResults.slice(0, 10).map((isWin, idx) => (
                   <div
@@ -652,8 +707,8 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Top Champions Section */}
           {playerStats?.topChampions && playerStats.topChampions.length > 0 && (
-            <div className="hidden xl:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Top Champions</div>
+            <div className="hidden xl:flex" style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.75rem' }}>Top Champions</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                 {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
                   <div

@@ -638,92 +638,6 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       {/* Animated background with stars */}
       <AnimatedBackground />
 
-      {/* Top Bar - Fixed at top right */}
-      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '1rem', right: '1.5rem', gap: '0.5rem' }}>
-        {/* Settings Button */}
-        <button
-          onClick={() => setShowSettingsModal(true)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.625rem 1rem',
-            borderRadius: '0.75rem',
-            border: '1px solid rgba(168, 85, 247, 0.4)',
-            backgroundColor: 'rgba(168, 85, 247, 0.15)',
-            backdropFilter: 'blur(12px)',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            color: '#c084fc',
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-            boxShadow: '0 4px 12px rgba(168, 85, 247, 0.2)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.25)';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.2)';
-          }}
-        >
-          <svg
-            style={{ width: '18px', height: '18px' }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span className="hidden sm:inline">Settings</span>
-        </button>
-
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.625rem 1rem',
-            borderRadius: '0.75rem',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            backdropFilter: 'blur(12px)',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            color: '#f87171',
-            fontSize: '0.8125rem',
-            fontWeight: 600,
-            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)';
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
-          }}
-        >
-          <svg
-            style={{ width: '18px', height: '18px' }}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          <span className="hidden sm:inline">Logout</span>
-        </button>
-      </div>
-
       {/* Main content */}
       <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
         <div className="w-full max-w-[1400px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -740,6 +654,8 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 rank={summonerData?.rank}
                 playerStats={playerStats}
                 onRefresh={forceRefresh}
+                onOpenSettings={() => setShowSettingsModal(true)}
+                onLogout={handleLogout}
               />
             </div>
           </div>

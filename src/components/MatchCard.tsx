@@ -796,59 +796,65 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
   const kda = ((match.kills + match.assists) / Math.max(1, match.deaths)).toFixed(2);
   const kdaColor = parseFloat(kda) >= 3 ? 'text-yellow-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-gray-400';
 
-  // Fonction pour obtenir les styles du badge de rang
+  // Fonction pour obtenir les styles du badge de rang - Design plus pro
   const getRankBadge = (rank: number) => {
     if (rank === 1) {
       return {
-        container: 'bg-gradient-to-br from-yellow-300 via-yellow-500 to-yellow-600 shadow-lg shadow-yellow-500/50',
-        text: 'text-black font-black',
+        bg: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
+        border: '1px solid rgba(255, 215, 0, 0.6)',
+        color: '#1a1a1a',
         showIcon: true,
         label: 'MVP',
-        glow: true,
+        shadow: '0 0 8px rgba(255, 215, 0, 0.5)',
       };
     }
     if (rank === 2) {
       return {
-        container: 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 shadow-lg shadow-gray-400/50',
-        text: 'text-gray-800 font-bold',
+        bg: 'linear-gradient(135deg, #C0C0C0 0%, #E8E8E8 50%, #C0C0C0 100%)',
+        border: '1px solid rgba(192, 192, 192, 0.6)',
+        color: '#2a2a2a',
         showIcon: false,
-        label: '#2',
-        glow: false,
+        label: '2nd',
+        shadow: 'none',
       };
     }
     if (rank === 3) {
       return {
-        container: 'bg-gradient-to-br from-orange-400 via-orange-600 to-orange-700 shadow-lg shadow-orange-500/50',
-        text: 'text-white font-bold',
+        bg: 'linear-gradient(135deg, #CD7F32 0%, #E5A857 50%, #CD7F32 100%)',
+        border: '1px solid rgba(205, 127, 50, 0.6)',
+        color: '#1a1a1a',
         showIcon: false,
-        label: '#3',
-        glow: false,
+        label: '3rd',
+        shadow: 'none',
       };
     }
     if (rank <= 5) {
       return {
-        container: 'bg-gradient-to-br from-blue-500 to-blue-600 shadow-md',
-        text: 'text-white font-semibold',
+        bg: 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)',
+        border: '1px solid rgba(59, 130, 246, 0.5)',
+        color: '#ffffff',
         showIcon: false,
-        label: `#${rank}`,
-        glow: false,
+        label: `${rank}th`,
+        shadow: 'none',
       };
     }
     if (rank <= 7) {
       return {
-        container: 'bg-gradient-to-br from-gray-600 to-gray-700 shadow-sm',
-        text: 'text-gray-200 font-medium',
+        bg: 'rgba(100, 116, 139, 0.6)',
+        border: '1px solid rgba(100, 116, 139, 0.4)',
+        color: '#e2e8f0',
         showIcon: false,
-        label: `#${rank}`,
-        glow: false,
+        label: `${rank}th`,
+        shadow: 'none',
       };
     }
     return {
-      container: 'bg-gradient-to-br from-red-600 to-red-700 shadow-sm',
-      text: 'text-white font-medium',
+      bg: 'rgba(71, 85, 105, 0.4)',
+      border: '1px solid rgba(71, 85, 105, 0.3)',
+      color: '#94a3b8',
       showIcon: false,
-      label: `#${rank}`,
-      glow: false,
+      label: `${rank}th`,
+      shadow: 'none',
     };
   };
 
@@ -931,18 +937,33 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
               </div>
 
               <div className="flex flex-col gap-0.5 sm:gap-1">
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   <h4 className="text-sm sm:text-base lg:text-lg font-bold text-white font-['Rajdhani']">{match.champion}</h4>
                   {match.rank && (() => {
                     const badge = getRankBadge(match.rank);
                     return (
-                      <div className={`relative flex items-center gap-1.5 px-4 py-1.5 rounded-full ${badge.container} ${badge.text} ${badge.glow ? 'rank-mvp-shimmer glow-mvp' : ''} shadow-lg`}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '3px',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          background: badge.bg,
+                          border: badge.border,
+                          color: badge.color,
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          boxShadow: badge.shadow,
+                          letterSpacing: '0.02em',
+                        }}
+                      >
                         {badge.showIcon && (
-                          <svg className="w-3.5 h-3.5 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                          <svg style={{ width: '10px', height: '10px' }} viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                           </svg>
                         )}
-                        <span className="text-[11px] relative z-10 font-black tracking-tight">{badge.label}</span>
+                        <span>{badge.label}</span>
                       </div>
                     );
                   })()}
@@ -952,83 +973,81 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10 gap-2 sm:gap-3 lg:gap-4 pl-2 sm:pl-3 lg:pl-4">
+            <div className="flex items-center border-l border-white/10 gap-3 pl-3">
               <div className="text-center">
-                <div className="text-xs sm:text-sm lg:text-base font-bold text-white tracking-tight mb-0.5">
+                <div className="text-sm sm:text-base font-bold text-white tracking-tight">
                   {match.kills}
-                  <span className="text-[var(--text-tertiary)] mx-1 sm:mx-2">/</span>
+                  <span className="text-[var(--text-quaternary)] mx-1">/</span>
                   <span className="text-red-400">{match.deaths}</span>
-                  <span className="text-[var(--text-tertiary)] mx-1 sm:mx-2">/</span>
+                  <span className="text-[var(--text-quaternary)] mx-1">/</span>
                   {match.assists}
                 </div>
-                <p className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
+                <p className="text-[9px] text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
               </div>
 
-              <div className="h-8 sm:h-10 w-px bg-white/10"></div>
+              <div className="h-8 w-px bg-white/10"></div>
 
               <div className="text-center">
-                <p className={`text-base sm:text-lg lg:text-xl font-bold tracking-tight ${kdaColor} font-['Rajdhani'] mb-0.5`}>
+                <p className={`text-lg font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
-                <p className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
+                <p className="text-[9px] text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
               </div>
             </div>
           </div>
 
           {/* Center Section - Player Stats */}
-          <div className="hidden lg:flex items-center border-l border-white/10 gap-6 ml-4 pl-4">
+          <div className="hidden lg:flex items-center border-l border-white/10 gap-4 pl-4 flex-1 justify-center">
             {/* CS */}
             {match.totalMinionsKilled !== undefined && (
               <div className="text-center">
                 <div className="text-sm font-bold text-white">{match.totalMinionsKilled + (match.neutralMinionsKilled || 0)}</div>
-                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">CS</div>
+                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">CS</div>
               </div>
             )}
             {/* CS/min */}
             {match.totalMinionsKilled !== undefined && match.gameDuration > 0 && (
               <div className="text-center">
                 <div className="text-sm font-bold text-cyan-400">{((match.totalMinionsKilled + (match.neutralMinionsKilled || 0)) / (match.gameDuration / 60)).toFixed(1)}</div>
-                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">CS/min</div>
+                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">CS/min</div>
               </div>
             )}
             {/* Damage */}
             {match.totalDamageDealtToChampions !== undefined && (
               <div className="text-center">
                 <div className="text-sm font-bold text-orange-400">{(match.totalDamageDealtToChampions / 1000).toFixed(1)}k</div>
-                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Damage</div>
+                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Damage</div>
               </div>
             )}
             {/* Gold */}
             {match.goldEarned !== undefined && (
               <div className="text-center">
                 <div className="text-sm font-bold text-yellow-400">{(match.goldEarned / 1000).toFixed(1)}k</div>
-                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Gold</div>
+                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Gold</div>
               </div>
             )}
             {/* Vision */}
             {match.visionScore !== undefined && (
               <div className="text-center">
                 <div className="text-sm font-bold text-purple-400">{match.visionScore}</div>
-                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Vision</div>
+                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Vision</div>
               </div>
             )}
           </div>
 
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden md:flex items-start border-l border-white/10 gap-4 ml-auto pl-4" style={{ maxWidth: '320px' }}>
-          {/* Teams */}
-          <div className="flex gap-4">
+          <div className="hidden xl:flex items-start border-l border-white/10 gap-3 pl-4" style={{ marginLeft: 'auto' }}>
             {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
-              <div style={{ width: '140px' }}>
-                <div className="text-[10px] text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Allies</div>
-                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
+              <div style={{ width: '120px' }}>
+                <div className="text-[9px] text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.25rem' }}>Allies</div>
+                <div className="flex flex-col" style={{ gap: '0.125rem' }}>
                   {match.teammates.map((teammate, index) => {
                     const teammateChampionUrl = getChampionImageUrl(teammate.championName, ddragonVersion);
                     const isMVP = teammate.rank === 1;
                     return (
-                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
-                        <div className={`w-4 h-4 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-blue-500/50'}`}>
+                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.25rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-3.5 h-3.5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-blue-500/40'}`}>
                           <img
                             src={teammateChampionUrl}
                             alt={teammate.championName}
@@ -1040,8 +1059,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(teammate, e)}
-                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          style={{ maxWidth: '100px' }}
+                          className="text-[10px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '90px' }}
                         >
                           {teammate.summonerName}
                         </button>
@@ -1054,15 +1073,15 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
 
             {/* Enemies (Red team) - Compact grid */}
             {match.enemies && match.enemies.length > 0 && (
-              <div style={{ width: '140px' }}>
-                <div className="text-[10px] text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Enemies</div>
-                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
+              <div style={{ width: '120px' }}>
+                <div className="text-[9px] text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.25rem' }}>Enemies</div>
+                <div className="flex flex-col" style={{ gap: '0.125rem' }}>
                   {match.enemies.map((enemy, index) => {
                     const enemyChampionUrl = getChampionImageUrl(enemy.championName, ddragonVersion);
                     const isMVP = enemy.rank === 1;
                     return (
-                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
-                        <div className={`w-4 h-4 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-red-500/50'}`}>
+                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.25rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-3.5 h-3.5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-red-500/40'}`}>
                           <img
                             src={enemyChampionUrl}
                             alt={enemy.championName}
@@ -1074,8 +1093,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(enemy, e)}
-                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          style={{ maxWidth: '100px' }}
+                          className="text-[10px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '90px' }}
                         >
                           {enemy.summonerName}
                         </button>
@@ -1086,7 +1105,6 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
               </div>
             )}
           </div>
-        </div>
         </div>
 
         {/* Action Button */}
@@ -2361,14 +2379,28 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       }`}>
                         <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
-                          <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
-                            <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
+                          <div
+                            style={{
+                              position: 'relative',
+                              width: '28px',
+                              height: '28px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              background: badge.bg,
+                              border: badge.border,
+                              boxShadow: badge.shadow,
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: badge.color, position: 'relative', zIndex: 10 }}>
                               {badge.showIcon && (
-                                <svg className="w-2.5 h-2.5 mb-0.5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg style={{ width: '10px', height: '10px', marginBottom: '2px' }} viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
                               )}
-                              <span className="text-[8px] leading-none font-bold">{badge.label}</span>
+                              <span style={{ fontSize: '8px', lineHeight: 1, fontWeight: 700 }}>{badge.label}</span>
                             </div>
                           </div>
 
@@ -2493,14 +2525,28 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       }`}>
                         <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
-                          <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
-                            <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
+                          <div
+                            style={{
+                              position: 'relative',
+                              width: '28px',
+                              height: '28px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              background: badge.bg,
+                              border: badge.border,
+                              boxShadow: badge.shadow,
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: badge.color, position: 'relative', zIndex: 10 }}>
                               {badge.showIcon && (
-                                <svg className="w-2.5 h-2.5 mb-0.5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg style={{ width: '10px', height: '10px', marginBottom: '2px' }} viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
                               )}
-                              <span className="text-[8px] leading-none font-bold">{badge.label}</span>
+                              <span style={{ fontSize: '8px', lineHeight: 1, fontWeight: 700 }}>{badge.label}</span>
                             </div>
                           </div>
 
@@ -2635,14 +2681,28 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                       }`}>
                         <div className="grid grid-cols-[auto_auto_1fr_auto_auto] gap-2 items-center">
                           {/* Rang */}
-                          <div className={`relative w-7 h-7 flex items-center justify-center rounded-full flex-shrink-0 ${badge.container} ${badge.glow ? 'rank-mvp-shimmer' : ''}`}>
-                            <div className={`flex flex-col items-center justify-center ${badge.text} relative z-10`}>
+                          <div
+                            style={{
+                              position: 'relative',
+                              width: '28px',
+                              height: '28px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              borderRadius: '50%',
+                              flexShrink: 0,
+                              background: badge.bg,
+                              border: badge.border,
+                              boxShadow: badge.shadow,
+                            }}
+                          >
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: badge.color, position: 'relative', zIndex: 10 }}>
                               {badge.showIcon && (
-                                <svg className="w-2.5 h-2.5 mb-0.5" viewBox="0 0 24 24" fill="currentColor">
+                                <svg style={{ width: '10px', height: '10px', marginBottom: '2px' }} viewBox="0 0 24 24" fill="currentColor">
                                   <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
                                 </svg>
                               )}
-                              <span className="text-[8px] leading-none font-bold">{badge.label}</span>
+                              <span style={{ fontSize: '8px', lineHeight: 1, fontWeight: 700 }}>{badge.label}</span>
                             </div>
                           </div>
 
