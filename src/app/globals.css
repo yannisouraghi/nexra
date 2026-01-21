@@ -3818,6 +3818,15 @@ body {
   padding-right: 3rem;
 }
 
+.nexra-auth-field .relative button {
+  color: #666;
+  filter: drop-shadow(0 0 1px rgba(255,255,255,0.5));
+}
+
+.nexra-auth-field .relative button:hover {
+  color: #00d4ff;
+}
+
 .nexra-auth-field input::placeholder {
   color: rgba(255, 255, 255, 0.25);
 }
