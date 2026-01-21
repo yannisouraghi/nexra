@@ -567,9 +567,9 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
           {/* Rank Info - BIGGER */}
           {rank && rankImageUrl ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-              <div style={{ width: '110px', overflow: 'visible', flexShrink: 0 }}>
-                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(2.2)', transformOrigin: 'center' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, position: 'relative' }}>
+                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '280px', height: '280px', objectFit: 'contain', position: 'absolute' }} />
               </div>
               <div>
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>

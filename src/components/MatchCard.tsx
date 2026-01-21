@@ -973,12 +973,12 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center ml-3">
+            <div style={{ display: 'flex', alignItems: 'center', marginLeft: '12px' }}>
               {/* Trait gauche */}
-              <div className="h-10 w-px bg-white/10"></div>
+              <div style={{ height: '40px', width: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
 
               {/* K/D/A */}
-              <div className="text-center mx-5">
+              <div style={{ textAlign: 'center', margin: '0 20px' }}>
                 <div className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {match.kills}
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
@@ -990,10 +990,10 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
               </div>
 
               {/* Trait central */}
-              <div className="h-10 w-px bg-white/10"></div>
+              <div style={{ height: '40px', width: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
 
               {/* KDA ratio */}
-              <div className="text-center mx-5">
+              <div style={{ textAlign: 'center', margin: '0 20px' }}>
                 <p className={`text-xl sm:text-2xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
@@ -1001,7 +1001,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
               </div>
 
               {/* Trait droit */}
-              <div className="h-10 w-px bg-white/10"></div>
+              <div style={{ height: '40px', width: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }}></div>
             </div>
           </div>
 
