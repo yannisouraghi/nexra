@@ -764,86 +764,144 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Performance Stats Grid - 2x3 layout */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: '1rem', flex: 1 }}>
-                      {/* Win Rate */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                        <div className={`text-3xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
-                          {winRate}%
+                  <div className="glass-card" style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Performance Stats - Compact horizontal layout */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', flex: 1 }}>
+                      {/* Win Rate - Featured stat */}
+                      <div style={{
+                        flex: '1 1 calc(50% - 0.375rem)',
+                        minWidth: '140px',
+                        padding: '1rem 1.25rem',
+                        borderRadius: '0.75rem',
+                        background: parseInt(winRate) >= 50
+                          ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)'
+                          : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)',
+                        border: `1px solid ${parseInt(winRate) >= 50 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                      }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.25rem' }}>Win Rate</div>
+                          <div style={{ fontSize: '2rem', fontWeight: 800, color: parseInt(winRate) >= 50 ? '#22c55e' : '#ef4444', lineHeight: 1, fontFamily: 'Rajdhani, sans-serif' }}>{winRate}%</div>
                         </div>
-                        <div className="text-xs mt-1">
-                          <span className="text-green-400 font-semibold">{wins}W</span>
-                          <span className="text-[var(--text-quaternary)]">/</span>
-                          <span className="text-red-400 font-semibold">{losses}L</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.125rem' }}>
+                          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#22c55e' }}>{wins}W</span>
+                          <span style={{ fontSize: '1.125rem', fontWeight: 700, color: '#ef4444' }}>{losses}L</span>
                         </div>
-                        <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Win Rate</div>
                       </div>
 
-                      {/* KDA */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
-                        {(() => {
-                          const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
-                          const kdaColor = parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white';
-                          return (
-                            <>
-                              <div className={`text-3xl font-bold font-['Rajdhani'] ${kdaColor}`}>{kda}</div>
-                              <div className="text-xs mt-1">
-                                <span className="text-green-400">{avgKills}</span>
-                                <span className="text-[var(--text-quaternary)]"> / </span>
-                                <span className="text-red-400">{avgDeaths}</span>
-                                <span className="text-[var(--text-quaternary)]"> / </span>
-                                <span className="text-yellow-400">{avgAssists}</span>
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">KDA</div>
-                            </>
-                          );
-                        })()}
-                      </div>
+                      {/* KDA - Featured stat */}
+                      {(() => {
+                        const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
+                        const kdaNum = parseFloat(kda);
+                        const kdaColor = kdaNum >= 3 ? '#22d3ee' : kdaNum >= 2 ? '#22c55e' : 'white';
+                        return (
+                          <div style={{
+                            flex: '1 1 calc(50% - 0.375rem)',
+                            minWidth: '140px',
+                            padding: '1rem 1.25rem',
+                            borderRadius: '0.75rem',
+                            background: kdaNum >= 3
+                              ? 'linear-gradient(135deg, rgba(34, 211, 238, 0.15) 0%, rgba(34, 211, 238, 0.05) 100%)'
+                              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%)',
+                            border: `1px solid ${kdaNum >= 3 ? 'rgba(34, 211, 238, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '1rem'
+                          }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.25rem' }}>KDA</div>
+                              <div style={{ fontSize: '2rem', fontWeight: 800, color: kdaColor, lineHeight: 1, fontFamily: 'Rajdhani, sans-serif' }}>{kda}</div>
+                            </div>
+                            <div style={{ fontSize: '0.9375rem', fontWeight: 600 }}>
+                              <span style={{ color: '#22c55e' }}>{avgKills}</span>
+                              <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
+                              <span style={{ color: '#ef4444' }}>{avgDeaths}</span>
+                              <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
+                              <span style={{ color: '#eab308' }}>{avgAssists}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
-                      {/* CS/min */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      {/* Secondary stats row */}
+                      <div style={{
+                        flex: '1 1 100%',
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '0.5rem'
+                      }}>
+                        {/* CS/min */}
                         {(() => {
                           const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
                           const avgCSMin = matchesWithCS.length > 0
                             ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
                             : '0';
-                          const csColor = parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white';
+                          const csColor = parseFloat(avgCSMin) >= 7 ? '#22d3ee' : parseFloat(avgCSMin) >= 5 ? '#22c55e' : 'white';
                           return (
-                            <>
-                              <div className={`text-3xl font-bold font-['Rajdhani'] ${csColor}`}>{avgCSMin}</div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">CS/min</div>
-                            </>
+                            <div style={{
+                              flex: '1 1 calc(25% - 0.375rem)',
+                              minWidth: '90px',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '0.5rem',
+                              background: 'rgba(255, 255, 255, 0.03)',
+                              border: '1px solid rgba(255, 255, 255, 0.08)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>CS/min</span>
+                              <span style={{ fontSize: '1.375rem', fontWeight: 800, color: csColor, fontFamily: 'Rajdhani, sans-serif' }}>{avgCSMin}</span>
+                            </div>
                           );
                         })()}
-                      </div>
 
-                      {/* MVP */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {/* MVP */}
                         {(() => {
                           const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
                           return (
-                            <>
-                              <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">{mvpCount}</div>
-                              <div className="text-xs mt-1 text-[var(--text-tertiary)]">/ {totalGames}</div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">MVP</div>
-                            </>
+                            <div style={{
+                              flex: '1 1 calc(25% - 0.375rem)',
+                              minWidth: '90px',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '0.5rem',
+                              background: mvpCount > 0 ? 'rgba(234, 179, 8, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                              border: mvpCount > 0 ? '1px solid rgba(234, 179, 8, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>MVP</span>
+                              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+                                <span style={{ fontSize: '1.375rem', fontWeight: 800, color: '#eab308', fontFamily: 'Rajdhani, sans-serif' }}>{mvpCount}</span>
+                                <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)' }}>/{totalGames}</span>
+                              </div>
+                            </div>
                           );
                         })()}
-                      </div>
 
-                      {/* Streak */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {/* Streak */}
                         {(() => {
                           if (filteredMatches.length === 0) {
                             return (
-                              <>
-                                <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>
-                                <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Streak</div>
-                              </>
+                              <div style={{
+                                flex: '1 1 calc(25% - 0.375rem)',
+                                minWidth: '90px',
+                                padding: '0.75rem 1rem',
+                                borderRadius: '0.5rem',
+                                background: 'rgba(255, 255, 255, 0.03)',
+                                border: '1px solid rgba(255, 255, 255, 0.08)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                              }}>
+                                <span style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Streak</span>
+                                <span style={{ fontSize: '1.375rem', fontWeight: 800, color: 'white', fontFamily: 'Rajdhani, sans-serif' }}>-</span>
+                              </div>
                             );
                           }
                           let streak = 0;
@@ -852,29 +910,46 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                             if (match.win === firstResult) streak++;
                             else break;
                           }
+                          const streakColor = firstResult ? '#22c55e' : '#ef4444';
                           return (
-                            <>
-                              <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
-                                {streak}{firstResult ? 'W' : 'L'}
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Streak</div>
-                            </>
+                            <div style={{
+                              flex: '1 1 calc(25% - 0.375rem)',
+                              minWidth: '90px',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '0.5rem',
+                              background: firstResult ? 'rgba(34, 197, 94, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+                              border: `1px solid ${firstResult ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Streak</span>
+                              <span style={{ fontSize: '1.375rem', fontWeight: 800, color: streakColor, fontFamily: 'Rajdhani, sans-serif' }}>{streak}{firstResult ? 'W' : 'L'}</span>
+                            </div>
                           );
                         })()}
-                      </div>
 
-                      {/* Avg Damage */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {/* Avg Damage */}
                         {(() => {
                           const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
                           const avgDmg = matchesWithDmg.length > 0
                             ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
                             : '0';
                           return (
-                            <>
-                              <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">{avgDmg}k</div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Damage</div>
-                            </>
+                            <div style={{
+                              flex: '1 1 calc(25% - 0.375rem)',
+                              minWidth: '90px',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '0.5rem',
+                              background: 'rgba(249, 115, 22, 0.08)',
+                              border: '1px solid rgba(249, 115, 22, 0.2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span style={{ fontSize: '0.6875rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Damage</span>
+                              <span style={{ fontSize: '1.375rem', fontWeight: 800, color: '#fb923c', fontFamily: 'Rajdhani, sans-serif' }}>{avgDmg}k</span>
+                            </div>
                           );
                         })()}
                       </div>

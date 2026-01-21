@@ -403,46 +403,46 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
 
   return (
     <div className="glass-card" style={{ position: 'relative', overflow: 'hidden' }}>
-      <div style={{ padding: '1.25rem' }}>
+      <div style={{ padding: '1.5rem 2rem' }}>
         {/* Row 1: Player Identity - Centered */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', marginBottom: '1.5rem' }}>
           {/* Profile Icon */}
           <div style={styles.profileIconWrapper}>
-            <div style={styles.profileIcon}>
+            <div style={{ ...styles.profileIcon, width: '80px', height: '80px' }}>
               {profileIconUrl ? (
                 <img src={profileIconUrl} alt={`${gameName} profile`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               ) : (
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg style={{ width: '40px', height: '40px', color: 'rgba(255, 255, 255, 0.3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg style={{ width: '44px', height: '44px', color: 'rgba(255, 255, 255, 0.3)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
               )}
             </div>
             {summonerLevel && (
-              <div style={styles.levelBadge}>
-                <span style={styles.levelText}>{summonerLevel}</span>
+              <div style={{ ...styles.levelBadge, padding: '3px 8px' }}>
+                <span style={{ ...styles.levelText, fontSize: '12px' }}>{summonerLevel}</span>
               </div>
             )}
           </div>
 
           {/* Name and Region */}
           <div>
-            <div style={styles.nameRow}>
-              <h1 style={styles.gameName}>{gameName}</h1>
-              <span style={styles.tagLine}>#{tagLine}</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.625rem', marginBottom: '0.5rem' }}>
+              <h1 style={{ fontSize: '2rem', fontWeight: 700, color: 'white', letterSpacing: '-0.02em' }}>{gameName}</h1>
+              <span style={{ fontSize: '1.25rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 500 }}>#{tagLine}</span>
             </div>
             <div style={styles.badgesRow}>
-              <div style={styles.regionBadge}>
-                <div style={styles.regionDot}></div>
-                <span style={styles.regionText}>{regionLabels[region] || region.toUpperCase()}</span>
+              <div style={{ ...styles.regionBadge, padding: '0.375rem 0.625rem' }}>
+                <div style={{ ...styles.regionDot, width: '8px', height: '8px' }}></div>
+                <span style={{ ...styles.regionText, fontSize: '12px' }}>{regionLabels[region] || region.toUpperCase()}</span>
               </div>
               {currentSeason && (
-                <div style={styles.seasonBadge}>
-                  <svg style={styles.seasonIcon} fill="currentColor" viewBox="0 0 20 20">
+                <div style={{ ...styles.seasonBadge, padding: '0.375rem 0.625rem' }}>
+                  <svg style={{ ...styles.seasonIcon, width: '14px', height: '14px' }} fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
-                  <span style={styles.seasonText}>S{currentSeason.year} Split {currentSeason.split}</span>
+                  <span style={{ ...styles.seasonText, fontSize: '12px' }}>S{currentSeason.year} Split {currentSeason.split}</span>
                 </div>
               )}
             </div>
@@ -450,43 +450,43 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
         </div>
 
         {/* Row 2: Stats Row - All centered on one line */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap', position: 'relative' }}>
           {/* Rank Info */}
           {rank && rankImageUrl ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <div style={{ width: '50px', overflow: 'visible', flexShrink: 0 }}>
-                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(1.6)', transformOrigin: 'center' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div style={{ width: '72px', overflow: 'visible', flexShrink: 0 }}>
+                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(1.8)', transformOrigin: 'center' }} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>
+                <h2 style={{ fontSize: '1.375rem', fontWeight: 700, color: tierColor, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
                   {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
                 </h2>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{rank.leaguePoints}</span>
-                  <span style={{ fontSize: '0.65rem', color: 'rgba(255, 255, 255, 0.5)' }}>LP</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
+                  <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{rank.leaguePoints}</span>
+                  <span style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>LP</span>
                 </div>
               </div>
             </div>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', background: 'rgba(107, 114, 128, 0.1)', borderRadius: '0.5rem', border: '1px solid rgba(107, 114, 128, 0.2)' }}>
-              <svg style={{ width: '24px', height: '24px', color: 'rgba(156, 163, 175, 0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.25rem', background: 'rgba(107, 114, 128, 0.1)', borderRadius: '0.75rem', border: '1px solid rgba(107, 114, 128, 0.2)' }}>
+              <svg style={{ width: '36px', height: '36px', color: 'rgba(156, 163, 175, 0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white' }}>Unranked</span>
+              <span style={{ fontSize: '1.125rem', fontWeight: 600, color: 'white' }}>Unranked</span>
             </div>
           )}
 
-          <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
+          <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden md:block" />
 
           {/* LP Evolution Graph */}
           {rank && playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
             <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.25rem' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '7px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.375rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
                   <span>100</span>
                   <span>0</span>
                 </div>
-                <div style={{ position: 'relative', width: '80px', height: '35px' }}>
+                <div style={{ position: 'relative', width: '120px', height: '48px' }}>
                   {(() => {
                     const recentResults = playerStats.recentMatchResults.slice(0, 10);
                     const lpPerGame = 18;
@@ -496,9 +496,9 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                       const prevLp = lpHistory[0] + (wasWin ? -lpPerGame : lpPerGame);
                       lpHistory.unshift(Math.max(0, Math.min(100, prevLp)));
                     }
-                    const graphWidth = 80;
-                    const graphHeight = 35;
-                    const padding = 2;
+                    const graphWidth = 120;
+                    const graphHeight = 48;
+                    const padding = 3;
                     const innerWidth = graphWidth - padding * 2;
                     const innerHeight = graphHeight - padding * 2;
                     const points = lpHistory.map((lp, i) => {
@@ -514,70 +514,70 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                       <svg width={graphWidth} height={graphHeight}>
                         <defs>
                           <linearGradient id="lpGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor={trendColor} stopOpacity="0.3" />
+                            <stop offset="0%" stopColor={trendColor} stopOpacity="0.4" />
                             <stop offset="100%" stopColor={trendColor} stopOpacity="0" />
                           </linearGradient>
                         </defs>
-                        <line x1={padding} y1={padding} x2={graphWidth - padding} y2={padding} stroke="rgba(34, 197, 94, 0.2)" strokeWidth="1" strokeDasharray="2,2" />
-                        <line x1={padding} y1={graphHeight - padding} x2={graphWidth - padding} y2={graphHeight - padding} stroke="rgba(239, 68, 68, 0.2)" strokeWidth="1" strokeDasharray="2,2" />
+                        <line x1={padding} y1={padding} x2={graphWidth - padding} y2={padding} stroke="rgba(34, 197, 94, 0.25)" strokeWidth="1" strokeDasharray="3,3" />
+                        <line x1={padding} y1={graphHeight - padding} x2={graphWidth - padding} y2={graphHeight - padding} stroke="rgba(239, 68, 68, 0.25)" strokeWidth="1" strokeDasharray="3,3" />
                         <path d={areaD} fill="url(#lpGradient)" />
-                        <path d={pathD} fill="none" stroke={trendColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill={trendColor} stroke="white" strokeWidth="1" />
+                        <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="5" fill={trendColor} stroke="white" strokeWidth="2" />
                       </svg>
                     );
                   })()}
                 </div>
               </div>
-              <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.5)', marginTop: '0.125rem' }}>
-                {playerStats.recentMatchResults.slice(0, 10).length} games
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '0.25rem', fontWeight: 500 }}>
+                Last {playerStats.recentMatchResults.slice(0, 10).length} games
               </div>
             </div>
           )}
 
-          <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
+          <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden md:block" />
 
           {/* Stats: Games, Winrate, W/L */}
           {rank && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'white' }}>{totalGames}</div>
-                <div style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase' }}>Games</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{totalGames}</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Games</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: winRate >= 50 ? '#22c55e' : '#ef4444' }}>{winRate}%</div>
-                <div style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase' }}>Winrate</div>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: winRate >= 50 ? '#22c55e' : '#ef4444', letterSpacing: '-0.02em' }}>{winRate}%</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Winrate</div>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }}>
-                  <span style={{ fontSize: '1rem', fontWeight: 700, color: '#22c55e' }}>{rank.wins}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.3)' }}>/</span>
-                  <span style={{ fontSize: '1rem', fontWeight: 700, color: '#ef4444' }}>{rank.losses}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#22c55e' }}>{rank.wins}</span>
+                  <span style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 500 }}>/</span>
+                  <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ef4444' }}>{rank.losses}</span>
                 </div>
-                <div style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase' }}>W / L</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>W / L</div>
               </div>
             </div>
           )}
 
-          <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden lg:block" />
+          <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden lg:block" />
 
           {/* Recent Performance */}
           {playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
             <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.125rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                 {playerStats.recentMatchResults.slice(0, 10).map((isWin, idx) => (
                   <div
                     key={idx}
                     style={{
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '3px',
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '4px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '8px',
+                      fontSize: '11px',
                       fontWeight: 700,
                       backgroundColor: isWin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                      border: `1px solid ${isWin ? '#22c55e' : '#ef4444'}`,
+                      border: `2px solid ${isWin ? '#22c55e' : '#ef4444'}`,
                       color: isWin ? '#22c55e' : '#ef4444',
                     }}
                   >
@@ -585,15 +585,15 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: '0.6rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', marginTop: '0.125rem' }}>Recent</div>
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', marginTop: '0.375rem', fontWeight: 600, letterSpacing: '0.05em' }}>Recent</div>
             </div>
           )}
 
-          <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden xl:block" />
+          <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden xl:block" />
 
           {/* Top Champions */}
           {playerStats?.topChampions && playerStats.topChampions.length > 0 && (
-            <div className="hidden xl:flex" style={{ alignItems: 'center', gap: '0.5rem' }}>
+            <div className="hidden xl:flex" style={{ alignItems: 'center', gap: '0.75rem' }}>
               {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
                 <div
                   key={idx}
@@ -601,20 +601,20 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '0.125rem',
+                    gap: '0.25rem',
                   }}
                 >
                   <img
                     src={getChampionImageUrl(champion.championName, ddragonVersion)}
                     alt={champion.championName}
-                    style={{ width: '28px', height: '28px', borderRadius: '4px', border: `2px solid ${champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444'}` }}
+                    style={{ width: '40px', height: '40px', borderRadius: '6px', border: `2px solid ${champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444'}` }}
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '9px', fontWeight: 700, color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
                       {champion.winrate}%
                     </div>
-                    <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.4)' }}>{champion.games}g</div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{champion.games}g</div>
                   </div>
                 </div>
               ))}
@@ -622,27 +622,27 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           )}
 
           {/* Action Buttons - Bottom right corner */}
-          <div style={{ position: 'absolute', right: '0', bottom: '-0.25rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <div style={{ position: 'absolute', right: '0', bottom: '0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <button
               onClick={onRefresh}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.375rem 0.625rem',
-                borderRadius: '0.375rem',
-                border: '1px solid rgba(6, 182, 212, 0.3)',
+                gap: '0.5rem',
+                padding: '0.5rem 0.875rem',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(6, 182, 212, 0.4)',
                 backgroundColor: 'rgba(6, 182, 212, 0.1)',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 color: '#22d3ee',
-                fontSize: '0.7rem',
+                fontSize: '0.8125rem',
                 fontWeight: 600,
               }}
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(6, 182, 212, 0.2)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(6, 182, 212, 0.1)'; }}
             >
-              <svg style={{ width: '12px', height: '12px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
               Refresh
@@ -654,22 +654,22 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.375rem 0.625rem',
-                borderRadius: '0.375rem',
-                border: '1px solid rgba(249, 115, 22, 0.3)',
+                gap: '0.5rem',
+                padding: '0.5rem 0.875rem',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(249, 115, 22, 0.4)',
                 backgroundColor: 'rgba(249, 115, 22, 0.1)',
                 cursor: unlinkingAccount ? 'not-allowed' : 'pointer',
                 opacity: unlinkingAccount ? 0.5 : 1,
                 transition: 'all 0.2s',
                 color: '#fb923c',
-                fontSize: '0.7rem',
+                fontSize: '0.8125rem',
                 fontWeight: 600,
               }}
               onMouseEnter={(e) => { if (!unlinkingAccount) e.currentTarget.style.backgroundColor = 'rgba(249, 115, 22, 0.2)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(249, 115, 22, 0.1)'; }}
             >
-              <svg style={{ width: '12px', height: '12px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
               Change
