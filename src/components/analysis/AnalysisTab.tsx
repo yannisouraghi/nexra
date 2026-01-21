@@ -22,7 +22,6 @@ interface AnalysisTabProps {
   region: string;
   gameName?: string;
   tagLine?: string;
-  profileIconId?: number;
   onInsufficientCredits?: () => void;
 }
 
@@ -43,7 +42,7 @@ interface RecentMatch {
   teamPosition?: string;
 }
 
-export default function AnalysisTab({ puuid, region, gameName, tagLine, profileIconId, onInsufficientCredits }: AnalysisTabProps) {
+export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsufficientCredits }: AnalysisTabProps) {
   const { data: session, update: updateSession } = useSession();
   const [matches, setMatches] = useState<MatchForAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +53,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const [creditError, setCreditError] = useState<string | null>(null);
   const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
   const [addingCredits, setAddingCredits] = useState(false);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  // Ref for cache to avoid stale closures in callbacks, state for re-renders
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
 
@@ -292,27 +291,9 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     }
   }, [puuid, region, session, onInsufficientCredits]);
 
-  // Handle card click - open modal and fetch full analysis if needed
-  const handleCardClick = useCallback(async (match: MatchForAnalysis) => {
+  // Handle card click - open modal
+  const handleCardClick = useCallback((match: MatchForAnalysis) => {
     setSelectedMatch(match);
-
-    // If we have cached data but it might be incomplete, fetch full analysis
-    const cachedData = analyzedCacheRef.current.get(match.matchId);
-    if (match.analysisStatus === 'completed' && (!cachedData?.stats?.performanceSummary)) {
-      try {
-        // Fetch full analysis data
-        const response = await fetch(`/api/analysis/${match.analysisId || match.matchId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success && data.data) {
-            analyzedCacheRef.current.set(match.matchId, data.data);
-            setAnalyzedCache(prev => new Map(prev).set(match.matchId, data.data));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching full analysis:', error);
-      }
-    }
   }, []);
 
   // Close modal
@@ -542,7 +523,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
           analysisData={analyzedCache.get(selectedMatch.matchId) || null}
           isAnalyzing={analyzingIds.has(selectedMatch.matchId)}
           onClose={handleCloseModal}
-          onStartAnalysis={handleStartAnalysis}
         />
       )}
 
@@ -748,12 +728,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: 400,
     margin: '0 auto',
     lineHeight: 1.6,
-  },
-  gamesGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 12,
-    paddingBottom: 60,
   },
   gamesGridCards: {
     display: 'grid',

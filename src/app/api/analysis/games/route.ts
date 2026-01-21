@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
 
       if (data.success && data.data) {
         // Transform API response to match frontend expected format
+        // Include full stats, errors, tips for caching in the frontend
         const games = data.data.map((analysis: any) => ({
           id: analysis.id,
           matchId: analysis.match_id || analysis.matchId,
@@ -47,6 +48,11 @@ export async function GET(request: NextRequest) {
           deaths: analysis.deaths || 0,
           assists: analysis.assists || 0,
           role: analysis.role,
+          // Include full analysis data for caching
+          stats: analysis.stats || null,
+          errors: analysis.errors || [],
+          tips: analysis.tips || [],
+          clips: analysis.clips || [],
         }));
 
         return NextResponse.json({

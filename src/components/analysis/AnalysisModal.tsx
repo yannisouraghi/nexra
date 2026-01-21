@@ -21,7 +21,6 @@ interface AnalysisModalProps {
   analysisData: AnalysisData | null;
   isAnalyzing: boolean;
   onClose: () => void;
-  onStartAnalysis: (matchId: string) => void;
 }
 
 type TabType = 'summary' | 'errors' | 'tips' | 'stats';
@@ -31,7 +30,6 @@ export default function AnalysisModal({
   analysisData,
   isAnalyzing,
   onClose,
-  onStartAnalysis,
 }: AnalysisModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [imageError, setImageError] = useState(false);

@@ -1029,7 +1029,6 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     region={riotAccount.region}
                     gameName={riotAccount.gameName}
                     tagLine={riotAccount.tagLine}
-                    profileIconId={summonerData.profileIconId}
                     onInsufficientCredits={() => setShowPricingModal(true)}
                   />
                 </div>

@@ -540,17 +540,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: '#22c55e',
     border: '2px solid #1a1a2e',
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    position: 'relative',
-  },
-  statusDotInner: {
-    position: 'absolute',
-    inset: 0,
-    borderRadius: '50%',
-    animation: 'pulse 1.5s ease-in-out infinite',
-  },
   content: {
     position: 'relative',
     height: '100%',
@@ -700,10 +689,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: 14,
     fontWeight: 600,
     color: '#00d4ff',
-  },
-  processingSubtext: {
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.5)',
   },
   // Pending state styles
   pendingContainer: {

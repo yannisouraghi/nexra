@@ -28,32 +28,36 @@ export async function GET(
         const analysis = data.data;
 
         // Transform API response to match frontend expected format
+        // Wrap in { success, data } format for consistency with other endpoints
         return NextResponse.json({
-          id: analysis.id,
-          matchId: analysis.match_id || analysis.matchId,
-          puuid: analysis.puuid,
-          status: analysis.status,
-          createdAt: analysis.created_at || analysis.createdAt,
-          completedAt: analysis.completed_at || analysis.completedAt,
+          success: true,
+          data: {
+            id: analysis.id,
+            matchId: analysis.match_id || analysis.matchId,
+            puuid: analysis.puuid,
+            status: analysis.status,
+            createdAt: analysis.created_at || analysis.createdAt,
+            completedAt: analysis.completed_at || analysis.completedAt,
 
-          // Game info
-          champion: analysis.champion || 'Unknown',
-          result: analysis.result || 'loss',
-          duration: analysis.duration || 0,
-          gameMode: analysis.game_mode || analysis.gameMode || 'Unknown',
-          kills: analysis.kills || 0,
-          deaths: analysis.deaths || 0,
-          assists: analysis.assists || 0,
-          role: analysis.role,
+            // Game info
+            champion: analysis.champion || 'Unknown',
+            result: analysis.result || 'loss',
+            duration: analysis.duration || 0,
+            gameMode: analysis.game_mode || analysis.gameMode || 'Unknown',
+            kills: analysis.kills || 0,
+            deaths: analysis.deaths || 0,
+            assists: analysis.assists || 0,
+            role: analysis.role,
 
-          // Analysis results
-          stats: analysis.stats || null,
-          errors: analysis.errors || [],
-          tips: analysis.tips || [],
-          clips: analysis.clips || [],
+            // Analysis results
+            stats: analysis.stats || null,
+            errors: analysis.errors || [],
+            tips: analysis.tips || [],
+            clips: analysis.clips || [],
 
-          // Error info
-          errorMessage: analysis.error_message || analysis.errorMessage,
+            // Error info
+            errorMessage: analysis.error_message || analysis.errorMessage,
+          },
         });
       }
     }
