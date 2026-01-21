@@ -105,11 +105,10 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
   const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
 
-  // Smooth progress animation - cycles through phases to avoid getting stuck
+  // Smooth progress animation
   useEffect(() => {
     if (isProcessing) {
       setProgress(0);
-      let phase = 0;
       const iv = setInterval(() => {
         setProgress(p => {
           // Phase 1: Quick start (0-40%)
@@ -117,10 +116,10 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
           // Phase 2: Slower middle (40-70%)
           if (p < 70) return p + 0.8;
           // Phase 3: Even slower (70-90%)
-          if (p < 90) return p + 0.4;
-          // Phase 4: Cycle between 90-98% to show activity
-          phase = (phase + 1) % 20;
-          return 90 + (phase < 10 ? phase * 0.8 : (20 - phase) * 0.8);
+          if (p < 90) return p + 0.3;
+          // Phase 4: Very slow crawl to 95% then stay there
+          if (p < 95) return p + 0.1;
+          return 95; // Stay at 95% until complete
         });
       }, 150);
       return () => clearInterval(iv);
