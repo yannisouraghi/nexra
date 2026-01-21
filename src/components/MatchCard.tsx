@@ -975,40 +975,73 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
           </div>
 
+          {/* Center Section - Player Stats */}
+          <div className="hidden lg:flex items-center border-l border-white/10 gap-6 ml-4 pl-4">
+            {/* CS */}
+            {match.totalMinionsKilled !== undefined && (
+              <div className="text-center">
+                <div className="text-sm font-bold text-white">{match.totalMinionsKilled + (match.neutralMinionsKilled || 0)}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">CS</div>
+              </div>
+            )}
+            {/* CS/min */}
+            {match.totalMinionsKilled !== undefined && match.gameDuration > 0 && (
+              <div className="text-center">
+                <div className="text-sm font-bold text-cyan-400">{((match.totalMinionsKilled + (match.neutralMinionsKilled || 0)) / (match.gameDuration / 60)).toFixed(1)}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">CS/min</div>
+              </div>
+            )}
+            {/* Damage */}
+            {match.totalDamageDealtToChampions !== undefined && (
+              <div className="text-center">
+                <div className="text-sm font-bold text-orange-400">{(match.totalDamageDealtToChampions / 1000).toFixed(1)}k</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Damage</div>
+              </div>
+            )}
+            {/* Gold */}
+            {match.goldEarned !== undefined && (
+              <div className="text-center">
+                <div className="text-sm font-bold text-yellow-400">{(match.goldEarned / 1000).toFixed(1)}k</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Gold</div>
+              </div>
+            )}
+            {/* Vision */}
+            {match.visionScore !== undefined && (
+              <div className="text-center">
+                <div className="text-sm font-bold text-purple-400">{match.visionScore}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase">Vision</div>
+              </div>
+            )}
+          </div>
+
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden md:flex items-start flex-1 border-l border-white/10 gap-4 lg:gap-6 ml-4 lg:ml-6 pl-4 lg:pl-6">
+          <div className="hidden md:flex items-start border-l border-white/10 gap-4 ml-auto pl-4" style={{ maxWidth: '320px' }}>
           {/* Teams */}
-          <div className="flex flex-1 gap-4 lg:gap-6">
-            {/* Allies (Blue team) - Vertical */}
+          <div className="flex gap-4">
+            {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
-              <div className="flex-1">
-                <div className="text-xs text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.5rem' }}>Allies</div>
-                <div className="flex flex-col" style={{ gap: '0.375rem' }}>
+              <div style={{ width: '140px' }}>
+                <div className="text-[10px] text-blue-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Allies</div>
+                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
                   {match.teammates.map((teammate, index) => {
                     const teammateChampionUrl = getChampionImageUrl(teammate.championName, ddragonVersion);
-                    const badge = getRankBadge(teammate.rank || 10);
                     const isMVP = teammate.rank === 1;
                     return (
-                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded-lg' : ''}`} style={isMVP ? { gap: '0.5rem', padding: '0.25rem 0.5rem' } : { gap: '0.5rem' }}>
-                        <div className={`w-5 h-5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border-2 border-yellow-500 shadow-lg shadow-yellow-500/50' : `border ${teammate.participantId ? getPlayerColor(teammate.participantId).border : 'border-blue-500'}`}`}>
+                      <div key={`ally-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-4 h-4 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-blue-500/50'}`}>
                           <img
                             src={teammateChampionUrl}
                             alt={teammate.championName}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement!.innerHTML = `
-                                <div class="w-full h-full flex items-center justify-center bg-gray-700 text-[8px] text-white">
-                                  ${teammate.championName.charAt(0)}
-                                </div>
-                              `;
                             }}
                           />
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(teammate, e)}
-                          className="text-xs text-gray-300 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          title={`View ${teammate.summonerName}'s profile`}
+                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '100px' }}
                         >
                           {teammate.summonerName}
                         </button>
@@ -1019,36 +1052,30 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
               </div>
             )}
 
-            {/* Enemies (Red team) - Vertical */}
+            {/* Enemies (Red team) - Compact grid */}
             {match.enemies && match.enemies.length > 0 && (
-              <div className="flex-1">
-                <div className="text-xs text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.5rem' }}>Enemies</div>
-                <div className="flex flex-col" style={{ gap: '0.375rem' }}>
+              <div style={{ width: '140px' }}>
+                <div className="text-[10px] text-red-400 font-bold uppercase tracking-wider" style={{ marginBottom: '0.375rem' }}>Enemies</div>
+                <div className="flex flex-col" style={{ gap: '0.25rem' }}>
                   {match.enemies.map((enemy, index) => {
                     const enemyChampionUrl = getChampionImageUrl(enemy.championName, ddragonVersion);
-                    const badge = getRankBadge(enemy.rank || 10);
                     const isMVP = enemy.rank === 1;
                     return (
-                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded-lg' : ''}`} style={isMVP ? { gap: '0.5rem', padding: '0.25rem 0.5rem' } : { gap: '0.5rem' }}>
-                        <div className={`w-5 h-5 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border-2 border-yellow-500 shadow-lg shadow-yellow-500/50' : `border ${enemy.participantId ? getPlayerColor(enemy.participantId).border : 'border-red-500'}`}`}>
+                      <div key={`enemy-${index}`} className={`flex items-center ${isMVP ? 'bg-yellow-500/10 rounded' : ''}`} style={{ gap: '0.375rem', padding: isMVP ? '0.125rem 0.25rem' : '0' }}>
+                        <div className={`w-4 h-4 rounded overflow-hidden flex-shrink-0 ${isMVP ? 'border border-yellow-500' : 'border border-red-500/50'}`}>
                           <img
                             src={enemyChampionUrl}
                             alt={enemy.championName}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
-                              e.currentTarget.parentElement!.innerHTML = `
-                                <div class="w-full h-full flex items-center justify-center bg-gray-700 text-[8px] text-white">
-                                  ${enemy.championName.charAt(0)}
-                                </div>
-                              `;
                             }}
                           />
                         </div>
                         <button
                           onClick={(e) => handlePlayerClick(enemy, e)}
-                          className="text-xs text-gray-300 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
-                          title={`View ${enemy.summonerName}'s profile`}
+                          className="text-[11px] text-gray-400 truncate hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 text-left"
+                          style={{ maxWidth: '100px' }}
                         >
                           {enemy.summonerName}
                         </button>

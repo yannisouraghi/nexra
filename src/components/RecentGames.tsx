@@ -762,58 +762,120 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '3rem' }}>
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" style={{ gap: '1.5rem', marginBottom: '2.5rem' }}>
-                    {/* Total Games */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.5rem' }}>
-                      <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '1rem' }}>
-                        Total Games
-                      </div>
-                      <div className="text-5xl font-bold text-white font-['Rajdhani']">{totalGames}</div>
-                    </div>
-
-                    {/* Victories */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.5rem' }}>
-                      <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '1rem' }}>
-                        Victories
-                      </div>
-                      <div className="text-5xl font-bold text-gradient-victory font-['Rajdhani']">{wins}</div>
-                    </div>
-
-                    {/* Defeats */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.5rem' }}>
-                      <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '1rem' }}>
-                        Defeats
-                      </div>
-                      <div className="text-5xl font-bold text-gradient-defeat font-['Rajdhani']">{losses}</div>
-                    </div>
-
+                  <div className="glass-card" style={{ padding: '2rem' }}>
+                  {/* Performance Stats Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" style={{ gap: '1rem' }}>
                     {/* Win Rate */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.5rem' }}>
-                      <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '1rem' }}>
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
                         Win Rate
                       </div>
-                      <div className="text-5xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-['Rajdhani']">
+                      <div className={`text-3xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                         {winRate}%
                       </div>
+                      <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
+                        {wins}W {losses}L
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Win Rate Progress Bar */}
-                  <div className="rounded-xl bg-glass-ultra border border-glass-border" style={{ padding: '1.5rem' }}>
-                    <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
-                      <span className="text-sm font-semibold text-[var(--text-secondary)]">Progression Win Rate</span>
-                      <span className="text-xl font-bold text-cyan-400 font-['Rajdhani']">{wins}/{totalGames}</span>
+                    {/* Average KDA */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                        Avg KDA
+                      </div>
+                      {(() => {
+                        const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
+                        return (
+                          <>
+                            <div className={`text-3xl font-bold font-['Rajdhani'] ${parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white'}`}>
+                              {kda}
+                            </div>
+                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
+                              {avgKills}/{avgDeaths}/{avgAssists}
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
-                    <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-700 ease-out"
-                        style={{
-                          width: `${winRate}%`,
-                          boxShadow: '0 0 16px rgba(0, 212, 255, 0.4)'
-                        }}
-                      ></div>
+
+                    {/* CS/min */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                        Avg CS/min
+                      </div>
+                      {(() => {
+                        const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
+                        const avgCSMin = matchesWithCS.length > 0
+                          ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
+                          : '0';
+                        return (
+                          <div className={`text-3xl font-bold font-['Rajdhani'] ${parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white'}`}>
+                            {avgCSMin}
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* MVP Count */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                        MVP
+                      </div>
+                      {(() => {
+                        const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
+                        return (
+                          <>
+                            <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">
+                              {mvpCount}
+                            </div>
+                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
+                              /{totalGames} games
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Current Streak */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                        Streak
+                      </div>
+                      {(() => {
+                        if (filteredMatches.length === 0) return <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>;
+                        let streak = 0;
+                        const firstResult = filteredMatches[0]?.win;
+                        for (const match of filteredMatches) {
+                          if (match.win === firstResult) streak++;
+                          else break;
+                        }
+                        return (
+                          <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
+                            {streak}{firstResult ? 'W' : 'L'}
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Kill Participation */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                      <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
+                        Avg Damage
+                      </div>
+                      {(() => {
+                        const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
+                        const avgDmg = matchesWithDmg.length > 0
+                          ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
+                          : '0';
+                        return (
+                          <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">
+                            {avgDmg}k
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   </div>
