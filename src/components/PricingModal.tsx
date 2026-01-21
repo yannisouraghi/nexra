@@ -69,7 +69,7 @@ export default function PricingModal({ isOpen, onClose }: PricingModalProps) {
 
   const handlePurchase = async (packId: string, priceId: string | undefined) => {
     if (status !== 'authenticated') {
-      router.push('/login');
+      router.push('/');
       return;
     }
 

@@ -27,9 +27,9 @@ function DashboardContent() {
     // Wait for session to load
     if (status === 'loading') return;
 
-    // If not authenticated, redirect to login
+    // If not authenticated, redirect to home
     if (status === 'unauthenticated') {
-      router.push('/login');
+      router.push('/');
       return;
     }
 

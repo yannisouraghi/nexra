@@ -49,7 +49,7 @@ export default function PricingPage() {
 
   const handlePurchase = async (packId: string, priceId: string | undefined) => {
     if (status !== 'authenticated') {
-      router.push('/login');
+      router.push('/');
       return;
     }
 
@@ -114,7 +114,7 @@ export default function PricingPage() {
               Dashboard
             </Link>
           ) : (
-            <Link href="/login" className="pricing-nav-btn pricing-nav-btn-primary">
+            <Link href="/" className="pricing-nav-btn pricing-nav-btn-primary">
               Sign In
             </Link>
           )}

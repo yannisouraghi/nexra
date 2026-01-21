@@ -3801,6 +3801,7 @@ body {
 }
 
 .nexra-auth-field input {
+  width: 100%;
   padding: 0.875rem 1rem;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -3810,6 +3811,11 @@ body {
   color: #fff;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nexra-auth-field .relative input {
+  padding-right: 3rem;
 }
 
 .nexra-auth-field input::placeholder {
