@@ -764,148 +764,58 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '1rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Performance Stats Grid - 2x3 layout with detailed data */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: '0.5rem', flex: 1 }}>
+                  <div className="glass-card" style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Stats Grid - 4 columns */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
+                      {/* Total Games */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.75rem' }}>
+                          Total Games
+                        </div>
+                        <div className="text-4xl font-bold text-white font-['Rajdhani']">{totalGames}</div>
+                      </div>
+
+                      {/* Victories */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.75rem' }}>
+                          Victories
+                        </div>
+                        <div className="text-4xl font-bold text-green-400 font-['Rajdhani']">{wins}</div>
+                      </div>
+
+                      {/* Defeats */}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.75rem' }}>
+                          Defeats
+                        </div>
+                        <div className="text-4xl font-bold text-red-400 font-['Rajdhani']">{losses}</div>
+                      </div>
+
                       {/* Win Rate */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">Win Rate</div>
-                        <div className={`text-2xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border text-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
+                        <div className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.75rem' }}>
+                          Win Rate
+                        </div>
+                        <div className="text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent font-['Rajdhani']">
                           {winRate}%
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-green-400 font-bold text-sm">{wins}W</span>
-                          <span className="text-[var(--text-quaternary)]">-</span>
-                          <span className="text-red-400 font-bold text-sm">{losses}L</span>
-                        </div>
-                        <div className="text-[10px] text-[var(--text-quaternary)] mt-1">{totalGames} games played</div>
                       </div>
+                    </div>
 
-                      {/* KDA */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        {(() => {
-                          const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
-                          const kdaColor = parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white';
-                          return (
-                            <>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">Avg KDA</div>
-                              <div className={`text-2xl font-bold font-['Rajdhani'] ${kdaColor}`}>{kda}</div>
-                              <div className="text-sm mt-1 font-medium">
-                                <span className="text-green-400">{avgKills}</span>
-                                <span className="text-[var(--text-quaternary)]"> / </span>
-                                <span className="text-red-400">{avgDeaths}</span>
-                                <span className="text-[var(--text-quaternary)]"> / </span>
-                                <span className="text-yellow-400">{avgAssists}</span>
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] mt-1">K/D/A per game</div>
-                            </>
-                          );
-                        })()}
+                    {/* Win Rate Progress Bar */}
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border" style={{ padding: '1.25rem' }}>
+                      <div className="flex items-center justify-between" style={{ marginBottom: '0.75rem' }}>
+                        <span className="text-sm font-semibold text-[var(--text-secondary)]">Win Rate Progression</span>
+                        <span className="text-xl font-bold text-cyan-400 font-['Rajdhani']">{wins}/{totalGames}</span>
                       </div>
-
-                      {/* CS/min */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        {(() => {
-                          const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
-                          const avgCSMin = matchesWithCS.length > 0
-                            ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
-                            : '0';
-                          const totalCS = matchesWithCS.reduce((sum, m) => sum + (m.totalMinionsKilled || 0), 0);
-                          const csColor = parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white';
-                          return (
-                            <>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">CS/min</div>
-                              <div className={`text-2xl font-bold font-['Rajdhani'] ${csColor}`}>{avgCSMin}</div>
-                              <div className="text-sm mt-1 text-[var(--text-tertiary)] font-medium">
-                                {Math.round(totalCS / (matchesWithCS.length || 1))} avg/game
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] mt-1">{parseFloat(avgCSMin) >= 7 ? 'Excellent' : parseFloat(avgCSMin) >= 5 ? 'Good' : 'Needs work'}</div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* MVP */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        {(() => {
-                          const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
-                          const mvpRate = totalGames > 0 ? Math.round((mvpCount / totalGames) * 100) : 0;
-                          return (
-                            <>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">MVP</div>
-                              <div className="text-2xl font-bold font-['Rajdhani'] text-yellow-400">{mvpCount}</div>
-                              <div className="text-sm mt-1 text-[var(--text-tertiary)] font-medium">
-                                {mvpRate}% of games
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] mt-1">out of {totalGames} games</div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Streak */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        {(() => {
-                          if (filteredMatches.length === 0) {
-                            return (
-                              <>
-                                <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">Streak</div>
-                                <div className="text-2xl font-bold font-['Rajdhani'] text-white">-</div>
-                                <div className="text-sm mt-1 text-[var(--text-tertiary)]">No games</div>
-                              </>
-                            );
-                          }
-                          let streak = 0;
-                          const firstResult = filteredMatches[0]?.win;
-                          for (const match of filteredMatches) {
-                            if (match.win === firstResult) streak++;
-                            else break;
-                          }
-                          // Calculate best streak
-                          let bestWinStreak = 0, currentStreak = 0;
-                          for (const m of [...filteredMatches].reverse()) {
-                            if (m.win) { currentStreak++; bestWinStreak = Math.max(bestWinStreak, currentStreak); }
-                            else currentStreak = 0;
-                          }
-                          return (
-                            <>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">Current Streak</div>
-                              <div className={`text-2xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
-                                {streak}{firstResult ? 'W' : 'L'}
-                              </div>
-                              <div className="text-sm mt-1 text-[var(--text-tertiary)] font-medium">
-                                {firstResult ? 'Winning' : 'Losing'} streak
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] mt-1">Best: {bestWinStreak}W</div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Avg Damage */}
-                      <div className="rounded-lg bg-glass-ultra border border-glass-border flex flex-col justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '0.75rem' }}>
-                        {(() => {
-                          const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
-                          const avgDmg = matchesWithDmg.length > 0
-                            ? Math.round(matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length)
-                            : 0;
-                          const maxDmg = matchesWithDmg.length > 0
-                            ? Math.max(...matchesWithDmg.map(m => m.totalDamageDealtToChampions || 0))
-                            : 0;
-                          return (
-                            <>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mb-1 font-semibold">Avg Damage</div>
-                              <div className="text-2xl font-bold font-['Rajdhani'] text-orange-400">{(avgDmg / 1000).toFixed(1)}k</div>
-                              <div className="text-sm mt-1 text-[var(--text-tertiary)] font-medium">
-                                per game
-                              </div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] mt-1">Max: {(maxDmg / 1000).toFixed(1)}k</div>
-                            </>
-                          );
-                        })()}
+                      <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-700 ease-out"
+                          style={{
+                            width: `${winRate}%`,
+                            boxShadow: '0 0 16px rgba(0, 212, 255, 0.4)'
+                          }}
+                        ></div>
                       </div>
                     </div>
                   </div>
