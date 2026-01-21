@@ -411,21 +411,31 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
     <div style={styles.container}>
       {/* Credit Error Banner */}
       {creditError && (
-        <div style={styles.errorBanner}>
-          <div style={styles.errorIcon}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
+        <div style={styles.creditErrorCard}>
+          <div style={styles.creditErrorContent}>
+            <div style={styles.creditErrorIconWrapper}>
+              <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div style={styles.creditErrorTextWrapper}>
+              <h3 style={styles.creditErrorTitle}>Out of Credits</h3>
+              <p style={styles.creditErrorText}>
+                You need credits to analyze your games. Each AI analysis costs <strong style={{ color: '#ffd700' }}>1 credit</strong> and provides detailed insights on deaths, positioning, and improvement areas.
+              </p>
+            </div>
           </div>
-          <span>{creditError}</span>
           <button
             onClick={() => {
               setCreditError(null);
               onInsufficientCredits?.();
             }}
-            style={styles.buyCreditsButton}
+            style={styles.getCreditsButton}
           >
-            Buy Credits
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ marginRight: 6 }}>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Get Credits
           </button>
         </div>
       )}
@@ -580,36 +590,60 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     gap: 24,
   },
-  errorBanner: {
+  creditErrorCard: {
     display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    padding: '12px 16px',
-    borderRadius: 12,
-    background: 'rgba(255, 51, 102, 0.1)',
-    border: '1px solid rgba(255, 51, 102, 0.3)',
-    color: '#ff6b6b',
-    fontSize: 14,
+    flexDirection: 'column',
+    gap: 16,
+    padding: 20,
+    borderRadius: 16,
+    background: 'linear-gradient(135deg, rgba(255, 183, 77, 0.1) 0%, rgba(255, 107, 107, 0.1) 100%)',
+    border: '1px solid rgba(255, 183, 77, 0.3)',
   },
-  errorIcon: {
+  creditErrorContent: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 16,
+  },
+  creditErrorIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    background: 'linear-gradient(135deg, rgba(255, 183, 77, 0.2), rgba(255, 215, 0, 0.2))',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: '#ff3366',
+    color: '#ffd700',
     flexShrink: 0,
   },
-  buyCreditsButton: {
-    marginLeft: 'auto',
-    padding: '8px 16px',
-    borderRadius: 8,
+  creditErrorTextWrapper: {
+    flex: 1,
+  },
+  creditErrorTitle: {
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#ffd700',
+    margin: '0 0 6px 0',
+  },
+  creditErrorText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.7)',
+    margin: 0,
+    lineHeight: 1.5,
+  },
+  getCreditsButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '12px 24px',
+    borderRadius: 10,
     border: 'none',
     background: 'linear-gradient(135deg, #ffd700, #ff9500)',
     color: '#000',
-    fontSize: 13,
-    fontWeight: 600,
+    fontSize: 14,
+    fontWeight: 700,
     cursor: 'pointer',
     transition: 'all 0.2s',
-    flexShrink: 0,
+    alignSelf: 'flex-start',
   },
   infoBanner: {
     display: 'flex',

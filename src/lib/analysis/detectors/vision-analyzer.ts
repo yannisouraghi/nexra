@@ -95,16 +95,16 @@ export function analyzeVision(
         type: 'vision',
         severity,
         timestamp: minuteStart * 60,
-        title: `Manque de vision (${minuteStart}-${minuteEnd} min)`,
-        description: `Tu n'as place que ${data.placed} ward(s) entre ${minuteStart} et ${minuteEnd} min. ${
+        title: `Lack of vision (${minuteStart}-${minuteEnd} min)`,
+        description: `You only placed ${data.placed} ward(s) between ${minuteStart} and ${minuteEnd} min. ${
           isSupport
-            ? 'En tant que support, la vision est ta responsabilite principale.'
-            : 'Meme en tant que laner, tu dois contribuer a la vision.'
+            ? 'As a support, vision is your main responsibility.'
+            : 'Even as a laner, you should contribute to vision control.'
         }`,
         suggestion: isSupport
-          ? 'Place des wards strategiques: river, jungle ennemie, objectifs. Utilise ton Oracle Lens pour deward.'
-          : 'Achete des Control Wards regulierement. Une ward peut sauver ta vie ou celle de ton equipe.',
-        coachingNote: `La vision gagne des games. ${data.placed} ward(s) en 5 min est insuffisant pour avoir une bonne lecture de la map.`,
+          ? 'Place strategic wards: river, enemy jungle, objectives. Use your Oracle Lens to deward.'
+          : 'Buy Control Wards regularly. A ward can save your life or your team\'s.',
+        coachingNote: `Vision wins games. ${data.placed} ward(s) in 5 min is not enough to have good map awareness.`,
         context: {
           visionState: {
             playerWardsActive: data.placed,
@@ -121,10 +121,10 @@ export function analyzeVision(
         type: 'vision',
         severity: 'low',
         timestamp: minuteStart * 60,
-        title: `Pas de Control Ward (${minuteStart}-${minuteEnd} min)`,
-        description: `Tu n'as pas place de Control Ward entre ${minuteStart} et ${minuteEnd} min.`,
-        suggestion: 'Les Control Wards sont essentielles pour controler les zones cl des (dragon, baron, jungle). Achetes-en a chaque back.',
-        coachingNote: 'Une Control Ward coute 75 gold mais peut sauver ta vie ou reveler des embuscades. C\'est l\'un des meilleurs investissements du jeu.',
+        title: `No Control Ward (${minuteStart}-${minuteEnd} min)`,
+        description: `You didn't place any Control Ward between ${minuteStart} and ${minuteEnd} min.`,
+        suggestion: 'Control Wards are essential to control key zones (dragon, baron, jungle). Buy one on every back.',
+        coachingNote: 'A Control Ward costs 75 gold but can save your life or reveal ambushes. It\'s one of the best investments in the game.',
         context: {
           visionState: {
             playerWardsActive: data.placed,

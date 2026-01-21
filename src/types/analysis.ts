@@ -256,16 +256,16 @@ export function getSeverityLabel(severity: ErrorSeverity): string {
 
 export function getErrorTypeLabel(type: ErrorType): string {
   const labels: Record<ErrorType, string> = {
-    'positioning': 'Positionnement',
+    'positioning': 'Positioning',
     'timing': 'Timing',
-    'cs-missing': 'CS Manqués',
+    'cs-missing': 'Missed CS',
     'vision': 'Vision',
-    'objective': 'Objectifs',
-    'map-awareness': 'Conscience Map',
-    'itemization': 'Itemisation',
+    'objective': 'Objectives',
+    'map-awareness': 'Map Awareness',
+    'itemization': 'Itemization',
     'cooldown-tracking': 'Cooldowns',
-    'trading': 'Trades',
-    'wave-management': 'Gestion Waves',
+    'trading': 'Trading',
+    'wave-management': 'Wave Management',
     'roaming': 'Roaming',
     'teamfight': 'Teamfight',
   };

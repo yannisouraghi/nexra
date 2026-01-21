@@ -99,14 +99,14 @@ export function analyzeCS(
             type: 'cs-missing',
             severity,
             timestamp: checkpoint * 60,
-            title: `Retard de CS a ${checkpoint} min`,
-            description: `Tu as ${playerCS} CS contre ${opponentCS} pour ton adversaire (${csDiff} CS, soit ~${goldLost} gold de retard).`,
+            title: `CS deficit at ${checkpoint} min`,
+            description: `You have ${playerCS} CS vs ${opponentCS} for your opponent (${csDiff} CS, ~${goldLost} gold behind).`,
             suggestion: isJungler
-              ? 'Optimise tes clears de jungle. Ne rate pas de camps et time bien tes respawns.'
-              : 'Focus sur le last hit. Si la lane est difficile, utilise tes sorts pour securiser les CS sous tour.',
+              ? 'Optimize your jungle clears. Don\'t miss camps and time your respawns well.'
+              : 'Focus on last hitting. If the lane is difficult, use your abilities to secure CS under tower.',
             coachingNote: csDiff < -30
-              ? `${Math.abs(csDiff)} CS de retard est significatif. Ton adversaire a presque un item d'avance juste en CS.`
-              : 'Meme 15 CS de retard represente ~300 gold. Ca s\'accumule vite sur la duree de la partie.',
+              ? `${Math.abs(csDiff)} CS behind is significant. Your opponent has almost an item advantage just from CS.`
+              : 'Even 15 CS behind represents ~300 gold. It adds up quickly over the game.',
             context: {
               csState: {
                 player: playerCS,
@@ -129,12 +129,12 @@ export function analyzeCS(
           type: 'cs-missing',
           severity: 'medium',
           timestamp: checkpoint * 60,
-          title: `CS en dessous de la moyenne a ${checkpoint} min`,
-          description: `Tu as ${playerCS} CS (${csPerMin.toFixed(1)} CS/min). L'objectif est ${benchmark.average} CS/min minimum.`,
+          title: `CS below average at ${checkpoint} min`,
+          description: `You have ${playerCS} CS (${csPerMin.toFixed(1)} CS/min). Target is ${benchmark.average} CS/min minimum.`,
           suggestion: isJungler
-            ? 'Assure-toi de clear tous tes camps efficacement et de ne pas perdre de temps entre les ganks.'
-            : 'Entraine-toi au last hit en practice tool. Chaque minion compte.',
-          coachingNote: `A ${checkpoint} min, tu devrais viser ${Math.round(expectedCS)} CS. Tu en as rate ${Math.round(expectedCS - playerCS)}.`,
+            ? 'Make sure to clear all your camps efficiently and don\'t waste time between ganks.'
+            : 'Practice last hitting in Practice Tool. Every minion counts.',
+          coachingNote: `At ${checkpoint} min, you should aim for ${Math.round(expectedCS)} CS. You missed ${Math.round(expectedCS - playerCS)}.`,
           context: {
             csState: {
               player: playerCS,

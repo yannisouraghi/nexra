@@ -109,14 +109,14 @@ export function analyzeObjectives(
               type: 'objective',
               severity,
               timestamp: Math.floor(timestamp / 1000),
-              title: isElder ? 'Elder Dragon perdu' : `Dragon ${event.monsterSubType?.replace('_DRAGON', '') || ''} perdu`,
-              description: `L'ennemi a pris le ${isElder ? 'Elder Dragon' : 'Dragon'} a ${timeStr}. Tu etais a ${Math.round(distance)} unites de distance (${wasDead ? 'mort' : 'vivant'}).`,
+              title: isElder ? 'Elder Dragon lost' : `${event.monsterSubType?.replace('_DRAGON', '') || ''} Dragon lost`,
+              description: `The enemy took ${isElder ? 'Elder Dragon' : 'Dragon'} at ${timeStr}. You were ${Math.round(distance)} units away (${wasDead ? 'dead' : 'alive'}).`,
               suggestion: isJungler
-                ? 'En tant que jungler, tu dois timer les objectifs et etre present. Ward la zone 1 min avant le spawn.'
-                : 'Sois pret a pivoter vers le Dragon quand il spawn. Communique avec ton equipe.',
+                ? 'As a jungler, you must time objectives and be present. Ward the area 1 min before spawn.'
+                : 'Be ready to rotate to Dragon when it spawns. Communicate with your team.',
               coachingNote: isElder
-                ? 'L\'Elder Dragon est souvent game-deciding. Tout doit etre organise autour de cet objectif.'
-                : `Le Dragon donne des buffs permanents a ton equipe. ${distance > 6000 ? 'Tu etais beaucoup trop loin pour contester.' : 'Rapproche-toi plus tot pour avoir le priority.'}`,
+                ? 'Elder Dragon is often game-deciding. Everything should be organized around this objective.'
+                : `Dragon gives permanent buffs to your team. ${distance > 6000 ? 'You were way too far to contest.' : 'Get closer earlier to have priority.'}`,
               context: {
                 mapState: {
                   zone: 'danger',
@@ -138,10 +138,10 @@ export function analyzeObjectives(
               type: 'objective',
               severity: 'critical',
               timestamp: Math.floor(timestamp / 1000),
-              title: 'Baron Nashor perdu',
-              description: `L'ennemi a pris le Baron a ${timeStr}. Tu etais a ${Math.round(distance)} unites de distance.`,
-              suggestion: 'Le Baron est l\'objectif le plus important du mid/late game. Groupe avec ton equipe pour le contester ou le prendre.',
-              coachingNote: 'Un Baron donne un enorme avantage en siege et en gold. Perdre un Baron sans le contester est souvent un point tournant negatif.',
+              title: 'Baron Nashor lost',
+              description: `The enemy took Baron at ${timeStr}. You were ${Math.round(distance)} units away.`,
+              suggestion: 'Baron is the most important mid/late game objective. Group with your team to contest or take it.',
+              coachingNote: 'Baron gives a huge advantage in siege and gold. Losing Baron without contesting is often a negative turning point.',
               context: {
                 mapState: {
                   zone: 'danger',
@@ -163,10 +163,10 @@ export function analyzeObjectives(
               type: 'objective',
               severity: 'medium',
               timestamp: Math.floor(timestamp / 1000),
-              title: 'Herald perdu',
-              description: `L'ennemi a pris le Herald a ${timeStr}. Tu etais a ${Math.round(distance)} unites de distance.`,
-              suggestion: 'Le Herald peut detruire une tour entiere. Aide ton jungler a le secure ou au moins conteste le.',
-              coachingNote: 'Le Herald est tres utile pour accelerer le early game. Une tour en moins ouvre la map pour ton equipe.',
+              title: 'Herald lost',
+              description: `The enemy took Herald at ${timeStr}. You were ${Math.round(distance)} units away.`,
+              suggestion: 'Herald can destroy an entire tower. Help your jungler secure it or at least contest it.',
+              coachingNote: 'Herald is very useful to accelerate early game. One less tower opens up the map for your team.',
               context: {
                 mapState: {
                   zone: 'neutral',
