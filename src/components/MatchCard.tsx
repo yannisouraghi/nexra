@@ -973,8 +973,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10 gap-4 pl-4 ml-2">
-              <div className="text-center">
+            <div className="flex items-center border-l border-white/10 ml-2">
+              <div className="text-center px-4">
                 <div className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {match.kills}
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
@@ -987,7 +987,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
 
               <div className="h-10 w-px bg-white/10"></div>
 
-              <div className="text-center">
+              <div className="text-center px-4">
                 <p className={`text-xl sm:text-2xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
@@ -1036,7 +1036,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
           </div>
 
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden xl:flex items-start border-l border-white/10 gap-4 pl-4" style={{ marginRight: '2.5rem' }}>
+          <div className="hidden xl:flex items-start border-l border-white/10 gap-4 pl-4" style={{ marginRight: '4rem' }}>
             {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
               <div style={{ width: '130px' }}>
