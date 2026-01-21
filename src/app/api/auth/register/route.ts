@@ -53,11 +53,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Account created successfully',
+      message: data.message || 'Account created successfully',
+      requiresVerification: data.requiresVerification || false,
       user: {
         id: data.user?.id,
         email: data.user?.email,
         name: data.user?.name,
+        emailVerified: data.user?.emailVerified || false,
       },
     });
   } catch (error) {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { NEXRA_API_URL } from '@/config/api';
 
 interface OnboardingStep {
   title: string;
@@ -63,38 +64,162 @@ const steps: OnboardingStep[] = [
     title: "Game Detected!",
     description: "After your game ends, it will appear in your dashboard. You'll see your champion, KDA, and match result. The game is now ready to be analyzed!",
     image: (
-      <div style={{ width: '100%', height: '200px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Mock game card with champion splash style */}
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+        {/* Realistic GameAnalysisCard preview */}
         <div style={{
           position: 'relative',
-          height: '140px',
-          borderRadius: '12px',
+          width: '180px',
+          height: '260px',
+          borderRadius: '16px',
           overflow: 'hidden',
-          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(139, 92, 246, 0.2) 100%)',
-          border: '1px solid rgba(34, 197, 94, 0.3)',
+          background: 'linear-gradient(180deg, #1a1a2e 0%, #0d0d1a 100%)',
+          border: '2px solid rgba(0,255,136,0.5)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         }}>
-          {/* Champion splash background effect */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)' }} />
+          {/* Champion splash background */}
+          <div style={{ position: 'absolute', inset: 0 }}>
+            <img
+              src="https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Yasuo_0.jpg"
+              alt="Yasuo"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'top',
+                opacity: 0.55,
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.98) 0%, rgba(0,0,0,0.7) 50%, rgba(0,0,0,0.4) 100%)',
+            }} />
+          </div>
+
+          {/* Top badges */}
+          <div style={{
+            position: 'absolute',
+            top: 10,
+            left: 10,
+            right: 10,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            zIndex: 10,
+          }}>
+            <span style={{
+              padding: '4px 8px',
+              borderRadius: 6,
+              fontSize: 10,
+              fontWeight: 600,
+              backgroundColor: 'rgba(0,0,0,0.7)',
+              color: 'rgba(255,255,255,0.8)',
+              backdropFilter: 'blur(8px)',
+            }}>
+              2m
+            </span>
+            <span style={{
+              padding: '4px 8px',
+              borderRadius: 6,
+              fontSize: 9,
+              fontWeight: 700,
+              backgroundColor: 'rgba(0,255,136,0.2)',
+              color: '#00ff88',
+            }}>
+              WIN
+            </span>
+          </div>
+
           {/* Content */}
-          <div style={{ position: 'relative', height: '100%', padding: '16px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                <span style={{ color: '#22c55e', fontSize: '11px', fontWeight: 600, background: 'rgba(34, 197, 94, 0.2)', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase' }}>Victory</span>
-                <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Ranked Solo</span>
+          <div style={{
+            position: 'relative',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 12,
+            paddingTop: 44,
+          }}>
+            {/* Middle - Analyze button */}
+            <div style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 10,
+            }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <img
+                  src="https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png"
+                  alt="MID"
+                  style={{ width: 22, height: 22, filter: 'brightness(1.1)' }}
+                />
               </div>
-              <div style={{ color: 'white', fontSize: '20px', fontWeight: 700 }}>Yasuo</div>
-              <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginTop: '4px' }}>
-                <span style={{ color: '#22c55e', fontWeight: 600 }}>12</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
-                <span style={{ color: '#ef4444', fontWeight: 600 }}>3</span>
-                <span style={{ color: 'rgba(255,255,255,0.3)' }}> / </span>
-                <span style={{ color: '#f59e0b', fontWeight: 600 }}>8</span>
-                <span style={{ marginLeft: '12px', color: 'rgba(255,255,255,0.4)' }}>32:45</span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '8px 16px',
+                borderRadius: 8,
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'white',
+                background: 'linear-gradient(135deg, #00d4ff 0%, #6366f1 100%)',
+                boxShadow: '0 4px 16px rgba(0,212,255,0.4)',
+              }}>
+                <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                <span>Analyze</span>
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <div style={{ background: 'linear-gradient(135deg, #00d4ff 0%, #0066ff 100%)', padding: '8px 20px', borderRadius: '8px', color: 'white', fontWeight: 600, fontSize: '13px' }}>
-                Analyze
+
+            {/* Bottom - Champion info */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 4,
+              marginTop: 'auto',
+              paddingTop: 8,
+            }}>
+              <h3 style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: 'white',
+                margin: 0,
+                textAlign: 'center',
+                textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+              }}>
+                Yasuo
+              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 13, fontWeight: 600 }}>
+                <span style={{ color: '#4ade80' }}>12</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+                <span style={{ color: '#f87171' }}>3</span>
+                <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+                <span style={{ color: '#22d3ee' }}>8</span>
+                <span style={{ marginLeft: 6, fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>(6.7)</span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: 9,
+                color: 'rgba(255,255,255,0.5)',
+              }}>
+                <span>Ranked</span>
+                <span style={{ color: 'rgba(255,255,255,0.25)' }}>•</span>
+                <span>32:45</span>
               </div>
             </div>
           </div>
@@ -191,9 +316,10 @@ const steps: OnboardingStep[] = [
 
 interface OnboardingModalProps {
   onComplete: () => void;
+  userId?: string;
 }
 
-export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
+export default function OnboardingModal({ onComplete, userId }: OnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -216,18 +342,36 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
     }
   };
 
+  const markOnboardingComplete = async () => {
+    // Store in localStorage as backup
+    localStorage.setItem('nexra_onboarding_completed', 'true');
+
+    // Also save to database if userId is available
+    if (userId) {
+      try {
+        await fetch(`${NEXRA_API_URL}/users/${userId}/complete-onboarding`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
+      } catch (error) {
+        console.error('Error saving onboarding status:', error);
+        // localStorage already set as fallback
+      }
+    }
+  };
+
   const handleComplete = () => {
     setIsVisible(false);
-    setTimeout(() => {
-      localStorage.setItem('nexra_onboarding_completed', 'true');
+    setTimeout(async () => {
+      await markOnboardingComplete();
       onComplete();
     }, 300);
   };
 
   const handleSkip = () => {
     setIsVisible(false);
-    setTimeout(() => {
-      localStorage.setItem('nexra_onboarding_completed', 'true');
+    setTimeout(async () => {
+      await markOnboardingComplete();
       onComplete();
     }, 300);
   };

@@ -20,6 +20,8 @@ function DashboardContent() {
   } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
 
   useEffect(() => {
     // Wait for session to load
@@ -87,6 +89,21 @@ function DashboardContent() {
         if (response.ok) {
           const data = await response.json();
 
+          if (data.success && data.user) {
+            // Store the database user ID (may differ from session ID)
+            const dbUserId = data.user.id || currentUserId;
+            setUserId(dbUserId);
+
+            // Check onboarding status from database
+            const onboardingCompletedInDb = data.user.onboarding_completed === 1;
+            const onboardingCompletedLocally = localStorage.getItem('nexra_onboarding_completed') === 'true';
+
+            if (!onboardingCompletedInDb && !onboardingCompletedLocally) {
+              setShowOnboarding(true);
+            }
+            setOnboardingChecked(true);
+          }
+
           // Check for Riot account (fields are snake_case from DB)
           if (data.success && data.user?.riot_game_name && data.user?.riot_tag_line) {
             const accountData = {
@@ -142,17 +159,17 @@ function DashboardContent() {
     fetchUserData();
   }, [searchParams, router, status, session]);
 
-  // Check if user needs onboarding (first-time user)
+  // Check if user needs onboarding (first-time user) - fallback for localStorage
   useEffect(() => {
-    if (!riotAccount) return;
+    if (!riotAccount || onboardingChecked) return;
 
-    // Check if onboarding has been completed
+    // Only check localStorage as fallback if not already checked from API
     const onboardingCompleted = localStorage.getItem('nexra_onboarding_completed');
     if (!onboardingCompleted) {
-      // First-time user, show onboarding
       setShowOnboarding(true);
     }
-  }, [riotAccount]);
+    setOnboardingChecked(true);
+  }, [riotAccount, onboardingChecked]);
 
   const handleOnboardingComplete = () => {
     setShowOnboarding(false);
@@ -208,7 +225,7 @@ function DashboardContent() {
     <>
       <RecentGames riotAccount={riotAccount} />
       {showOnboarding && (
-        <OnboardingModal onComplete={handleOnboardingComplete} />
+        <OnboardingModal onComplete={handleOnboardingComplete} userId={userId || undefined} />
       )}
       <MobileNotAvailable
         gameName={riotAccount.gameName}
