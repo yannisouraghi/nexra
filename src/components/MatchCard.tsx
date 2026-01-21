@@ -973,8 +973,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10 ml-2">
-              <div className="text-center px-4">
+            <div className="flex items-center border-l border-white/10 pl-4 ml-2">
+              <div className="text-center mr-4">
                 <div className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {match.kills}
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
@@ -987,7 +987,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
 
               <div className="h-10 w-px bg-white/10"></div>
 
-              <div className="text-center px-4">
+              <div className="text-center ml-4 mr-2">
                 <p className={`text-xl sm:text-2xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
