@@ -4,773 +4,387 @@ import { MatchForAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role }
 import { getChampionSplashUrl } from '@/utils/ddragon';
 import { useState, useEffect } from 'react';
 
+// Language types
+type AnalysisLanguage = 'en' | 'fr' | 'es' | 'de' | 'pt';
+const LANGUAGES: { code: AnalysisLanguage; flag: string }[] = [
+  { code: 'en', flag: '🇬🇧' },
+  { code: 'fr', flag: '🇫🇷' },
+  { code: 'es', flag: '🇪🇸' },
+  { code: 'de', flag: '🇩🇪' },
+  { code: 'pt', flag: '🇧🇷' },
+];
+
 interface GameAnalysisCardProps {
   match: MatchForAnalysis;
-  onStartAnalysis?: (matchId: string) => void;
+  onStartAnalysis?: (matchId: string, language: AnalysisLanguage) => void;
   onCardClick?: (match: MatchForAnalysis) => void;
   isStarting?: boolean;
 }
 
-// Role display labels
-const roleLabels: Record<Role, string> = {
-  TOP: 'TOP',
-  JUNGLE: 'JGL',
-  MID: 'MID',
-  ADC: 'ADC',
-  SUPPORT: 'SUP',
-  UNKNOWN: '?',
+// Role display config
+const roleConfig: Record<Role, { label: string; color: string; imageUrl: string }> = {
+  TOP: {
+    label: 'TOP',
+    color: '#f59e0b',
+    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png',
+  },
+  JUNGLE: {
+    label: 'JGL',
+    color: '#22c55e',
+    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png',
+  },
+  MID: {
+    label: 'MID',
+    color: '#8b5cf6',
+    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png',
+  },
+  ADC: {
+    label: 'ADC',
+    color: '#ef4444',
+    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png',
+  },
+  SUPPORT: {
+    label: 'SUP',
+    color: '#06b6d4',
+    imageUrl: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png',
+  },
+  UNKNOWN: {
+    label: '?',
+    color: '#6b7280',
+    imageUrl: '',
+  },
 };
 
-// Role colors for visual distinction
-const roleColors: Record<Role, string> = {
-  TOP: '#f59e0b',
-  JUNGLE: '#22c55e',
-  MID: '#8b5cf6',
-  ADC: '#ef4444',
-  SUPPORT: '#06b6d4',
-  UNKNOWN: '#6b7280',
-};
+// Normalize role string to Role type
+function normalizeRole(roleStr?: string): Role {
+  const map: Record<string, Role> = {
+    TOP: 'TOP', JUNGLE: 'JUNGLE', MID: 'MID', MIDDLE: 'MID',
+    ADC: 'ADC', BOTTOM: 'ADC', BOT: 'ADC',
+    SUPPORT: 'SUPPORT', UTILITY: 'SUPPORT', SUP: 'SUPPORT',
+  };
+  return map[roleStr?.toUpperCase() || ''] || 'UNKNOWN';
+}
+
+// Format game mode
+function formatGameMode(mode: string | null): string {
+  if (!mode) return 'Ranked';
+  if (mode.includes('Ranked') || mode.includes('Normal') || mode.includes('ARAM')) return mode;
+  const m = mode.toUpperCase();
+  if (m === 'CLASSIC' || m === 'MATCHED_GAME') return 'Ranked';
+  if (m === 'ARAM') return 'ARAM';
+  return mode;
+}
+
+// Format duration
+function formatDuration(seconds: number | null): string {
+  if (!seconds) return '--:--';
+  return `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, '0')}`;
+}
+
+// Format time ago
+function formatTimeAgo(timestamp: number | null): string {
+  if (!timestamp) return '';
+  const diffMs = Date.now() - timestamp;
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
 
 // Role Icon component
-const RoleIcon = ({ role }: { role: Role }) => {
-  const [imageError, setImageError] = useState(false);
+function RoleIcon({ role }: { role: Role }) {
+  const [error, setError] = useState(false);
+  const config = roleConfig[role];
 
-  const roleImageUrls: Record<Role, string> = {
-    TOP: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-top.png',
-    JUNGLE: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-jungle.png',
-    MID: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-middle.png',
-    ADC: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-bottom.png',
-    SUPPORT: 'https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-clash/global/default/assets/images/position-selector/positions/icon-position-utility.png',
-    UNKNOWN: '',
-  };
-
-  const imageUrl = roleImageUrls[role];
-  const color = roleColors[role];
-  const label = roleLabels[role];
-
-  if (role === 'UNKNOWN' || !imageUrl || imageError) {
+  if (role === 'UNKNOWN' || !config.imageUrl || error) {
     return (
-      <div style={{
-        width: 24,
-        height: 24,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 4,
-        backgroundColor: `${color}30`,
-        border: `1px solid ${color}50`,
-      }}>
-        <span style={{
-          fontSize: 10,
-          fontWeight: 700,
-          color: color,
-          letterSpacing: '0.05em',
-        }}>
-          {label}
-        </span>
+      <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold"
+        style={{ backgroundColor: `${config.color}30`, border: `1px solid ${config.color}50`, color: config.color }}>
+        {config.label}
       </div>
     );
   }
 
   return (
-    <img
-      src={imageUrl}
-      alt={role}
-      style={{
-        width: 24,
-        height: 24,
-        filter: 'brightness(1.2)',
-      }}
-      onError={() => setImageError(true)}
-    />
+    <img src={config.imageUrl} alt={role} className="w-6 h-6 brightness-110" onError={() => setError(true)} />
   );
-};
-
-// Format game mode for display
-const formatGameMode = (gameMode: string | null): string => {
-  if (!gameMode) return 'Classic';
-
-  // If backend already sent a properly formatted string, use it
-  if (gameMode.includes('Ranked') || gameMode.includes('Normal') ||
-      gameMode.includes('ARAM') || gameMode.includes('URF')) {
-    return gameMode;
-  }
-
-  // Parse legacy gameMode strings from Riot API
-  const mode = gameMode.toUpperCase();
-  if (mode === 'CLASSIC' || mode === 'MATCHED_GAME') return 'Ranked';
-  if (mode === 'ARAM') return 'ARAM';
-  if (mode === 'URF' || mode === 'ARURF') return 'URF';
-  if (mode === 'ONEFORALL') return 'One for All';
-  if (mode === 'PRACTICETOOL') return 'Practice';
-  if (mode === 'TUTORIAL') return 'Tutorial';
-  if (mode === 'PRACTICE TOOL') return 'Practice';
-
-  return gameMode;
-};
-
-// Processing animation component with progress
-const ProcessingAnimation = ({ progress }: { progress: number | null }) => {
-  const displayProgress = progress ?? 0;
-  const circumference = 2 * Math.PI * 35;
-  const strokeDashoffset = circumference - (displayProgress / 100) * circumference;
-
-  return (
-    <div style={styles.processingContainer}>
-      <div style={styles.processingRing}>
-        <svg width="80" height="80" viewBox="0 0 80 80">
-          {/* Background circle */}
-          <circle
-            cx="40"
-            cy="40"
-            r="35"
-            fill="none"
-            stroke="rgba(0, 212, 255, 0.15)"
-            strokeWidth="5"
-          />
-          {/* Progress circle */}
-          <circle
-            cx="40"
-            cy="40"
-            r="35"
-            fill="none"
-            stroke="#00d4ff"
-            strokeWidth="5"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            style={{
-              transform: 'rotate(-90deg)',
-              transformOrigin: 'center',
-              transition: 'stroke-dashoffset 0.5s ease',
-            }}
-          />
-        </svg>
-        {/* Percentage in center */}
-        <div style={styles.progressPercent}>{displayProgress}%</div>
-      </div>
-      <div style={styles.processingText}>
-        Analyzing<span className="animated-dots"></span>
-      </div>
-      <style>{`
-        .animated-dots::after {
-          content: '';
-          animation: dots 1.5s steps(4, end) infinite;
-        }
-        @keyframes dots {
-          0% { content: ''; }
-          25% { content: '.'; }
-          50% { content: '..'; }
-          75% { content: '...'; }
-          100% { content: ''; }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-// Start button component - Compact version
-const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLoading?: boolean }) => (
-  <button
-    onClick={(e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      onClick();
-    }}
-    disabled={isLoading}
-    style={{
-      ...styles.startButton,
-      opacity: isLoading ? 0.7 : 1,
-      cursor: isLoading ? 'not-allowed' : 'pointer',
-    }}
-  >
-    {isLoading ? (
-      <>
-        <div style={styles.buttonSpinner} />
-        <span>Starting...</span>
-      </>
-    ) : (
-      <>
-        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>Analyze</span>
-      </>
-    )}
-  </button>
-);
+}
 
 export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, isStarting }: GameAnalysisCardProps) {
-  const [imageError, setImageError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const [simulatedProgress, setSimulatedProgress] = useState(0);
+  const [imgError, setImgError] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [language, setLanguage] = useState<AnalysisLanguage>('en');
 
   const status = match.analysisStatus;
   const isCompleted = status === 'completed';
   const isProcessing = status === 'processing';
-  const isPending = status === 'pending';
-  const isNotStarted = status === 'not_started';
+  const isReady = status === 'not_started' || status === 'pending';
   const isFailed = status === 'failed';
 
-  // Simulate progress animation when processing
+  const role = normalizeRole(match.role);
+  const isWin = match.result === 'win';
+  const champion = match.champion || 'Unknown';
+  const splashUrl = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
+  const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
+  const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
+
+  // Simulated progress for processing state
   useEffect(() => {
     if (isProcessing) {
-      setSimulatedProgress(0);
+      setProgress(0);
       const interval = setInterval(() => {
-        setSimulatedProgress(prev => {
-          // Progress quickly to 30%, then slow down, never reach 100% (real completion does that)
-          if (prev < 30) return prev + 3;
-          if (prev < 60) return prev + 1.5;
-          if (prev < 85) return prev + 0.5;
-          if (prev < 95) return prev + 0.2;
-          return prev; // Stay at ~95% until real completion
+        setProgress(p => {
+          if (p < 30) return p + 3;
+          if (p < 60) return p + 1.5;
+          if (p < 85) return p + 0.5;
+          if (p < 95) return p + 0.2;
+          return p;
         });
       }, 200);
       return () => clearInterval(interval);
-    } else {
-      // Reset when not processing
-      setSimulatedProgress(isCompleted ? 100 : 0);
     }
+    setProgress(isCompleted ? 100 : 0);
   }, [isProcessing, isCompleted]);
 
-  const statusColor = getStatusColor(status);
-  const statusLabel = getStatusLabel(status);
-
-  // Map role string to Role type
-  const roleMap: Record<string, Role> = {
-    'TOP': 'TOP',
-    'JUNGLE': 'JUNGLE',
-    'MID': 'MID',
-    'MIDDLE': 'MID',
-    'ADC': 'ADC',
-    'BOTTOM': 'ADC',
-    'BOT': 'ADC',
-    'SUPPORT': 'SUPPORT',
-    'UTILITY': 'SUPPORT',
-    'SUP': 'SUPPORT',
-  };
-  const normalizedRole = match.role?.toUpperCase() || '';
-  const role: Role = roleMap[normalizedRole] || 'UNKNOWN';
-
-  const scoreColor = isCompleted ? getScoreColor(match.overallScore) : statusColor;
-  const isWin = match.result === 'win';
-
-  const formatDuration = (seconds: number | null) => {
-    if (!seconds) return '--:--';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const handleAnalyze = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onStartAnalysis?.(match.matchId, language);
   };
 
-  const formatTimeAgo = (dateString: string | null) => {
-    if (!dateString) return 'Recently';
-    const date = new Date(dateString.replace(' ', 'T') + 'Z');
-    if (isNaN(date.getTime())) return 'Recently';
-
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    return `${diffDays}d ago`;
+  const handleView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCardClick?.(match);
   };
 
-  const kda = match.deaths > 0
-    ? ((match.kills + match.assists) / match.deaths).toFixed(2)
-    : 'Perfect';
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    setLanguage(e.target.value as AnalysisLanguage);
+  };
 
-  const champion = match.champion || 'Unknown';
-  const champSplashUrl = champion !== 'Unknown' ? getChampionSplashUrl(champion) : null;
+  // Card border color based on state
+  const borderColor = isCompleted
+    ? (isWin ? 'rgba(0,255,136,0.4)' : 'rgba(255,51,102,0.4)')
+    : isProcessing
+    ? 'rgba(0,212,255,0.5)'
+    : isFailed
+    ? 'rgba(255,51,102,0.4)'
+    : 'rgba(255,255,255,0.1)';
 
-  const cardContent = (
-    <>
+  return (
+    <div
+      className="relative w-full min-w-[180px] max-w-[220px] h-[300px] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300"
+      style={{
+        background: 'linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%)',
+        border: `2px solid ${borderColor}`,
+        transform: hovered && isCompleted ? 'scale(1.03)' : 'scale(1)',
+        boxShadow: hovered && isCompleted ? '0 8px 32px rgba(0,212,255,0.2)' : 'none',
+      }}
+      onClick={() => isCompleted && onCardClick?.(match)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       {/* Background Image */}
-      {champSplashUrl && !imageError ? (
-        <div style={styles.bgContainer}>
+      {splashUrl && !imgError ? (
+        <div className="absolute inset-0">
           <img
-            src={champSplashUrl}
+            src={splashUrl}
             alt={champion}
-            style={{
-              ...styles.bgImage,
-              opacity: isProcessing ? 0.3 : 0.7,
-              filter: isProcessing ? 'blur(2px)' : 'none',
-            }}
-            onError={() => setImageError(true)}
+            className="w-full h-full object-cover object-top transition-all duration-300"
+            style={{ opacity: isProcessing ? 0.25 : 0.6, filter: isProcessing ? 'blur(2px)' : 'none' }}
+            onError={() => setImgError(true)}
           />
-          <div style={styles.bgOverlay} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-black/30" />
         </div>
       ) : (
-        <div style={styles.bgFallback} />
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 to-cyan-900/30" />
       )}
 
-      {/* Top Left - Date */}
-      <span style={styles.timeAgo}>
-        {formatTimeAgo(match.timestamp ? new Date(match.timestamp).toISOString() : null)}
-      </span>
-
-      {/* Top Right - Victory/Defeat Badge */}
-      {match.result && (
-        <span style={{
-          ...styles.resultBadge,
-          backgroundColor: isWin ? 'rgba(0, 255, 136, 0.25)' : 'rgba(255, 51, 102, 0.25)',
-          color: isWin ? '#00ff88' : '#ff3366',
-        }}>
-          {isWin ? 'VICTORY' : 'DEFEAT'}
+      {/* Top Bar: Time & Result */}
+      <div className="absolute top-0 left-0 right-0 flex justify-between items-center p-3 z-10">
+        <span className="px-2 py-1 rounded-md text-[11px] font-medium bg-black/60 text-white/70 backdrop-blur-sm">
+          {formatTimeAgo(match.timestamp)}
         </span>
-      )}
+        {match.result && (
+          <span
+            className="px-2 py-1 rounded-md text-[10px] font-bold backdrop-blur-sm"
+            style={{
+              backgroundColor: isWin ? 'rgba(0,255,136,0.2)' : 'rgba(255,51,102,0.2)',
+              color: isWin ? '#00ff88' : '#ff3366',
+            }}
+          >
+            {isWin ? 'WIN' : 'LOSS'}
+          </span>
+        )}
+      </div>
 
-      {/* Status Badge - Different display based on status */}
-      {isCompleted ? (
-        /* Completed: Subtle checkmark icon */
-        <div style={styles.completedIcon}>
-          <svg width="12" height="12" fill="none" viewBox="0 0 24 24">
-            <path stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" d="M5 12l5 5L19 7" />
+      {/* Completed Check Icon */}
+      {isCompleted && (
+        <div className="absolute -top-1 -right-1 z-20 w-5 h-5 rounded-full bg-green-500 border-2 border-[#1a1a2e] flex items-center justify-center">
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-      ) : isProcessing ? (
-        /* Processing: No badge, the animation is enough */
-        null
-      ) : (
-        /* Other statuses: Full badge centered */
-        <div style={{
-          ...styles.statusBadge,
-          backgroundColor: `${statusColor}25`,
-          color: statusColor,
-          borderColor: `${statusColor}50`,
-        }}>
-          {statusLabel}
-        </div>
       )}
 
-      {/* Content Container */}
-      <div style={styles.content}>
-
-        {/* Middle Section - Different content based on status */}
-        <div style={styles.middleSection}>
+      {/* Content */}
+      <div className="relative h-full flex flex-col p-4 pt-12">
+        {/* Middle Section */}
+        <div className="flex-1 flex flex-col items-center justify-center gap-3">
           {isProcessing ? (
-            <ProcessingAnimation progress={Math.round(simulatedProgress)} />
-          ) : isNotStarted || isPending ? (
-            <div style={styles.pendingContainer}>
-              {role !== 'UNKNOWN' && (
-                <div style={styles.roleIcon}>
-                  <RoleIcon role={role} />
-                </div>
-              )}
-              <StartAnalysisButton
-                onClick={() => onStartAnalysis?.(match.matchId)}
-                isLoading={isStarting}
-              />
-            </div>
-          ) : isFailed ? (
-            <div style={styles.failedContainer}>
-              <div style={styles.failedIcon}>
-                <svg width="40" height="40" fill="none" stroke="#ff3366" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            /* Processing State */
+            <div className="flex flex-col items-center gap-2">
+              <div className="relative w-16 h-16">
+                <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                  <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(0,212,255,0.15)" strokeWidth="4" />
+                  <circle
+                    cx="32" cy="32" r="28" fill="none" stroke="#00d4ff" strokeWidth="4" strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 28}
+                    strokeDashoffset={2 * Math.PI * 28 * (1 - progress / 100)}
+                    className="transition-all duration-500"
+                  />
                 </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-cyan-400">
+                  {Math.round(progress)}%
+                </span>
               </div>
-              <div style={styles.failedText}>Analysis failed</div>
+              <span className="text-xs font-semibold text-cyan-400">Analyzing...</span>
             </div>
-          ) : (
-            <>
-              <div style={styles.roleIcon}>
+          ) : isReady ? (
+            /* Ready State - Analyze Button + Language */
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
                 <RoleIcon role={role} />
               </div>
-              <div style={{
-                ...styles.scoreBadge,
-                backgroundColor: `${scoreColor}25`,
-                color: scoreColor,
-                borderColor: `${scoreColor}60`,
-              }}>
+
+              {/* Language Selector */}
+              <select
+                value={language}
+                onChange={handleLanguageChange}
+                onClick={(e) => e.stopPropagation()}
+                className="px-2 py-1 rounded-md text-xs font-medium bg-white/5 border border-white/10 text-white/80 cursor-pointer outline-none hover:bg-white/10 transition-colors"
+              >
+                {LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code} className="bg-[#1a1a2e]">
+                    {l.flag} {l.code.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+
+              {/* Analyze Button */}
+              <button
+                onClick={handleAnalyze}
+                disabled={isStarting}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed hover:scale-105 hover:shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #00d4ff 0%, #6366f1 100%)',
+                  boxShadow: '0 4px 15px rgba(0,212,255,0.3)',
+                }}
+              >
+                {isStarting ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Starting...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    <span>Analyze</span>
+                  </>
+                )}
+              </button>
+            </div>
+          ) : isFailed ? (
+            /* Failed State */
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <span className="text-xs font-semibold text-red-500">Failed</span>
+            </div>
+          ) : (
+            /* Completed State */
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-black/40 border border-white/10 flex items-center justify-center">
+                <RoleIcon role={role} />
+              </div>
+              <div
+                className="px-4 py-1.5 rounded-full text-sm font-bold border"
+                style={{
+                  backgroundColor: `${scoreColor}20`,
+                  color: scoreColor,
+                  borderColor: `${scoreColor}50`,
+                }}
+              >
                 {match.overallScore} pts
               </div>
               <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onCardClick?.(match);
-                }}
-                style={styles.seeAnalysisButton}
+                onClick={handleView}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 transition-all duration-200 hover:scale-105"
               >
-                <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span>View</span>
+                <span>View Analysis</span>
               </button>
-            </>
+            </div>
           )}
         </div>
 
         {/* Bottom Section */}
-        <div style={styles.bottomSection}>
-          <h3 style={styles.championName}>{champion}</h3>
+        <div className="flex flex-col items-center gap-1.5 mt-auto">
+          <h3 className="text-lg font-bold text-white text-center truncate w-full">{champion}</h3>
 
-          {/* KDA - Only show if we have game data */}
           {match.result && (
-            <div style={styles.kdaRow}>
-              <span style={{ color: '#4ade80', fontWeight: 700, fontSize: 18 }}>{match.kills}</span>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>/</span>
-              <span style={{ color: '#f87171', fontWeight: 700, fontSize: 18 }}>{match.deaths}</span>
-              <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18 }}>/</span>
-              <span style={{ color: '#22d3ee', fontWeight: 700, fontSize: 18 }}>{match.assists}</span>
-              <span style={{ marginLeft: 8, color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>({kda})</span>
+            <div className="flex items-center gap-0.5 text-base font-semibold">
+              <span className="text-green-400">{match.kills}</span>
+              <span className="text-white/30">/</span>
+              <span className="text-red-400">{match.deaths}</span>
+              <span className="text-white/30">/</span>
+              <span className="text-cyan-400">{match.assists}</span>
+              <span className="ml-2 text-xs text-white/40">({kda})</span>
             </div>
           )}
 
-          {/* Game Mode & Duration */}
-          <div style={styles.metaRow}>
-            <span style={styles.metaText}>{formatGameMode(match.gameMode)}</span>
-            <span style={styles.metaDot}>•</span>
-            <span style={styles.metaText}>{formatDuration(match.gameDuration)}</span>
+          <div className="flex items-center gap-2 text-[11px] text-white/50">
+            <span>{formatGameMode(match.gameMode)}</span>
+            <span className="text-white/30">•</span>
+            <span>{formatDuration(match.gameDuration)}</span>
           </div>
 
-          {/* Errors - Only show if completed */}
           {isCompleted && match.errorsCount > 0 && (
-            <div style={styles.errorsRow}>
-              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div className="flex items-center gap-1 text-[11px] text-orange-400">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              <span>{match.errorsCount} errors detected</span>
+              <span>{match.errorsCount} errors</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Hover Effect - View Button (only for completed) */}
+      {/* Hover Overlay for Completed */}
       {isCompleted && (
-        <div style={{
-          ...styles.hoverOverlay,
-          opacity: isHovered ? 1 : 0,
-        }}>
-          <div style={styles.viewButton}>
+        <div
+          className="absolute inset-0 bg-black/70 flex items-center justify-center transition-opacity duration-300 rounded-2xl"
+          style={{ opacity: hovered ? 1 : 0, pointerEvents: hovered ? 'auto' : 'none' }}
+        >
+          <div className="flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-white text-sm bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-500/50">
             <span>View Analysis</span>
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </div>
         </div>
       )}
-    </>
-  );
-
-  // Completed state - clickable to open modal
-  if (isCompleted) {
-    return (
-      <div
-        style={{
-          ...styles.card,
-          borderColor: isWin ? 'rgba(0, 255, 136, 0.4)' : 'rgba(255, 51, 102, 0.4)',
-          transform: isHovered ? 'scale(1.05)' : 'scale(1)',
-          boxShadow: isHovered ? '0 0 30px rgba(0,212,255,0.3)' : 'none',
-          cursor: 'pointer',
-        }}
-        onClick={() => onCardClick?.(match)}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {cardContent}
-      </div>
-    );
-  }
-
-  // Non-clickable card for other states (processing, failed)
-  return (
-    <div
-      style={{
-        ...styles.card,
-        borderColor: isProcessing ? 'rgba(0, 212, 255, 0.4)' : isFailed ? 'rgba(255, 51, 102, 0.4)' : 'rgba(107, 114, 128, 0.4)',
-        cursor: 'default',
-      }}
-    >
-      {cardContent}
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  card: {
-    position: 'relative',
-    display: 'block',
-    overflow: 'visible',
-    borderRadius: 16,
-    width: '100%',
-    minWidth: 160,
-    maxWidth: 220,
-    height: 320,
-    background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
-    border: '2px solid',
-    textDecoration: 'none',
-    transition: 'all 0.3s ease',
-  },
-  bgContainer: {
-    position: 'absolute',
-    inset: 0,
-    overflow: 'hidden',
-    borderRadius: 14,
-  },
-  bgImage: {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    objectPosition: 'top',
-    transition: 'all 0.3s ease',
-  },
-  bgOverlay: {
-    position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.3) 100%)',
-  },
-  bgFallback: {
-    position: 'absolute',
-    inset: 0,
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    opacity: 0.3,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  statusBadge: {
-    position: 'absolute',
-    top: 38,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    zIndex: 10,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '4px 12px',
-    borderRadius: 12,
-    fontSize: 11,
-    fontWeight: 600,
-    border: '1px solid',
-    backdropFilter: 'blur(4px)',
-  },
-  completedIcon: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    zIndex: 20,
-    width: 20,
-    height: 20,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '50%',
-    backgroundColor: '#22c55e',
-    border: '2px solid #1a1a2e',
-  },
-  content: {
-    position: 'relative',
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: 14,
-    paddingTop: 40,
-    gap: 8,
-  },
-  timeAgo: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 10,
-    fontSize: 11,
-    fontWeight: 500,
-    padding: '4px 8px',
-    borderRadius: 6,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    color: 'rgba(255,255,255,0.8)',
-    backdropFilter: 'blur(4px)',
-  },
-  resultBadge: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 10,
-    fontSize: 11,
-    fontWeight: 700,
-    padding: '4px 8px',
-    borderRadius: 6,
-    backdropFilter: 'blur(4px)',
-  },
-  middleSection: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingTop: 10,
-  },
-  roleIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    border: '1px solid rgba(255,255,255,0.15)',
-    boxShadow: '0 0 12px rgba(255,255,255,0.08)',
-  },
-  scoreBadge: {
-    padding: '6px 16px',
-    borderRadius: 20,
-    fontSize: 14,
-    fontWeight: 700,
-    border: '1px solid',
-  },
-  bottomSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-    marginTop: 'auto',
-    paddingTop: 8,
-  },
-  championName: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: 'white',
-    textAlign: 'center',
-    margin: 0,
-  },
-  kdaRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-  },
-  metaRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  metaText: {
-    fontSize: 12,
-    fontWeight: 500,
-    color: 'rgba(255,255,255,0.6)',
-  },
-  metaDot: {
-    color: 'rgba(255,255,255,0.4)',
-  },
-  errorsRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    fontSize: 12,
-    color: '#fb923c',
-  },
-  hoverOverlay: {
-    position: 'absolute',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transition: 'opacity 0.3s ease',
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  viewButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    padding: '10px 20px',
-    borderRadius: 8,
-    fontWeight: 600,
-    color: 'white',
-    background: 'linear-gradient(135deg, rgba(0,212,255,0.3) 0%, rgba(99,102,241,0.3) 100%)',
-    border: '1px solid rgba(0,212,255,0.5)',
-  },
-  // Processing animation styles
-  processingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  processingRing: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressPercent: {
-    position: 'absolute',
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#00d4ff',
-  },
-  processingText: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#00d4ff',
-  },
-  // Pending state styles
-  pendingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 10,
-  },
-  startButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '8px 14px',
-    borderRadius: 8,
-    fontSize: 12,
-    fontWeight: 600,
-    color: 'white',
-    background: 'linear-gradient(135deg, #00d4ff 0%, #6366f1 100%)',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 2px 10px rgba(0, 212, 255, 0.25)',
-  },
-  buttonSpinner: {
-    width: 12,
-    height: 12,
-    border: '2px solid rgba(255,255,255,0.3)',
-    borderTopColor: 'white',
-    borderRadius: '50%',
-    animation: 'spin 0.8s linear infinite',
-  },
-  // Failed state styles
-  failedContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 12,
-  },
-  failedIcon: {
-    padding: 12,
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255, 51, 102, 0.2)',
-  },
-  failedText: {
-    fontSize: 14,
-    fontWeight: 600,
-    color: '#ff3366',
-  },
-  seeAnalysisButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 3,
-    padding: '4px 8px',
-    borderRadius: 4,
-    fontSize: 10,
-    fontWeight: 600,
-    color: 'white',
-    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    border: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-  },
-};
