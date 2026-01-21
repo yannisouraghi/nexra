@@ -3570,7 +3570,8 @@ body {
 
 .nexra-footer-content {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
@@ -3612,6 +3613,24 @@ body {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.3);
+}
+
+.nexra-footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.nexra-footer-link {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nexra-footer-link:hover {
+  color: rgba(0, 212, 255, 0.8);
 }
 
 /* =============================================

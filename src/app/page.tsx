@@ -757,9 +757,14 @@ export default function LandingPage() {
                 Riot Games and League of Legends are trademarks of Riot Games, Inc.
               </p>
             </div>
+            <div className="nexra-footer-links">
+              <Link href="/legal" className="nexra-footer-link">Mentions Légales</Link>
+              <Link href="/privacy" className="nexra-footer-link">Confidentialité</Link>
+              <Link href="/terms" className="nexra-footer-link">CGU</Link>
+            </div>
           </div>
           <div className="nexra-footer-bottom">
-            <span>&copy; 2025 Nexra. All rights reserved.</span>
+            <span>&copy; 2025 Nexra - Crocoding. Tous droits réservés.</span>
           </div>
         </div>
       </footer>
