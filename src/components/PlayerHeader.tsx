@@ -493,95 +493,106 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.375rem' }}>
                 LP Evolution
               </div>
-              <div style={{ position: 'relative', width: '140px', height: '50px' }}>
-                {(() => {
-                  // Calculate LP history going backwards from current LP
-                  const recentResults = playerStats.recentMatchResults.slice(0, 10);
-                  const lpPerGame = 18; // Average LP gain/loss per game
-                  let lpHistory: number[] = [rank.leaguePoints];
-
-                  // Go backwards through recent matches to estimate previous LP values
-                  for (let i = 0; i < recentResults.length; i++) {
-                    const wasWin = recentResults[i];
-                    const prevLp = lpHistory[0] + (wasWin ? -lpPerGame : lpPerGame);
-                    lpHistory.unshift(Math.max(0, Math.min(100, prevLp)));
-                  }
-
-                  // Normalize for graph (0-100 LP range)
-                  const minLp = Math.min(...lpHistory);
-                  const maxLp = Math.max(...lpHistory);
-                  const range = maxLp - minLp || 1;
-
-                  const graphWidth = 140;
-                  const graphHeight = 50;
-                  const padding = 4;
-                  const innerWidth = graphWidth - padding * 2;
-                  const innerHeight = graphHeight - padding * 2;
-
-                  // Generate SVG path
-                  const points = lpHistory.map((lp, i) => {
-                    const x = padding + (i / (lpHistory.length - 1 || 1)) * innerWidth;
-                    const y = graphHeight - padding - ((lp - minLp) / range) * innerHeight;
-                    return { x, y, lp };
-                  });
-
-                  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-                  const areaD = `${pathD} L ${points[points.length - 1].x} ${graphHeight - padding} L ${padding} ${graphHeight - padding} Z`;
-
-                  // Determine trend color
-                  const lpChange = lpHistory[lpHistory.length - 1] - lpHistory[0];
-                  const trendColor = lpChange >= 0 ? '#22c55e' : '#ef4444';
-
-                  return (
-                    <svg width={graphWidth} height={graphHeight} style={{ overflow: 'visible' }}>
-                      {/* Background gradient area */}
-                      <defs>
-                        <linearGradient id="lpGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={trendColor} stopOpacity="0.3" />
-                          <stop offset="100%" stopColor={trendColor} stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-
-                      {/* Area fill */}
-                      <path d={areaD} fill="url(#lpGradient)" />
-
-                      {/* Line */}
-                      <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-
-                      {/* Current LP dot */}
-                      <circle
-                        cx={points[points.length - 1].x}
-                        cy={points[points.length - 1].y}
-                        r="4"
-                        fill={trendColor}
-                        stroke="white"
-                        strokeWidth="1.5"
-                      />
-                    </svg>
-                  );
-                })()}
-                {/* LP change indicator */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '-2px',
-                  right: '0',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  color: (() => {
-                    const recentResults = playerStats.recentMatchResults.slice(0, 10);
-                    const wins = recentResults.filter(r => r).length;
-                    const losses = recentResults.length - wins;
-                    const lpChange = (wins - losses) * 18;
-                    return lpChange >= 0 ? '#22c55e' : '#ef4444';
-                  })(),
-                }}>
+              <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.25rem' }}>
+                {/* Y-axis labels */}
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600, paddingTop: '2px', paddingBottom: '2px' }}>
+                  <span>100</span>
+                  <span>50</span>
+                  <span>0</span>
+                </div>
+                {/* Graph */}
+                <div style={{ position: 'relative', width: '120px', height: '55px' }}>
                   {(() => {
+                    // Calculate LP history going backwards from current LP
                     const recentResults = playerStats.recentMatchResults.slice(0, 10);
-                    const wins = recentResults.filter(r => r).length;
-                    const losses = recentResults.length - wins;
-                    const lpChange = (wins - losses) * 18;
-                    return lpChange >= 0 ? `+${lpChange}` : lpChange;
+                    const lpPerGame = 18;
+                    let lpHistory: number[] = [rank.leaguePoints];
+
+                    for (let i = 0; i < recentResults.length; i++) {
+                      const wasWin = recentResults[i];
+                      const prevLp = lpHistory[0] + (wasWin ? -lpPerGame : lpPerGame);
+                      lpHistory.unshift(Math.max(0, Math.min(100, prevLp)));
+                    }
+
+                    const graphWidth = 120;
+                    const graphHeight = 55;
+                    const padding = 4;
+                    const innerWidth = graphWidth - padding * 2;
+                    const innerHeight = graphHeight - padding * 2;
+
+                    // Generate SVG path - always use 0-100 range
+                    const points = lpHistory.map((lp, i) => {
+                      const x = padding + (i / (lpHistory.length - 1 || 1)) * innerWidth;
+                      const y = graphHeight - padding - (lp / 100) * innerHeight;
+                      return { x, y, lp };
+                    });
+
+                    const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+                    const areaD = `${pathD} L ${points[points.length - 1].x} ${graphHeight - padding} L ${padding} ${graphHeight - padding} Z`;
+
+                    const lpChange = lpHistory[lpHistory.length - 1] - lpHistory[0];
+                    const trendColor = lpChange >= 0 ? '#22c55e' : '#ef4444';
+
+                    // Threshold lines (0 LP = demotion, 100 LP = promotion)
+                    const y100 = padding;
+                    const y50 = padding + innerHeight / 2;
+                    const y0 = graphHeight - padding;
+
+                    return (
+                      <svg width={graphWidth} height={graphHeight} style={{ overflow: 'visible' }}>
+                        <defs>
+                          <linearGradient id="lpGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor={trendColor} stopOpacity="0.3" />
+                            <stop offset="100%" stopColor={trendColor} stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+
+                        {/* Threshold lines */}
+                        <line x1={padding} y1={y100} x2={graphWidth - padding} y2={y100} stroke="rgba(34, 197, 94, 0.3)" strokeWidth="1" strokeDasharray="3,3" />
+                        <line x1={padding} y1={y50} x2={graphWidth - padding} y2={y50} stroke="rgba(255, 255, 255, 0.1)" strokeWidth="1" strokeDasharray="2,2" />
+                        <line x1={padding} y1={y0} x2={graphWidth - padding} y2={y0} stroke="rgba(239, 68, 68, 0.3)" strokeWidth="1" strokeDasharray="3,3" />
+
+                        {/* Area fill */}
+                        <path d={areaD} fill="url(#lpGradient)" />
+
+                        {/* Line */}
+                        <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+
+                        {/* Current LP dot */}
+                        <circle
+                          cx={points[points.length - 1].x}
+                          cy={points[points.length - 1].y}
+                          r="4"
+                          fill={trendColor}
+                          stroke="white"
+                          strokeWidth="1.5"
+                        />
+                      </svg>
+                    );
                   })()}
+                  {/* LP change indicator */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '-12px',
+                    right: '0',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: (() => {
+                      const recentResults = playerStats.recentMatchResults.slice(0, 10);
+                      const wins = recentResults.filter(r => r).length;
+                      const losses = recentResults.length - wins;
+                      const lpChange = (wins - losses) * 18;
+                      return lpChange >= 0 ? '#22c55e' : '#ef4444';
+                    })(),
+                  }}>
+                    {(() => {
+                      const recentResults = playerStats.recentMatchResults.slice(0, 10);
+                      const wins = recentResults.filter(r => r).length;
+                      const losses = recentResults.length - wins;
+                      const lpChange = (wins - losses) * 18;
+                      return lpChange >= 0 ? `+${lpChange} LP` : `${lpChange} LP`;
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -688,22 +699,20 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           )}
 
           {/* Action Buttons - Right side */}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.375rem', flexShrink: 0 }}>
             <button
               onClick={onRefresh}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 0.875rem',
+                justifyContent: 'center',
+                padding: '0.5rem',
                 borderRadius: '0.5rem',
                 border: '1px solid rgba(6, 182, 212, 0.3)',
                 backgroundColor: 'rgba(6, 182, 212, 0.1)',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
                 color: '#22d3ee',
-                fontSize: '0.75rem',
-                fontWeight: 600,
               }}
               title="Refresh data"
               onMouseEnter={(e) => {
@@ -713,10 +722,9 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                 e.currentTarget.style.backgroundColor = 'rgba(6, 182, 212, 0.1)';
               }}
             >
-              <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              <span className="hidden sm:inline">Refresh</span>
             </button>
 
             <button
@@ -725,8 +733,8 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.375rem',
-                padding: '0.5rem 0.875rem',
+                justifyContent: 'center',
+                padding: '0.5rem',
                 borderRadius: '0.5rem',
                 border: '1px solid rgba(249, 115, 22, 0.3)',
                 backgroundColor: 'rgba(249, 115, 22, 0.1)',
@@ -734,8 +742,6 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                 opacity: unlinkingAccount ? 0.5 : 1,
                 transition: 'all 0.2s',
                 color: '#fb923c',
-                fontSize: '0.75rem',
-                fontWeight: 600,
               }}
               title="Change Riot account"
               onMouseEnter={(e) => {
@@ -745,10 +751,9 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                 e.currentTarget.style.backgroundColor = 'rgba(249, 115, 22, 0.1)';
               }}
             >
-              <svg style={{ width: '14px', height: '14px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '16px', height: '16px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
               </svg>
-              <span className="hidden sm:inline">Change</span>
             </button>
           </div>
         </div>

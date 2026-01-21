@@ -639,38 +639,39 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
       <AnimatedBackground />
 
       {/* Top Bar - Fixed at top right */}
-      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '0.75rem', right: '1rem', left: 'auto', gap: '0.5rem' }}>
+      <div style={{ position: 'fixed', zIndex: 50, display: 'flex', alignItems: 'center', top: '1rem', right: '1.5rem', gap: '0.5rem' }}>
         {/* Settings Button */}
         <button
           onClick={() => setShowSettingsModal(true)}
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgba(10, 10, 20, 0.8)',
-            backdropFilter: 'blur(8px)',
+            gap: '0.5rem',
+            padding: '0.625rem 1rem',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(168, 85, 247, 0.4)',
+            backgroundColor: 'rgba(168, 85, 247, 0.15)',
+            backdropFilter: 'blur(12px)',
             cursor: 'pointer',
-            transition: 'all 0.3s',
+            transition: 'all 0.2s',
+            color: '#c084fc',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(168, 85, 247, 0.2)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.4)';
-            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)';
-            const svg = e.currentTarget.querySelector('svg');
-            if (svg) svg.style.color = 'rgb(192, 132, 252)';
+            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.25)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(168, 85, 247, 0.3)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-            e.currentTarget.style.backgroundColor = 'rgba(10, 10, 20, 0.8)';
-            const svg = e.currentTarget.querySelector('svg');
-            if (svg) svg.style.color = 'rgba(255, 255, 255, 0.7)';
+            e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(168, 85, 247, 0.2)';
           }}
-          title="Settings"
         >
           <svg
-            style={{ width: '22px', height: '22px', color: 'rgba(255, 255, 255, 0.7)', transition: 'all 0.3s' }}
+            style={{ width: '18px', height: '18px' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -678,6 +679,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
+          <span className="hidden sm:inline">Settings</span>
         </button>
 
         {/* Logout Button */}
@@ -686,37 +688,39 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
           style={{
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            padding: '0.5rem',
-            borderRadius: '0.5rem',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            backgroundColor: 'rgba(10, 10, 20, 0.8)',
-            backdropFilter: 'blur(8px)',
+            gap: '0.5rem',
+            padding: '0.625rem 1rem',
+            borderRadius: '0.75rem',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            backgroundColor: 'rgba(239, 68, 68, 0.15)',
+            backdropFilter: 'blur(12px)',
             cursor: 'pointer',
-            transition: 'all 0.3s',
+            transition: 'all 0.2s',
+            color: '#f87171',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
+            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.4)';
-            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
-            const svg = e.currentTarget.querySelector('svg');
-            if (svg) svg.style.color = 'rgb(248, 113, 113)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.3)';
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-            e.currentTarget.style.backgroundColor = 'rgba(10, 10, 20, 0.8)';
-            const svg = e.currentTarget.querySelector('svg');
-            if (svg) svg.style.color = 'rgba(255, 255, 255, 0.7)';
+            e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)';
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
           }}
-          title="Logout"
         >
           <svg
-            style={{ width: '22px', height: '22px', color: 'rgba(255, 255, 255, 0.7)', transition: 'all 0.3s' }}
+            style={{ width: '18px', height: '18px' }}
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
+          <span className="hidden sm:inline">Logout</span>
         </button>
       </div>
 
@@ -760,121 +764,122 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {/* Performance Stats Grid - 2x3 layout */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: '1rem', flex: 1 }}>
+                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    {/* Performance Stats - Horizontal layout */}
+                    <div className="flex flex-wrap items-center justify-between" style={{ gap: '1.5rem' }}>
                       {/* Win Rate */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          Win Rate
-                        </div>
-                        <div className={`text-4xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div style={{ textAlign: 'center', minWidth: '80px' }}>
+                        <div className={`text-3xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                           {winRate}%
                         </div>
-                        <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
-                          {wins}W {losses}L
+                        <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
+                          <span className="text-green-400">{wins}W</span>
+                          <span className="mx-1">/</span>
+                          <span className="text-red-400">{losses}L</span>
                         </div>
+                        <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Win Rate</div>
                       </div>
 
-                      {/* Average KDA */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          Avg KDA
-                        </div>
-                        {(() => {
-                          const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
-                          const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
-                          return (
-                            <>
-                              <div className={`text-4xl font-bold font-['Rajdhani'] ${parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white'}`}>
-                                {kda}
-                              </div>
-                              <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
-                                {avgKills}/{avgDeaths}/{avgAssists}
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
+                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden sm:block" />
+
+                      {/* KDA */}
+                      {(() => {
+                        const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
+                        const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
+                        const kdaColor = parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white';
+                        return (
+                          <div style={{ textAlign: 'center', minWidth: '100px' }}>
+                            <div className={`text-3xl font-bold font-['Rajdhani'] ${kdaColor}`}>{kda}</div>
+                            <div className="text-xs" style={{ marginTop: '0.25rem' }}>
+                              <span className="text-green-400">{avgKills}</span>
+                              <span className="text-[var(--text-quaternary)]"> / </span>
+                              <span className="text-red-400">{avgDeaths}</span>
+                              <span className="text-[var(--text-quaternary)]"> / </span>
+                              <span className="text-yellow-400">{avgAssists}</span>
+                            </div>
+                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">KDA</div>
+                          </div>
+                        );
+                      })()}
+
+                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
 
                       {/* CS/min */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          Avg CS/min
-                        </div>
-                        {(() => {
-                          const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
-                          const avgCSMin = matchesWithCS.length > 0
-                            ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
-                            : '0';
+                      {(() => {
+                        const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
+                        const avgCSMin = matchesWithCS.length > 0
+                          ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
+                          : '0';
+                        const csColor = parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white';
+                        return (
+                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                            <div className={`text-3xl font-bold font-['Rajdhani'] ${csColor}`}>{avgCSMin}</div>
+                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">CS/min</div>
+                          </div>
+                        );
+                      })()}
+
+                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
+
+                      {/* MVP */}
+                      {(() => {
+                        const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
+                        return (
+                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                            <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">{mvpCount}</div>
+                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
+                              <span className="text-[var(--text-quaternary)]">/ {totalGames}</span>
+                            </div>
+                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">MVP</div>
+                          </div>
+                        );
+                      })()}
+
+                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden lg:block" />
+
+                      {/* Streak */}
+                      {(() => {
+                        if (filteredMatches.length === 0) {
                           return (
-                            <div className={`text-4xl font-bold font-['Rajdhani'] ${parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white'}`}>
-                              {avgCSMin}
+                            <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                              <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Streak</div>
                             </div>
                           );
-                        })()}
-                      </div>
-
-                      {/* MVP Count */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          MVP
-                        </div>
-                        {(() => {
-                          const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
-                          return (
-                            <>
-                              <div className="text-4xl font-bold font-['Rajdhani'] text-yellow-400">
-                                {mvpCount}
-                              </div>
-                              <div className="text-sm text-[var(--text-tertiary)]" style={{ marginTop: '0.5rem' }}>
-                                /{totalGames} games
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
-
-                      {/* Current Streak */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          Streak
-                        </div>
-                        {(() => {
-                          if (filteredMatches.length === 0) return <div className="text-4xl font-bold font-['Rajdhani'] text-white">-</div>;
-                          let streak = 0;
-                          const firstResult = filteredMatches[0]?.win;
-                          for (const match of filteredMatches) {
-                            if (match.win === firstResult) streak++;
-                            else break;
-                          }
-                          return (
-                            <div className={`text-4xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
+                        }
+                        let streak = 0;
+                        const firstResult = filteredMatches[0]?.win;
+                        for (const match of filteredMatches) {
+                          if (match.win === firstResult) streak++;
+                          else break;
+                        }
+                        return (
+                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
+                            <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
                               {streak}{firstResult ? 'W' : 'L'}
                             </div>
-                          );
-                        })()}
-                      </div>
+                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Streak</div>
+                          </div>
+                        );
+                      })()}
+
+                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden lg:block" />
 
                       {/* Avg Damage */}
-                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1.25rem' }}>
-                        <div className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest" style={{ marginBottom: '0.5rem' }}>
-                          Avg Damage
-                        </div>
-                        {(() => {
-                          const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
-                          const avgDmg = matchesWithDmg.length > 0
-                            ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
-                            : '0';
-                          return (
-                            <div className="text-4xl font-bold font-['Rajdhani'] text-orange-400">
-                              {avgDmg}k
-                            </div>
-                          );
-                        })()}
-                      </div>
+                      {(() => {
+                        const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
+                        const avgDmg = matchesWithDmg.length > 0
+                          ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
+                          : '0';
+                        return (
+                          <div style={{ textAlign: 'center', minWidth: '70px' }}>
+                            <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">{avgDmg}k</div>
+                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Damage</div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
