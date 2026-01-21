@@ -973,8 +973,12 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
             </div>
 
             {/* KDA Stats */}
-            <div className="flex items-center border-l border-white/10 pl-4 ml-2">
-              <div className="text-center mr-4">
+            <div className="flex items-center ml-3">
+              {/* Trait gauche */}
+              <div className="h-10 w-px bg-white/10"></div>
+
+              {/* K/D/A */}
+              <div className="text-center mx-5">
                 <div className="text-lg sm:text-xl font-bold text-white tracking-tight">
                   {match.kills}
                   <span className="text-[var(--text-quaternary)] mx-1">/</span>
@@ -985,19 +989,24 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                 <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">K / D / A</p>
               </div>
 
+              {/* Trait central */}
               <div className="h-10 w-px bg-white/10"></div>
 
-              <div className="text-center ml-4 mr-2">
+              {/* KDA ratio */}
+              <div className="text-center mx-5">
                 <p className={`text-xl sm:text-2xl font-bold tracking-tight ${kdaColor} font-['Rajdhani']`}>
                   {kda}
                 </p>
                 <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">KDA</p>
               </div>
+
+              {/* Trait droit */}
+              <div className="h-10 w-px bg-white/10"></div>
             </div>
           </div>
 
           {/* Center Section - Player Stats */}
-          <div className="hidden lg:flex items-center border-l border-white/10 gap-6 pl-6 flex-1 justify-center">
+          <div className="hidden lg:flex items-center gap-6 pl-6 flex-1 justify-center">
             {/* CS */}
             {match.totalMinionsKilled !== undefined && (
               <div className="text-center">
