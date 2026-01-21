@@ -147,14 +147,41 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     setLoading(false);
   }, [puuid, region, gameName, tagLine, userCreatedAt]);
 
+  // Fetch existing analyses from backend
+  const fetchExistingAnalyses = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/analysis/games?puuid=${encodeURIComponent(puuid)}&limit=50`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.games && Array.isArray(data.games)) {
+          // Cache all existing analyses
+          data.games.forEach((game: any) => {
+            if (game.matchId && game.status === 'completed') {
+              analyzedCacheRef.current.set(game.matchId, game);
+            }
+          });
+          // Also update the state cache
+          setAnalyzedCache(new Map(analyzedCacheRef.current));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching existing analyses:', error);
+    }
+  }, [puuid]);
+
   // Initial load - wait for userCreatedAt to be fetched first
   useEffect(() => {
-    // Only load if userCreatedAt has been fetched (or if no session/user)
-    if (!hasLoadedRef.current && (userCreatedAt || !session?.user)) {
-      hasLoadedRef.current = true;
-      loadMatches();
-    }
-  }, [loadMatches, userCreatedAt, session]);
+    const initializeData = async () => {
+      if (!hasLoadedRef.current && (userCreatedAt || !session?.user)) {
+        hasLoadedRef.current = true;
+        // First fetch existing analyses to populate cache
+        await fetchExistingAnalyses();
+        // Then load matches (which will use the cache)
+        await loadMatches();
+      }
+    };
+    initializeData();
+  }, [loadMatches, userCreatedAt, session, fetchExistingAnalyses]);
 
   // Start analysis for a match
   const handleStartAnalysis = useCallback(async (matchId: string) => {
@@ -265,9 +292,27 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
     }
   }, [puuid, region, session, onInsufficientCredits]);
 
-  // Handle card click - open modal
-  const handleCardClick = useCallback((match: MatchForAnalysis) => {
+  // Handle card click - open modal and fetch full analysis if needed
+  const handleCardClick = useCallback(async (match: MatchForAnalysis) => {
     setSelectedMatch(match);
+
+    // If we have cached data but it might be incomplete, fetch full analysis
+    const cachedData = analyzedCacheRef.current.get(match.matchId);
+    if (match.analysisStatus === 'completed' && (!cachedData?.stats?.performanceSummary)) {
+      try {
+        // Fetch full analysis data
+        const response = await fetch(`/api/analysis/${match.analysisId || match.matchId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            analyzedCacheRef.current.set(match.matchId, data.data);
+            setAnalyzedCache(prev => new Map(prev).set(match.matchId, data.data));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching full analysis:', error);
+      }
+    }
   }, []);
 
   // Close modal

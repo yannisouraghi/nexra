@@ -374,11 +374,11 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
                 }}
                 style={styles.seeAnalysisButton}
               >
-                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span>See Analysis</span>
+                <span>View</span>
               </button>
             </>
           )}
@@ -479,7 +479,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '100%',
     minWidth: 160,
     maxWidth: 220,
-    height: 280,
+    height: 320,
     background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
     border: '2px solid',
     textDecoration: 'none',
@@ -557,8 +557,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    padding: 16,
-    paddingTop: 36,
+    padding: 14,
+    paddingTop: 40,
+    gap: 8,
   },
   timeAgo: {
     position: 'absolute',
@@ -590,7 +591,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 20,
+    gap: 10,
+    paddingTop: 10,
   },
   roleIcon: {
     width: 44,
@@ -614,7 +616,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   bottomSection: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 8,
+    gap: 6,
+    marginTop: 'auto',
+    paddingTop: 8,
   },
   championName: {
     fontSize: 20,
@@ -752,17 +756,17 @@ const styles: { [key: string]: React.CSSProperties } = {
   seeAnalysisButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    padding: '8px 14px',
-    borderRadius: 8,
-    fontSize: 12,
+    gap: 4,
+    padding: '6px 12px',
+    borderRadius: 6,
+    fontSize: 11,
     fontWeight: 600,
     color: 'white',
     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 2px 10px rgba(34, 197, 94, 0.25)',
-    marginTop: 8,
+    boxShadow: '0 2px 8px rgba(34, 197, 94, 0.2)',
+    marginTop: 4,
   },
 };
