@@ -430,7 +430,7 @@ function LoginContent() {
 
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Password</label>
-                <div className="password-field">
+                <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -438,12 +438,32 @@ function LoginContent() {
                     placeholder={mode === 'register' ? 'Min. 8 characters' : 'Your password'}
                     required
                     minLength={mode === 'register' ? 8 : undefined}
+                    style={{
+                      ...styles.input,
+                      width: '100%',
+                      paddingRight: '48px',
+                      boxSizing: 'border-box',
+                    }}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="eye-btn"
                     tabIndex={-1}
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: '4px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'rgba(255,255,255,0.5)',
+                      zIndex: 10,
+                    }}
                   >
                     {showPassword ? (
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -463,19 +483,39 @@ function LoginContent() {
               {mode === 'register' && (
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Confirm Password</label>
-                  <div className="password-field">
+                  <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm your password"
                       required
+                      style={{
+                        ...styles.input,
+                        width: '100%',
+                        paddingRight: '48px',
+                        boxSizing: 'border-box',
+                      }}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="eye-btn"
                       tabIndex={-1}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'rgba(255,255,255,0.5)',
+                        zIndex: 10,
+                      }}
                     >
                       {showConfirmPassword ? (
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
