@@ -997,46 +997,46 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
           </div>
 
           {/* Center Section - Player Stats */}
-          <div className="hidden lg:flex items-center border-l border-white/10 gap-4 pl-4 flex-1 justify-center">
+          <div className="hidden lg:flex items-center border-l border-white/10 gap-6 pl-6 flex-1 justify-center">
             {/* CS */}
             {match.totalMinionsKilled !== undefined && (
               <div className="text-center">
-                <div className="text-sm font-bold text-white">{match.totalMinionsKilled + (match.neutralMinionsKilled || 0)}</div>
-                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">CS</div>
+                <div className="text-xl font-bold text-white">{match.totalMinionsKilled + (match.neutralMinionsKilled || 0)}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wide">CS</div>
               </div>
             )}
             {/* CS/min */}
             {match.totalMinionsKilled !== undefined && match.gameDuration > 0 && (
               <div className="text-center">
-                <div className="text-sm font-bold text-cyan-400">{((match.totalMinionsKilled + (match.neutralMinionsKilled || 0)) / (match.gameDuration / 60)).toFixed(1)}</div>
-                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">CS/min</div>
+                <div className="text-xl font-bold text-cyan-400">{((match.totalMinionsKilled + (match.neutralMinionsKilled || 0)) / (match.gameDuration / 60)).toFixed(1)}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wide">CS/min</div>
               </div>
             )}
             {/* Damage */}
             {match.totalDamageDealtToChampions !== undefined && (
               <div className="text-center">
-                <div className="text-sm font-bold text-orange-400">{(match.totalDamageDealtToChampions / 1000).toFixed(1)}k</div>
-                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Damage</div>
+                <div className="text-xl font-bold text-orange-400">{(match.totalDamageDealtToChampions / 1000).toFixed(1)}k</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wide">Damage</div>
               </div>
             )}
             {/* Gold */}
             {match.goldEarned !== undefined && (
               <div className="text-center">
-                <div className="text-sm font-bold text-yellow-400">{(match.goldEarned / 1000).toFixed(1)}k</div>
-                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Gold</div>
+                <div className="text-xl font-bold text-yellow-400">{(match.goldEarned / 1000).toFixed(1)}k</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wide">Gold</div>
               </div>
             )}
             {/* Vision */}
             {match.visionScore !== undefined && (
               <div className="text-center">
-                <div className="text-sm font-bold text-purple-400">{match.visionScore}</div>
-                <div className="text-[9px] text-[var(--text-tertiary)] uppercase">Vision</div>
+                <div className="text-xl font-bold text-purple-400">{match.visionScore}</div>
+                <div className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wide">Vision</div>
               </div>
             )}
           </div>
 
           {/* Right Section - Teams (hidden on mobile) */}
-          <div className="hidden xl:flex items-start border-l border-white/10 gap-3 pl-4" style={{ marginLeft: 'auto' }}>
+          <div className="hidden xl:flex items-start border-l border-white/10 gap-3 pl-4" style={{ marginRight: '1rem' }}>
             {/* Allies (Blue team) - Compact grid */}
             {match.teammates && match.teammates.length > 0 && (
               <div style={{ width: '120px' }}>
