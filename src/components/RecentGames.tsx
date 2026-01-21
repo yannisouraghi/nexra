@@ -764,122 +764,120 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    {/* Performance Stats - Horizontal layout */}
-                    <div className="flex flex-wrap items-center justify-between" style={{ gap: '1.5rem' }}>
+                  <div className="glass-card" style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    {/* Performance Stats Grid - 2x3 layout */}
+                    <div className="grid grid-cols-2 sm:grid-cols-3" style={{ gap: '1rem', flex: 1 }}>
                       {/* Win Rate */}
-                      <div style={{ textAlign: 'center', minWidth: '80px' }}>
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
                         <div className={`text-3xl font-bold font-['Rajdhani'] ${parseInt(winRate) >= 50 ? 'text-green-400' : 'text-red-400'}`}>
                           {winRate}%
                         </div>
-                        <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
-                          <span className="text-green-400">{wins}W</span>
-                          <span className="mx-1">/</span>
-                          <span className="text-red-400">{losses}L</span>
+                        <div className="text-xs mt-1">
+                          <span className="text-green-400 font-semibold">{wins}W</span>
+                          <span className="text-[var(--text-quaternary)]">/</span>
+                          <span className="text-red-400 font-semibold">{losses}L</span>
                         </div>
                         <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Win Rate</div>
                       </div>
 
-                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden sm:block" />
-
                       {/* KDA */}
-                      {(() => {
-                        const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
-                        const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
-                        const kdaColor = parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white';
-                        return (
-                          <div style={{ textAlign: 'center', minWidth: '100px' }}>
-                            <div className={`text-3xl font-bold font-['Rajdhani'] ${kdaColor}`}>{kda}</div>
-                            <div className="text-xs" style={{ marginTop: '0.25rem' }}>
-                              <span className="text-green-400">{avgKills}</span>
-                              <span className="text-[var(--text-quaternary)]"> / </span>
-                              <span className="text-red-400">{avgDeaths}</span>
-                              <span className="text-[var(--text-quaternary)]"> / </span>
-                              <span className="text-yellow-400">{avgAssists}</span>
-                            </div>
-                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">KDA</div>
-                          </div>
-                        );
-                      })()}
-
-                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {(() => {
+                          const avgKills = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.kills, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const avgDeaths = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.deaths, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const avgAssists = filteredMatches.length > 0 ? (filteredMatches.reduce((sum, m) => sum + m.assists, 0) / filteredMatches.length).toFixed(1) : '0';
+                          const kda = parseFloat(avgDeaths) > 0 ? ((parseFloat(avgKills) + parseFloat(avgAssists)) / parseFloat(avgDeaths)).toFixed(2) : 'Perfect';
+                          const kdaColor = parseFloat(kda) >= 3 ? 'text-cyan-400' : parseFloat(kda) >= 2 ? 'text-green-400' : 'text-white';
+                          return (
+                            <>
+                              <div className={`text-3xl font-bold font-['Rajdhani'] ${kdaColor}`}>{kda}</div>
+                              <div className="text-xs mt-1">
+                                <span className="text-green-400">{avgKills}</span>
+                                <span className="text-[var(--text-quaternary)]"> / </span>
+                                <span className="text-red-400">{avgDeaths}</span>
+                                <span className="text-[var(--text-quaternary)]"> / </span>
+                                <span className="text-yellow-400">{avgAssists}</span>
+                              </div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">KDA</div>
+                            </>
+                          );
+                        })()}
+                      </div>
 
                       {/* CS/min */}
-                      {(() => {
-                        const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
-                        const avgCSMin = matchesWithCS.length > 0
-                          ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
-                          : '0';
-                        const csColor = parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white';
-                        return (
-                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
-                            <div className={`text-3xl font-bold font-['Rajdhani'] ${csColor}`}>{avgCSMin}</div>
-                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">CS/min</div>
-                          </div>
-                        );
-                      })()}
-
-                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {(() => {
+                          const matchesWithCS = filteredMatches.filter(m => m.totalMinionsKilled !== undefined && m.gameDuration > 0);
+                          const avgCSMin = matchesWithCS.length > 0
+                            ? (matchesWithCS.reduce((sum, m) => sum + ((m.totalMinionsKilled || 0) / (m.gameDuration / 60)), 0) / matchesWithCS.length).toFixed(1)
+                            : '0';
+                          const csColor = parseFloat(avgCSMin) >= 7 ? 'text-cyan-400' : parseFloat(avgCSMin) >= 5 ? 'text-green-400' : 'text-white';
+                          return (
+                            <>
+                              <div className={`text-3xl font-bold font-['Rajdhani'] ${csColor}`}>{avgCSMin}</div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">CS/min</div>
+                            </>
+                          );
+                        })()}
+                      </div>
 
                       {/* MVP */}
-                      {(() => {
-                        const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
-                        return (
-                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
-                            <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">{mvpCount}</div>
-                            <div className="text-xs text-[var(--text-tertiary)]" style={{ marginTop: '0.25rem' }}>
-                              <span className="text-[var(--text-quaternary)]">/ {totalGames}</span>
-                            </div>
-                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">MVP</div>
-                          </div>
-                        );
-                      })()}
-
-                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden lg:block" />
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {(() => {
+                          const mvpCount = filteredMatches.filter(m => m.rank === 1).length;
+                          return (
+                            <>
+                              <div className="text-3xl font-bold font-['Rajdhani'] text-yellow-400">{mvpCount}</div>
+                              <div className="text-xs mt-1 text-[var(--text-tertiary)]">/ {totalGames}</div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">MVP</div>
+                            </>
+                          );
+                        })()}
+                      </div>
 
                       {/* Streak */}
-                      {(() => {
-                        if (filteredMatches.length === 0) {
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {(() => {
+                          if (filteredMatches.length === 0) {
+                            return (
+                              <>
+                                <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>
+                                <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Streak</div>
+                              </>
+                            );
+                          }
+                          let streak = 0;
+                          const firstResult = filteredMatches[0]?.win;
+                          for (const match of filteredMatches) {
+                            if (match.win === firstResult) streak++;
+                            else break;
+                          }
                           return (
-                            <div style={{ textAlign: 'center', minWidth: '60px' }}>
-                              <div className="text-3xl font-bold font-['Rajdhani'] text-white">-</div>
-                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Streak</div>
-                            </div>
+                            <>
+                              <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
+                                {streak}{firstResult ? 'W' : 'L'}
+                              </div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Streak</div>
+                            </>
                           );
-                        }
-                        let streak = 0;
-                        const firstResult = filteredMatches[0]?.win;
-                        for (const match of filteredMatches) {
-                          if (match.win === firstResult) streak++;
-                          else break;
-                        }
-                        return (
-                          <div style={{ textAlign: 'center', minWidth: '60px' }}>
-                            <div className={`text-3xl font-bold font-['Rajdhani'] ${firstResult ? 'text-green-400' : 'text-red-400'}`}>
-                              {streak}{firstResult ? 'W' : 'L'}
-                            </div>
-                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Streak</div>
-                          </div>
-                        );
-                      })()}
-
-                      <div style={{ width: '1px', height: '40px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden lg:block" />
+                        })()}
+                      </div>
 
                       {/* Avg Damage */}
-                      {(() => {
-                        const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
-                        const avgDmg = matchesWithDmg.length > 0
-                          ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
-                          : '0';
-                        return (
-                          <div style={{ textAlign: 'center', minWidth: '70px' }}>
-                            <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">{avgDmg}k</div>
-                            <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-1">Damage</div>
-                          </div>
-                        );
-                      })()}
+                      <div className="rounded-xl bg-glass-ultra border border-glass-border flex flex-col items-center justify-center hover:bg-glass-subtle transition-colors" style={{ padding: '1rem' }}>
+                        {(() => {
+                          const matchesWithDmg = filteredMatches.filter(m => m.totalDamageDealtToChampions !== undefined);
+                          const avgDmg = matchesWithDmg.length > 0
+                            ? (matchesWithDmg.reduce((sum, m) => sum + (m.totalDamageDealtToChampions || 0), 0) / matchesWithDmg.length / 1000).toFixed(1)
+                            : '0';
+                          return (
+                            <>
+                              <div className="text-3xl font-bold font-['Rajdhani'] text-orange-400">{avgDmg}k</div>
+                              <div className="text-[10px] text-[var(--text-quaternary)] uppercase tracking-wider mt-2">Damage</div>
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>
