@@ -71,11 +71,11 @@ export default function NotFound() {
 
           {/* Message */}
           <h1 style={{ fontSize: '24px', fontWeight: 600, marginBottom: '16px' }}>
-            Page non trouvée
+            Page Not Found
           </h1>
           <p style={{ marginBottom: '32px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>
-            Oups ! Cette page n'existe pas ou a été déplacée.
-            Pas de panique, retourne sur la Faille de l'invocateur.
+            Oops! This page doesn't exist or has been moved.
+            Don't panic, head back to the Summoner's Rift.
           </p>
 
           {/* Buttons */}
@@ -100,7 +100,7 @@ export default function NotFound() {
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                 <polyline points="9 22 9 12 15 12 15 22"/>
               </svg>
-              Retour à l'accueil
+              Back to Home
             </Link>
             <Link
               href="/dashboard"
