@@ -149,7 +149,7 @@ export default function TermsOfService() {
             <p>
               Les crédits achetés ne sont pas remboursables, sauf en cas de dysfonctionnement
               technique avéré empêchant leur utilisation. Dans ce cas, contactez-nous à{' '}
-              <a href="mailto:contact@nexra-ai.app" className="text-cyan-400 hover:underline">contact@nexra-ai.app</a>.
+              <a href="mailto:contact@crocoding.com" className="text-cyan-400 hover:underline">contact@crocoding.com</a>.
             </p>
           </section>
 
@@ -259,7 +259,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold text-white mb-4">13. Contact</h2>
             <p>
               Pour toute question relative aux présentes CGU, contactez-nous à :{' '}
-              <a href="mailto:contact@nexra-ai.app" className="text-cyan-400 hover:underline">contact@nexra-ai.app</a>
+              <a href="mailto:contact@crocoding.com" className="text-cyan-400 hover:underline">contact@crocoding.com</a>
             </p>
           </section>
 

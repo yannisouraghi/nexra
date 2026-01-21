@@ -67,7 +67,7 @@ export default function PrivacyPolicy() {
             <div className="p-4 bg-white/5 rounded-lg border border-white/10">
               <p><strong>Crocoding</strong></p>
               <p>51 Boulevard des Belges, 76000 Rouen, France</p>
-              <p>Email : <a href="mailto:contact@nexra-ai.app" className="text-cyan-400 hover:underline">contact@nexra-ai.app</a></p>
+              <p>Email : <a href="mailto:contact@crocoding.com" className="text-cyan-400 hover:underline">contact@crocoding.com</a></p>
             </div>
           </section>
 
@@ -175,7 +175,7 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mt-4">
               Pour exercer ces droits, contactez-nous à :{' '}
-              <a href="mailto:contact@nexra-ai.app" className="text-cyan-400 hover:underline">contact@nexra-ai.app</a>
+              <a href="mailto:contact@crocoding.com" className="text-cyan-400 hover:underline">contact@crocoding.com</a>
             </p>
             <p className="mt-4">
               Vous pouvez également introduire une réclamation auprès de la CNIL :{' '}

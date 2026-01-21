@@ -65,7 +65,7 @@ export default function MentionsLegales() {
           {/* Contact */}
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">2. Contact</h2>
-            <p>Email : <a href="mailto:contact@nexra-ai.app" className="text-cyan-400 hover:underline">contact@nexra-ai.app</a></p>
+            <p>Email : <a href="mailto:contact@crocoding.com" className="text-cyan-400 hover:underline">contact@crocoding.com</a></p>
           </section>
 
           {/* Hébergement */}
