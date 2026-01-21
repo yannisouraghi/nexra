@@ -58,11 +58,14 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
 
-  // Fetch user registration date
+  // Fetch user registration date (only once on mount)
+  const userCreatedAtFetchedRef = useRef(false);
   useEffect(() => {
     const fetchUserCreatedAt = async () => {
       const user = session?.user as { id?: string; email?: string };
-      if (!user?.id) return;
+      if (!user?.id || userCreatedAtFetchedRef.current) return;
+
+      userCreatedAtFetchedRef.current = true;
 
       try {
         const response = await fetch(`${NEXRA_API_URL}/users/${user.id}`, {
@@ -214,10 +217,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         throw new Error(creditData.error || 'Failed to use credit');
       }
 
-      // Update session with new credit count
-      await updateSession();
-
-      // Now start the analysis
+      // Now start the analysis (don't update session here to avoid page reload)
       const response = await fetch('/api/analysis/analyze', {
         method: 'POST',
         headers: {
@@ -263,7 +263,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, profileI
         return newSet;
       });
     }
-  }, [puuid, region, session, onInsufficientCredits, updateSession]);
+  }, [puuid, region, session, onInsufficientCredits]);
 
   // Handle card click - open modal
   const handleCardClick = useCallback((match: MatchForAnalysis) => {
