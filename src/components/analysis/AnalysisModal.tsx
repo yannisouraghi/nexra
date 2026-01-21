@@ -36,13 +36,7 @@ export default function AnalysisModal({
   const [activeTab, setActiveTab] = useState<TabType>('summary');
   const [imageError, setImageError] = useState(false);
 
-  // Auto-start analysis when modal opens if not already done
-  useEffect(() => {
-    if (!analysisData && !isAnalyzing && match.analysisStatus !== 'completed') {
-      onStartAnalysis(match.matchId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+  // Modal only opens when analysis is completed - no auto-start needed
 
   // Close on escape key
   useEffect(() => {
