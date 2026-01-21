@@ -105,12 +105,24 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
   const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
 
+  // Smooth progress animation - cycles through phases to avoid getting stuck
   useEffect(() => {
     if (isProcessing) {
       setProgress(0);
+      let phase = 0;
       const iv = setInterval(() => {
-        setProgress(p => p < 30 ? p + 3 : p < 60 ? p + 1.5 : p < 85 ? p + 0.5 : p < 95 ? p + 0.2 : p);
-      }, 200);
+        setProgress(p => {
+          // Phase 1: Quick start (0-40%)
+          if (p < 40) return p + 2;
+          // Phase 2: Slower middle (40-70%)
+          if (p < 70) return p + 0.8;
+          // Phase 3: Even slower (70-90%)
+          if (p < 90) return p + 0.4;
+          // Phase 4: Cycle between 90-98% to show activity
+          phase = (phase + 1) % 20;
+          return 90 + (phase < 10 ? phase * 0.8 : (20 - phase) * 0.8);
+        });
+      }, 150);
       return () => clearInterval(iv);
     }
     setProgress(isCompleted ? 100 : 0);
@@ -488,39 +500,6 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
         </div>
       </div>
 
-      {/* Hover Overlay */}
-      {isCompleted && (
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: hovered ? 1 : 0,
-          pointerEvents: hovered ? 'auto' : 'none',
-          transition: 'opacity 0.25s ease',
-          borderRadius: 14,
-        }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '12px 24px',
-            borderRadius: 10,
-            fontSize: 14,
-            fontWeight: 600,
-            color: 'white',
-            background: 'linear-gradient(135deg, rgba(0,212,255,0.25) 0%, rgba(99,102,241,0.25) 100%)',
-            border: '1px solid rgba(0,212,255,0.5)',
-          }}>
-            <span>View Analysis</span>
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes spin {
