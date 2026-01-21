@@ -506,44 +506,45 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
           {/* Separator */}
           <div style={{ width: '1px', height: '70px', backgroundColor: 'rgba(255,255,255,0.1)' }} className="hidden md:block" />
 
-          {/* Rank Info - ENLARGED */}
+          {/* Rank Info - BIGGER */}
           {rank && rankImageUrl ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <div style={{ width: '90px', overflow: 'visible', flexShrink: 0 }}>
-                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(2)', transformOrigin: 'center' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+              <div style={{ width: '110px', overflow: 'visible', flexShrink: 0 }}>
+                <img src={rankImageUrl} alt={`${rank.tier} ${rank.rank}`} style={{ width: '100%', height: 'auto', transform: 'scale(2.2)', transformOrigin: 'center' }} />
               </div>
               <div>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>
+                <h2 style={{ fontSize: '1.625rem', fontWeight: 700, color: tierColor, lineHeight: 1.2 }}>
                   {rank.tier.charAt(0) + rank.tier.slice(1).toLowerCase()} {rank.rank}
                 </h2>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem' }}>
-                  <span style={{ fontSize: '2rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{rank.leaguePoints}</span>
-                  <span style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>LP</span>
+                  <span style={{ fontSize: '2.25rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{rank.leaguePoints}</span>
+                  <span style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.5)', fontWeight: 600 }}>LP</span>
                 </div>
               </div>
             </div>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem 1.25rem', background: 'rgba(107, 114, 128, 0.1)', borderRadius: '0.75rem', border: '1px solid rgba(107, 114, 128, 0.2)' }}>
-              <svg style={{ width: '36px', height: '36px', color: 'rgba(156, 163, 175, 0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg style={{ width: '40px', height: '40px', color: 'rgba(156, 163, 175, 0.6)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              <span style={{ fontSize: '1.25rem', fontWeight: 600, color: 'white' }}>Unranked</span>
+              <span style={{ fontSize: '1.375rem', fontWeight: 600, color: 'white' }}>Unranked</span>
             </div>
           )}
         </div>
 
-        {/* Row 2: Stats Row - All centered on one line - ENLARGED */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-          {/* LP Evolution Graph - ENLARGED */}
+        {/* Row 2: Stats organized in sections with titles */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+          {/* LP Evolution Section */}
           {rank && playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
             <>
-              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center' }}>
+              <div className="hidden md:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>LP Evolution</div>
                 <div style={{ display: 'flex', alignItems: 'stretch', gap: '0.375rem' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '10px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
                     <span>100</span>
                     <span>0</span>
                   </div>
-                  <div style={{ position: 'relative', width: '130px', height: '50px' }}>
+                  <div style={{ position: 'relative', width: '120px', height: '45px' }}>
                     {(() => {
                       const recentResults = playerStats.recentMatchResults.slice(0, 10);
                       const lpPerGame = 18;
@@ -553,8 +554,8 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                         const prevLp = lpHistory[0] + (wasWin ? -lpPerGame : lpPerGame);
                         lpHistory.unshift(Math.max(0, Math.min(100, prevLp)));
                       }
-                      const graphWidth = 130;
-                      const graphHeight = 50;
+                      const graphWidth = 120;
+                      const graphHeight = 45;
                       const padding = 3;
                       const innerWidth = graphWidth - padding * 2;
                       const innerHeight = graphHeight - padding * 2;
@@ -578,105 +579,107 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
                           <line x1={padding} y1={padding} x2={graphWidth - padding} y2={padding} stroke="rgba(34, 197, 94, 0.25)" strokeWidth="1" strokeDasharray="3,3" />
                           <line x1={padding} y1={graphHeight - padding} x2={graphWidth - padding} y2={graphHeight - padding} stroke="rgba(239, 68, 68, 0.25)" strokeWidth="1" strokeDasharray="3,3" />
                           <path d={areaD} fill="url(#lpGradient)" />
-                          <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                          <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="5" fill={trendColor} stroke="white" strokeWidth="2" />
+                          <path d={pathD} fill="none" stroke={trendColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="4" fill={trendColor} stroke="white" strokeWidth="1.5" />
                         </svg>
                       );
                     })()}
                   </div>
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '0.25rem', fontWeight: 500 }}>
+                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '0.25rem' }}>
                   Last {playerStats.recentMatchResults.slice(0, 10).length} games
                 </div>
               </div>
-              <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden md:block" />
             </>
           )}
 
-          {/* Stats: Games, Winrate, W/L - ENLARGED */}
+          {/* Ranked Stats Section */}
           {rank && (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.75rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1.25rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Ranked Stats</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{totalGames}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Games</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>{totalGames}</div>
+                  <div style={{ fontSize: '0.625rem', color: 'rgba(255, 255, 255, 0.4)', textTransform: 'uppercase', fontWeight: 600 }}>Games</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '2rem', fontWeight: 800, color: winRate >= 50 ? '#22c55e' : '#ef4444', letterSpacing: '-0.02em' }}>{winRate}%</div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>Winrate</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 800, color: winRate >= 50 ? '#22c55e' : '#ef4444', letterSpacing: '-0.02em' }}>{winRate}%</div>
+                  <div style={{ fontSize: '0.625rem', color: 'rgba(255, 255, 255, 0.4)', textTransform: 'uppercase', fontWeight: 600 }}>Winrate</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', justifyContent: 'center' }}>
-                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#22c55e' }}>{rank.wins}</span>
-                    <span style={{ fontSize: '1rem', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 500 }}>/</span>
-                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color: '#ef4444' }}>{rank.losses}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.125rem', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#22c55e' }}>{rank.wins}</span>
+                    <span style={{ fontSize: '0.875rem', color: 'rgba(255, 255, 255, 0.3)', fontWeight: 500 }}>/</span>
+                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ef4444' }}>{rank.losses}</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>W / L</div>
+                  <div style={{ fontSize: '0.625rem', color: 'rgba(255, 255, 255, 0.4)', textTransform: 'uppercase', fontWeight: 600 }}>W / L</div>
                 </div>
               </div>
-              <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden lg:block" />
-            </>
+            </div>
           )}
 
-          {/* Recent Performance - ENLARGED */}
+          {/* Recent Games Section */}
           {playerStats?.recentMatchResults && playerStats.recentMatchResults.length > 0 && (
-            <>
-              <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  {playerStats.recentMatchResults.slice(0, 10).map((isWin, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        width: '26px',
-                        height: '26px',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        backgroundColor: isWin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-                        border: `2px solid ${isWin ? '#22c55e' : '#ef4444'}`,
-                        color: isWin ? '#22c55e' : '#ef4444',
-                      }}
-                    >
-                      {isWin ? 'W' : 'L'}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase', marginTop: '0.375rem', fontWeight: 600, letterSpacing: '0.05em' }}>Recent</div>
+            <div className="hidden lg:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Recent Games</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.1875rem' }}>
+                {playerStats.recentMatchResults.slice(0, 10).map((isWin, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      width: '24px',
+                      height: '24px',
+                      borderRadius: '4px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      backgroundColor: isWin ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+                      border: `2px solid ${isWin ? '#22c55e' : '#ef4444'}`,
+                      color: isWin ? '#22c55e' : '#ef4444',
+                    }}
+                  >
+                    {isWin ? 'W' : 'L'}
+                  </div>
+                ))}
               </div>
-              <div style={{ width: '1px', height: '56px', backgroundColor: 'rgba(255,255,255,0.08)' }} className="hidden xl:block" />
-            </>
+              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)', marginTop: '0.375rem' }}>
+                {playerStats.recentMatchResults.slice(0, 10).filter(w => w).length}W - {playerStats.recentMatchResults.slice(0, 10).filter(w => !w).length}L
+              </div>
+            </div>
           )}
 
-          {/* Top Champions - ENLARGED */}
+          {/* Top Champions Section */}
           {playerStats?.topChampions && playerStats.topChampions.length > 0 && (
-            <div className="hidden xl:flex" style={{ alignItems: 'center', gap: '0.75rem' }}>
-              {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '0.25rem',
-                  }}
-                >
-                  <img
-                    src={getChampionImageUrl(champion.championName, ddragonVersion)}
-                    alt={champion.championName}
-                    style={{ width: '44px', height: '44px', borderRadius: '8px', border: `2px solid ${champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444'}` }}
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                  />
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '13px', fontWeight: 700, color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
-                      {champion.winrate}%
+            <div className="hidden xl:flex" style={{ flexDirection: 'column', alignItems: 'center', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600, marginBottom: '0.5rem' }}>Top Champions</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+                {playerStats.topChampions.slice(0, 3).map((champion, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                    }}
+                  >
+                    <img
+                      src={getChampionImageUrl(champion.championName, ddragonVersion)}
+                      alt={champion.championName}
+                      style={{ width: '40px', height: '40px', borderRadius: '6px', border: `2px solid ${champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444'}` }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: champion.winrate >= 60 ? '#22c55e' : champion.winrate >= 50 ? '#eab308' : '#ef4444' }}>
+                        {champion.winrate}%
+                      </div>
+                      <div style={{ fontSize: '9px', color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{champion.games}g</div>
                     </div>
-                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{champion.games}g</div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </div>

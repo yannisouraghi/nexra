@@ -748,9 +748,9 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
           <div>
             <div className="w-full">
           {activeTab === 'summary' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {/* Stats Section with Vertical Menu */}
-              <div style={{ display: 'flex', gap: '2rem', alignItems: 'stretch' }} className="animate-fadeIn">
+              <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }} className="animate-fadeIn">
                 {/* Sidebar Navigation - Desktop only */}
                 <aside className="hidden lg:flex" style={{ width: '240px', flexShrink: 0, flexDirection: 'column' }}>
                   <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
@@ -758,13 +758,13 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 </aside>
 
                 {/* Stats Overview - Grid Layout */}
-                <div className="flex-1" style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="flex-1">
                   {/* Mobile Navigation - Horizontal */}
-                  <div className="lg:hidden w-full" style={{ marginBottom: '2rem' }}>
+                  <div className="lg:hidden w-full" style={{ marginBottom: '1.5rem' }}>
                     <NavigationTabs activeTab={activeTab} onTabChange={handleTabChange} isInGame={isInGame} />
                   </div>
 
-                  <div className="glass-card" style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <div className="glass-card" style={{ padding: '1.5rem' }}>
                     {/* Stats Grid - 4 columns */}
                     <div className="grid grid-cols-2 lg:grid-cols-4" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
                       {/* Total Games */}
@@ -803,17 +803,17 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                     </div>
 
                     {/* Win Rate Progress Bar */}
-                    <div className="rounded-xl bg-glass-ultra border border-glass-border" style={{ padding: '1.25rem' }}>
-                      <div className="flex items-center justify-between" style={{ marginBottom: '0.75rem' }}>
+                    <div className="rounded-xl bg-glass-ultra border border-glass-border" style={{ padding: '1rem' }}>
+                      <div className="flex items-center justify-between" style={{ marginBottom: '0.5rem' }}>
                         <span className="text-sm font-semibold text-[var(--text-secondary)]">Win Rate Progression</span>
-                        <span className="text-xl font-bold text-cyan-400 font-['Rajdhani']">{wins}/{totalGames}</span>
+                        <span className="text-lg font-bold text-cyan-400 font-['Rajdhani']">{wins}/{totalGames}</span>
                       </div>
-                      <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
+                      <div className="relative h-2.5 bg-white/5 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-700 ease-out"
                           style={{
                             width: `${winRate}%`,
-                            boxShadow: '0 0 16px rgba(0, 212, 255, 0.4)'
+                            boxShadow: '0 0 12px rgba(0, 212, 255, 0.4)'
                           }}
                         ></div>
                       </div>
