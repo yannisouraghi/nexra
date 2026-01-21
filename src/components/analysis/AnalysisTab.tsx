@@ -53,7 +53,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
   const [selectedMatch, setSelectedMatch] = useState<MatchForAnalysis | null>(null);
   const [creditError, setCreditError] = useState<string | null>(null);
   const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
-  const [addingCredits, setAddingCredits] = useState(false);
   // Ref for cache to avoid stale closures in callbacks, state for re-renders
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
@@ -325,33 +324,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
     setSelectedMatch(null);
   }, []);
 
-  // DEBUG: Add credits for testing
-  const handleAddDebugCredits = useCallback(async () => {
-    const user = session?.user as { id?: string; email?: string };
-    if (!user?.id) return;
-
-    setAddingCredits(true);
-    try {
-      const response = await fetch(`${NEXRA_API_URL}/users/${user.id}/add-credits`, {
-        method: 'POST',
-        headers: getAuthHeaders(user.id, user.email),
-        body: JSON.stringify({ amount: 10 }),
-      });
-
-      if (response.ok) {
-        await updateSession();
-        alert('Added 10 credits!');
-      } else {
-        alert('Failed to add credits');
-      }
-    } catch (error) {
-      console.error('Error adding credits:', error);
-      alert('Error adding credits');
-    } finally {
-      setAddingCredits(false);
-    }
-  }, [session, updateSession]);
-
   // Calculate stats from completed analyses
   const completedMatches = matches.filter(m => m.analysisStatus === 'completed');
   const totalCompleted = completedMatches.length;
@@ -454,15 +426,6 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
           </p>
         </div>
       </div>
-
-      {/* DEBUG: Add Credits Button */}
-      <button
-        onClick={handleAddDebugCredits}
-        disabled={addingCredits}
-        style={styles.debugButton}
-      >
-        {addingCredits ? 'Adding...' : '🔧 DEBUG: Add 10 Credits'}
-      </button>
 
       {/* Overview Section - Always show */}
       <AnalysisOverview stats={overallStats} />
@@ -792,17 +755,5 @@ const styles: { [key: string]: React.CSSProperties } = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: 20,
     paddingBottom: 60,
-  },
-  debugButton: {
-    padding: '10px 20px',
-    borderRadius: 8,
-    border: '2px dashed #ff6b6b',
-    background: 'rgba(255, 107, 107, 0.1)',
-    color: '#ff6b6b',
-    fontSize: 14,
-    fontWeight: 600,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    alignSelf: 'flex-start',
   },
 };
