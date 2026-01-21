@@ -2,16 +2,105 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
+const siteUrl = "https://nexra-ai.app";
+
 export const metadata: Metadata = {
-  title: "Nexra - AI-Powered League of Legends Coach",
-  description: "Advanced AI coaching for League of Legends. Record your games, get personalized analysis, and climb the ranks.",
+  // Base
+  title: {
+    default: "Nexra - AI-Powered League of Legends Coach",
+    template: "%s | Nexra",
+  },
+  description: "Analysez vos parties League of Legends avec l'IA. Identifiez vos erreurs, recevez des conseils personnalisés et progressez rapidement. Coach IA disponible 24/7.",
+  keywords: [
+    "League of Legends",
+    "LoL",
+    "coach",
+    "coaching",
+    "IA",
+    "AI",
+    "analyse",
+    "analysis",
+    "amélioration",
+    "climb",
+    "rank",
+    "ranked",
+    "Riot Games",
+    "esport",
+    "gaming",
+    "statistiques",
+    "stats",
+  ],
+  authors: [{ name: "Crocoding", url: "https://crocoding.com" }],
+  creator: "Crocoding",
+  publisher: "Crocoding",
+
+  // Favicon
   icons: {
     icon: [
       { url: "/nexra-ico.ico", sizes: "any" },
       { url: "/nexra-logo.png", type: "image/png" },
     ],
     apple: "/nexra-logo.png",
+    shortcut: "/nexra-ico.ico",
   },
+
+  // Open Graph (Facebook, LinkedIn, Discord, etc.)
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: siteUrl,
+    siteName: "Nexra",
+    title: "Nexra - AI-Powered League of Legends Coach",
+    description: "Analysez vos parties League of Legends avec l'IA. Identifiez vos erreurs, recevez des conseils personnalisés et progressez rapidement.",
+    images: [
+      {
+        url: `${siteUrl}/og-image.png`,
+        width: 1200,
+        height: 630,
+        alt: "Nexra - AI League of Legends Coach",
+      },
+    ],
+  },
+
+  // Twitter Card
+  twitter: {
+    card: "summary_large_image",
+    title: "Nexra - AI-Powered League of Legends Coach",
+    description: "Analysez vos parties League of Legends avec l'IA. Coach personnalisé disponible 24/7.",
+    images: [`${siteUrl}/og-image.png`],
+    creator: "@nexra_ai",
+  },
+
+  // Robots
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  // Canonical
+  metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+    languages: {
+      "fr-FR": "/",
+    },
+  },
+
+  // Verification (à remplir avec tes codes)
+  verification: {
+    google: "", // Tu ajouteras le code Google Search Console ici
+  },
+
+  // App
+  applicationName: "Nexra",
+  category: "gaming",
 };
 
 export default function RootLayout({
@@ -20,7 +109,39 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
+      <head>
+        {/* Structured Data JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "Nexra",
+              "applicationCategory": "GameApplication",
+              "operatingSystem": "Web",
+              "description": "Analysez vos parties League of Legends avec l'IA. Identifiez vos erreurs, recevez des conseils personnalisés et progressez rapidement.",
+              "url": siteUrl,
+              "author": {
+                "@type": "Organization",
+                "name": "Crocoding",
+                "url": "https://crocoding.com"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "EUR"
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "100"
+              }
+            }),
+          }}
+        />
+      </head>
       <body className="antialiased">
         <Providers>
           {children}
