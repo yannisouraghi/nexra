@@ -758,13 +758,13 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="nexra-footer-links">
-              <Link href="/legal" className="nexra-footer-link">Mentions Légales</Link>
-              <Link href="/privacy" className="nexra-footer-link">Confidentialité</Link>
-              <Link href="/terms" className="nexra-footer-link">CGU</Link>
+              <Link href="/legal" className="nexra-footer-link">Legal Notice</Link>
+              <Link href="/privacy" className="nexra-footer-link">Privacy</Link>
+              <Link href="/terms" className="nexra-footer-link">Terms</Link>
             </div>
           </div>
           <div className="nexra-footer-bottom">
-            <span>&copy; 2025 Nexra - Crocoding. Tous droits réservés.</span>
+            <span>&copy; 2025 Nexra - Crocoding. All rights reserved.</span>
           </div>
         </div>
       </footer>
