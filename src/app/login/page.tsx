@@ -23,6 +23,8 @@ function LoginContent() {
   const [verificationCode, setVerificationCode] = useState('');
   const [verificationEmail, setVerificationEmail] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
 
@@ -428,28 +430,68 @@ function LoginContent() {
 
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder={mode === 'register' ? 'Min. 8 characters' : 'Your password'}
-                  required
-                  minLength={mode === 'register' ? 8 : undefined}
-                  style={styles.input}
-                />
+                <div style={styles.passwordWrapper}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder={mode === 'register' ? 'Min. 8 characters' : 'Your password'}
+                    required
+                    minLength={mode === 'register' ? 8 : undefined}
+                    style={styles.passwordInput}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={styles.eyeButton}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {mode === 'register' && (
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Confirm Password</label>
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    required
-                    style={styles.input}
-                  />
+                  <div style={styles.passwordWrapper}>
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm your password"
+                      required
+                      style={styles.passwordInput}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      style={styles.eyeButton}
+                      tabIndex={-1}
+                    >
+                      {showConfirmPassword ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                          <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -573,6 +615,35 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'white',
     outline: 'none',
     transition: 'all 0.2s',
+  },
+  passwordWrapper: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  passwordInput: {
+    width: '100%',
+    padding: '12px 48px 12px 16px',
+    fontSize: '15px',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '10px',
+    color: 'white',
+    outline: 'none',
+    transition: 'all 0.2s',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px',
+    background: 'none',
+    border: 'none',
+    color: 'rgba(255,255,255,0.4)',
+    cursor: 'pointer',
+    transition: 'color 0.2s',
   },
   submitButton: {
     display: 'flex',
