@@ -527,7 +527,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <AnimatedBackground />
 
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-          <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {/* Player Header Skeleton */}
             <div>
               <div className="w-full">
@@ -584,7 +584,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         <AnimatedBackground />
 
         <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-          <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20 animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             <div>
               <div className="w-full">
                 <PlayerHeader
@@ -722,7 +722,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
       {/* Main content */}
       <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
-        <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div className="w-full max-w-[1600px] px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Player Header */}
           <div className="animate-fadeIn">
             <div className="w-full">
