@@ -7,21 +7,41 @@ export default function MentionsLegales() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       {/* Navigation */}
-      <nav className="nexra-nav" style={{ position: 'relative', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <Link href="/" className="nexra-logo">
+      <nav className="relative flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <Link href="/" className="flex items-center gap-2.5">
           <Image
             src="/nexra-logo.png"
             alt="Nexra"
             width={40}
             height={40}
-            className="nexra-logo-img"
+            className="w-10 h-10"
           />
-          <span className="nexra-logo-text">NEXRA</span>
+          <span className="font-rajdhani text-xl font-bold tracking-wider text-white">NEXRA</span>
+        </Link>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white/70 hover:text-white transition-colors"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Dashboard
         </Link>
       </nav>
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-6 py-16">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-cyan-400 transition-colors mb-8"
+        >
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Retour à l'accueil
+        </Link>
+
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
           Mentions Légales
         </h1>
