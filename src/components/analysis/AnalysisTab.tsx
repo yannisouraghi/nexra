@@ -27,6 +27,16 @@ interface AnalysisTabProps {
 
 type FilterType = 'all' | 'ready' | 'processing' | 'completed';
 
+// Available languages for AI analysis
+type AnalysisLanguage = 'en' | 'fr' | 'es' | 'de' | 'pt';
+const LANGUAGES: { code: AnalysisLanguage; label: string; flag: string }[] = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+  { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { code: 'pt', label: 'Português', flag: '🇧🇷' },
+];
+
 interface RecentMatch {
   matchId: string;
   champion: string;
@@ -53,6 +63,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
   const [creditError, setCreditError] = useState<string | null>(null);
   const [userCreatedAt, setUserCreatedAt] = useState<string | null>(null);
   const [addingCredits, setAddingCredits] = useState(false);
+  const [analysisLanguage, setAnalysisLanguage] = useState<AnalysisLanguage>('en');
   // Ref for cache to avoid stale closures in callbacks, state for re-renders
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
@@ -249,7 +260,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ matchId, puuid, region }),
+        body: JSON.stringify({ matchId, puuid, region, language: analysisLanguage }),
       });
 
       const data = await response.json();
@@ -289,7 +300,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
         return newSet;
       });
     }
-  }, [puuid, region, session, onInsufficientCredits]);
+  }, [puuid, region, session, onInsufficientCredits, analysisLanguage]);
 
   // Handle card click - open modal and fetch full analysis if cache is incomplete
   const handleCardClick = useCallback(async (match: MatchForAnalysis) => {
@@ -495,6 +506,21 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
               )}
             </button>
           ))}
+
+          {/* Language Selector */}
+          <div style={styles.languageSelector}>
+            <select
+              value={analysisLanguage}
+              onChange={(e) => setAnalysisLanguage(e.target.value as AnalysisLanguage)}
+              style={styles.languageSelect}
+            >
+              {LANGUAGES.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.flag} {lang.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -721,6 +747,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: 10,
     fontSize: 11,
     fontWeight: 600,
+  },
+  languageSelector: {
+    marginLeft: 'auto',
+  },
+  languageSelect: {
+    padding: '6px 12px',
+    borderRadius: 8,
+    fontSize: 12,
+    fontWeight: 500,
+    border: '1px solid rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    color: 'white',
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'all 0.2s',
   },
   emptyCard: {
     padding: 48,

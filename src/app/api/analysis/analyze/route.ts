@@ -7,7 +7,7 @@ import { NEXRA_API_URL } from '@/config/api';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { matchId, puuid, region } = body;
+    const { matchId, puuid, region, language } = body;
 
     // Validate required fields
     if (!matchId || !puuid || !region) {
@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
         matchId,
         puuid,
         region,
+        language: language || 'en',
         save: true,
       }),
     });

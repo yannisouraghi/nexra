@@ -2,7 +2,7 @@
 
 import { MatchForAnalysis, getScoreColor, getStatusColor, getStatusLabel, Role } from '@/types/analysis';
 import { getChampionSplashUrl } from '@/utils/ddragon';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface GameAnalysisCardProps {
   match: MatchForAnalysis;
@@ -204,6 +204,7 @@ const StartAnalysisButton = ({ onClick, isLoading }: { onClick: () => void; isLo
 export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, isStarting }: GameAnalysisCardProps) {
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [simulatedProgress, setSimulatedProgress] = useState(0);
 
   const status = match.analysisStatus;
   const isCompleted = status === 'completed';
@@ -211,6 +212,27 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const isPending = status === 'pending';
   const isNotStarted = status === 'not_started';
   const isFailed = status === 'failed';
+
+  // Simulate progress animation when processing
+  useEffect(() => {
+    if (isProcessing) {
+      setSimulatedProgress(0);
+      const interval = setInterval(() => {
+        setSimulatedProgress(prev => {
+          // Progress quickly to 30%, then slow down, never reach 100% (real completion does that)
+          if (prev < 30) return prev + 3;
+          if (prev < 60) return prev + 1.5;
+          if (prev < 85) return prev + 0.5;
+          if (prev < 95) return prev + 0.2;
+          return prev; // Stay at ~95% until real completion
+        });
+      }, 200);
+      return () => clearInterval(interval);
+    } else {
+      // Reset when not processing
+      setSimulatedProgress(isCompleted ? 100 : 0);
+    }
+  }, [isProcessing, isCompleted]);
 
   const statusColor = getStatusColor(status);
   const statusLabel = getStatusLabel(status);
@@ -331,7 +353,7 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
         {/* Middle Section - Different content based on status */}
         <div style={styles.middleSection}>
           {isProcessing ? (
-            <ProcessingAnimation progress={null} />
+            <ProcessingAnimation progress={Math.round(simulatedProgress)} />
           ) : isNotStarted || isPending ? (
             <div style={styles.pendingContainer}>
               {role !== 'UNKNOWN' && (

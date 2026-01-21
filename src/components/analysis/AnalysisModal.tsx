@@ -7,6 +7,7 @@ import { getChampionImageUrl, getChampionCenteredSplashUrl } from '@/utils/ddrag
 import ErrorsList from './ErrorsList';
 import CoachingTips from './CoachingTips';
 import StatsComparison from './StatsComparison';
+import DeathsAnalysis from './DeathsAnalysis';
 
 interface AnalysisData {
   id: string;
@@ -23,7 +24,7 @@ interface AnalysisModalProps {
   onClose: () => void;
 }
 
-type TabType = 'summary' | 'errors' | 'tips' | 'stats';
+type TabType = 'summary' | 'deaths' | 'errors' | 'tips' | 'stats';
 
 export default function AnalysisModal({
   match,
@@ -71,8 +72,11 @@ export default function AnalysisModal({
     ? ((match.kills + match.assists) / match.deaths).toFixed(2)
     : 'Perfect';
 
+  const deathsAnalysis = analysisData?.stats?.deathsAnalysis as any[] | undefined;
+
   const tabs: { id: TabType; label: string; count?: number }[] = [
     { id: 'summary', label: 'Summary' },
+    { id: 'deaths', label: 'Deaths', count: deathsAnalysis?.length || match.deaths || 0 },
     { id: 'errors', label: 'Errors', count: analysisData?.errors?.length || 0 },
     { id: 'tips', label: 'Tips', count: analysisData?.tips?.length || 0 },
     { id: 'stats', label: 'Stats' },
@@ -318,6 +322,12 @@ export default function AnalysisModal({
                       <p style={styles.emptyText}>Summary not available. The analysis may have encountered an issue.</p>
                     </div>
                   )}
+                </div>
+              )}
+
+              {activeTab === 'deaths' && (
+                <div>
+                  <DeathsAnalysis deathsAnalysis={deathsAnalysis || []} />
                 </div>
               )}
 
