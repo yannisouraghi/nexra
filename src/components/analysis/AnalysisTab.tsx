@@ -109,11 +109,14 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
       const recentMatches: RecentMatch[] = await response.json();
 
       // Filter only Ranked Solo/Duo games (queueId: 420) played AFTER user registration
+      // Exclude remakes and short games (less than 15 minutes / 900 seconds)
       const registrationTime = userCreatedAt ? new Date(userCreatedAt).getTime() : 0;
+      const MIN_GAME_DURATION = 900; // 15 minutes in seconds
       const rankedMatches = recentMatches.filter(match => {
         const isRankedSolo = match.queueId === 420;
         const isAfterRegistration = registrationTime === 0 || match.timestamp >= registrationTime;
-        return isRankedSolo && isAfterRegistration;
+        const isNotRemake = match.gameDuration >= MIN_GAME_DURATION;
+        return isRankedSolo && isAfterRegistration && isNotRemake;
       });
 
       // Transform to MatchForAnalysis format (use ref to avoid re-renders)
