@@ -430,7 +430,7 @@ function LoginContent() {
 
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Password</label>
-                <div style={styles.passwordWrapper}>
+                <div className="password-field">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -438,12 +438,11 @@ function LoginContent() {
                     placeholder={mode === 'register' ? 'Min. 8 characters' : 'Your password'}
                     required
                     minLength={mode === 'register' ? 8 : undefined}
-                    style={styles.passwordInput}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    style={styles.eyeButton}
+                    className="eye-btn"
                     tabIndex={-1}
                   >
                     {showPassword ? (
@@ -464,19 +463,18 @@ function LoginContent() {
               {mode === 'register' && (
                 <div style={styles.inputGroup}>
                   <label style={styles.label}>Confirm Password</label>
-                  <div style={styles.passwordWrapper}>
+                  <div className="password-field">
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm your password"
                       required
-                      style={styles.passwordInput}
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      style={styles.eyeButton}
+                      className="eye-btn"
                       tabIndex={-1}
                     >
                       {showConfirmPassword ? (
@@ -560,6 +558,47 @@ function LoginContent() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        .password-field {
+          position: relative;
+          width: 100%;
+        }
+        .password-field input {
+          width: 100%;
+          padding: 12px 48px 12px 16px;
+          font-size: 15px;
+          background-color: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 10px;
+          color: white;
+          outline: none;
+          transition: all 0.2s;
+          box-sizing: border-box;
+        }
+        .password-field input:focus {
+          border-color: rgba(0, 212, 255, 0.5);
+          background-color: rgba(255,255,255,0.08);
+        }
+        .password-field input::placeholder {
+          color: rgba(255,255,255,0.3);
+        }
+        .eye-btn {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 6px;
+          background: none;
+          border: none;
+          color: rgba(255,255,255,0.5);
+          cursor: pointer;
+          transition: color 0.2s;
+        }
+        .eye-btn:hover {
+          color: #00d4ff;
+        }
       `}</style>
     </div>
   );
@@ -615,40 +654,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'white',
     outline: 'none',
     transition: 'all 0.2s',
-  },
-  passwordWrapper: {
-    position: 'relative' as const,
-    display: 'flex',
-    alignItems: 'center',
-    width: '100%',
-  },
-  passwordInput: {
-    width: '100%',
-    padding: '12px 48px 12px 16px',
-    fontSize: '15px',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px',
-    color: 'white',
-    outline: 'none',
-    transition: 'all 0.2s',
-    boxSizing: 'border-box' as const,
-  },
-  eyeButton: {
-    position: 'absolute' as const,
-    right: '12px',
-    top: '50%',
-    transform: 'translateY(-50%)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '6px',
-    background: 'transparent',
-    border: 'none',
-    color: 'rgba(255,255,255,0.5)',
-    cursor: 'pointer',
-    transition: 'color 0.2s',
-    zIndex: 10,
   },
   submitButton: {
     display: 'flex',
