@@ -151,7 +151,7 @@ export default function ErrorsList({ errors, matchId }: ErrorsListProps) {
                     {/* Error Context Display */}
                     {error.context && (
                       <div style={styles.contextBox}>
-                        <span style={styles.contextLabel}>Contexte</span>
+                        <span style={styles.contextLabel}>Context</span>
                         <div style={styles.contextGrid}>
                           {error.context.goldState && (
                             <div style={styles.contextItem}>
@@ -166,7 +166,7 @@ export default function ErrorsList({ errors, matchId }: ErrorsListProps) {
                           )}
                           {error.context.levelState && (
                             <div style={styles.contextItem}>
-                              <span style={styles.contextItemLabel}>Niveau</span>
+                              <span style={styles.contextItemLabel}>Level</span>
                               <span style={styles.contextItemValue}>
                                 Lvl {error.context.levelState.player} vs {error.context.levelState.opponent}
                               </span>
@@ -181,13 +181,13 @@ export default function ErrorsList({ errors, matchId }: ErrorsListProps) {
                                        error.context.mapState.zone === 'neutral' ? '#ffd700' : '#ff3366'
                               }}>
                                 {error.context.mapState.zone === 'safe' ? 'Safe' :
-                                 error.context.mapState.zone === 'neutral' ? 'Neutre' : 'Danger'}
+                                 error.context.mapState.zone === 'neutral' ? 'Neutral' : 'Danger'}
                               </span>
                             </div>
                           )}
                           {error.context.mapState?.nearestAlly && (
                             <div style={styles.contextItem}>
-                              <span style={styles.contextItemLabel}>Allie proche</span>
+                              <span style={styles.contextItemLabel}>Nearby Ally</span>
                               <span style={styles.contextItemValue}>
                                 {error.context.mapState.nearestAlly.champion} ({error.context.mapState.nearestAlly.distance} u)
                               </span>

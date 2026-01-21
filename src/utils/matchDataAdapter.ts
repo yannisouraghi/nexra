@@ -1,12 +1,12 @@
 /**
  * MATCH DATA ADAPTER
- * Transforme les données de match brutes en format attendu par le calculateur de probabilité
+ * Transforms raw match data into the format expected by the probability calculator
  */
 
 import { PlayerData, TeamData } from './winProbabilityCalculator';
 
 // ==========================================
-// TYPES POUR LES DONNÉES EXISTANTES
+// TYPES FOR EXISTING DATA
 // ==========================================
 
 interface RawParticipant {
@@ -44,17 +44,17 @@ interface RawMatch {
 }
 
 // ==========================================
-// FONCTION D'ADAPTATION
+// ADAPTATION FUNCTION
 // ==========================================
 
 /**
- * Adapte les données d'un match pour le calcul de probabilité
+ * Adapts match data for probability calculation
  *
- * IMPORTANT: Cette fonction utilise des valeurs par défaut pour les données manquantes.
- * Dans une implémentation réelle, tu devrais :
- * 1. Enrichir les données via des appels API supplémentaires
- * 2. Stocker un historique de stats par joueur
- * 3. Calculer les valeurs réelles au lieu d'utiliser des estimations
+ * IMPORTANT: This function uses default values for missing data.
+ * In a real implementation, you should:
+ * 1. Enrich data via additional API calls
+ * 2. Store player stats history
+ * 3. Calculate actual values instead of using estimates
  */
 export function adaptMatchDataForProbability(
   match: RawMatch,
@@ -65,25 +65,25 @@ export function adaptMatchDataForProbability(
     return null;
   }
 
-  // Créer les données du joueur principal
+  // Create main player data
   const mainPlayer = createPlayerData(
     match.champion,
     'You',
-    true, // isMainRole - à déterminer via API
-    false, // isAutofill - à déterminer via API
+    true, // isMainRole - to be determined via API
+    false, // isAutofill - to be determined via API
     match.tier || 'UNRANKED',
     match.division || null,
-    0, // LP - à récupérer
+    0, // LP - to be fetched
     recentMatches
   );
 
-  // Créer les données des coéquipiers
+  // Create teammates data
   const teammates = match.teammates.map(teammate =>
     createPlayerData(
       teammate.championName,
       teammate.summonerName || 'Unknown',
-      true, // À déterminer
-      false, // À déterminer
+      true, // To be determined
+      false, // To be determined
       teammate.tier || 'UNRANKED',
       teammate.division || null,
       0,
@@ -91,7 +91,7 @@ export function adaptMatchDataForProbability(
     )
   );
 
-  // Créer les données des ennemis
+  // Create enemies data
   const enemies = match.enemies.map(enemy =>
     createPlayerData(
       enemy.championName,
@@ -117,7 +117,7 @@ export function adaptMatchDataForProbability(
 }
 
 // ==========================================
-// HELPER - CRÉATION D'UN PLAYERDATA
+// HELPER - CREATE PLAYERDATA
 // ==========================================
 
 function createPlayerData(
@@ -130,13 +130,13 @@ function createPlayerData(
   leaguePoints: number,
   recentMatches: RawMatch[]
 ): PlayerData {
-  // Déterminer le rôle (simplifié - à améliorer avec l'API Riot)
+  // Determine role (simplified - to be improved with Riot API)
   const role = inferRoleFromChampion(championName);
 
-  // Calculer les stats récentes
+  // Calculate recent stats
   const recentStats = calculateRecentStats(recentMatches, championName);
 
-  // Estimer la maîtrise du champion (à remplacer par vraies données)
+  // Estimate champion mastery (to be replaced with real data)
   const championMastery = estimateChampionMastery(recentMatches, championName);
 
   return {
@@ -162,7 +162,7 @@ function createPlayerData(
 }
 
 // ==========================================
-// HELPERS - CALCULS DE STATS
+// HELPERS - STATS CALCULATIONS
 // ==========================================
 
 function calculateRecentStats(matches: RawMatch[], championName: string) {
@@ -239,7 +239,7 @@ function estimateChampionMastery(matches: RawMatch[], championName: string): num
   const championMatches = matches.filter(m => m.champion === championName);
   const gamesCount = championMatches.length;
 
-  // Estimation basique basée sur le nombre de games
+  // Basic estimation based on number of games
   if (gamesCount >= 100) return 7;
   if (gamesCount >= 50) return 6;
   if (gamesCount >= 30) return 5;
@@ -250,11 +250,11 @@ function estimateChampionMastery(matches: RawMatch[], championName: string): num
 }
 
 // ==========================================
-// HELPER - INFÉRENCE DU RÔLE
+// HELPER - ROLE INFERENCE
 // ==========================================
 
 function inferRoleFromChampion(championName: string): PlayerData['role'] {
-  // Mapping simplifié - à remplacer par une vraie DB ou API
+  // Simplified mapping - to be replaced with real DB or API
   const roleMap: { [key: string]: PlayerData['role'] } = {
     // Top laners
     'Aatrox': 'TOP', 'Darius': 'TOP', 'Garen': 'TOP', 'Fiora': 'TOP', 'Camille': 'TOP',
@@ -288,17 +288,17 @@ function inferRoleFromChampion(championName: string): PlayerData['role'] {
 }
 
 // ==========================================
-// EXEMPLE D'USAGE
+// USAGE EXAMPLE
 // ==========================================
 
 /*
-EXEMPLE D'INTÉGRATION DANS MatchCard.tsx :
+INTEGRATION EXAMPLE IN MatchCard.tsx:
 
 import { calculateMatchWinProbability } from '@/utils/winProbabilityCalculator';
 import { adaptMatchDataForProbability } from '@/utils/matchDataAdapter';
 import WinProbabilityBadge from '@/components/WinProbabilityBadge';
 
-// Dans le composant MatchCard
+// In the MatchCard component
 const matchData = adaptMatchDataForProbability(match, recentMatches, playerPuuid);
 
 let winProbabilityResult = null;
@@ -309,7 +309,7 @@ if (matchData) {
   );
 }
 
-// Affichage
+// Display
 {winProbabilityResult && (
   <WinProbabilityBadge
     probability={winProbabilityResult.winProbability}

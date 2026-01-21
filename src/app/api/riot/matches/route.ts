@@ -115,7 +115,7 @@ const getRoutingValue = (platformRegion: string): string => {
   return regionMap[platformRegion] || 'europe';
 };
 
-// Calculer le score de performance d'un joueur
+// Calculate a player's performance score
 const calculatePlayerScore = (participant: any, gameDuration: number) => {
   // KDA Score (0-100)
   const kills = participant.kills || 0;
@@ -124,10 +124,10 @@ const calculatePlayerScore = (participant: any, gameDuration: number) => {
   const kda = deaths === 0 ? (kills + assists) * 1.2 : (kills + assists) / deaths;
   const kdaScore = Math.min(kda * 10, 100); // Max 100
 
-  // Damage Score (0-100) - normalisé plus tard
+  // Damage Score (0-100) - normalized later
   const damage = participant.totalDamageDealtToChampions || 0;
 
-  // Gold Score (0-100) - normalisé plus tard
+  // Gold Score (0-100) - normalized later
   const gold = participant.goldEarned || 0;
 
   // CS Score (0-100)
@@ -140,7 +140,7 @@ const calculatePlayerScore = (participant: any, gameDuration: number) => {
   const visionPerMin = vision / (gameDuration / 60);
   const visionScore = Math.min(visionPerMin * 20, 100); // 5 vision/min = 100 points
 
-  // Participation aux kills (0-100) - calculé plus tard avec les kills de l'équipe
+  // Kill participation (0-100) - calculated later with team kills
 
   return {
     puuid: participant.puuid,
@@ -155,32 +155,32 @@ const calculatePlayerScore = (participant: any, gameDuration: number) => {
   };
 };
 
-// Calculer les rangs de tous les joueurs d'une partie
+// Calculate rankings for all players in a match
 const calculatePlayerRankings = (match: RiotMatch): Map<string, number> => {
   const participants = match.info.participants;
 
-  // Calculer les scores de base pour chaque joueur
+  // Calculate base scores for each player
   const playerScores = participants.map(p => ({
     ...calculatePlayerScore(p, match.info.gameDuration),
     teamId: p.teamId,
   }));
 
-  // Trouver les valeurs max pour normalisation
+  // Find max values for normalization
   const maxDamage = Math.max(...playerScores.map(p => p.damage), 1);
   const maxGold = Math.max(...playerScores.map(p => p.gold), 1);
 
-  // Calculer les kills totaux par équipe pour la participation
+  // Calculate total kills per team for participation
   const teamKills: { [key: number]: number } = {};
   participants.forEach(p => {
     if (!teamKills[p.teamId]) teamKills[p.teamId] = 0;
     teamKills[p.teamId] += p.kills || 0;
   });
 
-  // Calculer le score final pour chaque joueur
+  // Calculate final score for each player
   const finalScores = playerScores.map(player => {
     const participant = participants.find(p => p.puuid === player.puuid)!;
 
-    // Normaliser damage et gold
+    // Normalize damage and gold
     const damageScore = (player.damage / maxDamage) * 100;
     const goldScore = (player.gold / maxGold) * 100;
 
@@ -189,14 +189,14 @@ const calculatePlayerRankings = (match: RiotMatch): Map<string, number> => {
     const killParticipation = ((player.kills + player.assists) / teamKillTotal) * 100;
     const participationScore = Math.min(killParticipation, 100);
 
-    // Poids des différentes métriques
+    // Weights for different metrics
     const weights = {
       kda: 0.25,        // 25% - KDA
-      damage: 0.25,     // 25% - Dégâts
+      damage: 0.25,     // 25% - Damage
       gold: 0.15,       // 15% - Gold
       cs: 0.10,         // 10% - CS
       vision: 0.10,     // 10% - Vision
-      participation: 0.15, // 15% - Participation aux kills
+      participation: 0.15, // 15% - Kill participation
     };
 
     // Score total (0-100)
@@ -208,7 +208,7 @@ const calculatePlayerRankings = (match: RiotMatch): Map<string, number> => {
       player.visionScore * weights.vision +
       participationScore * weights.participation;
 
-    // Bonus de victoire (5%)
+    // Win bonus (5%)
     if (player.win) {
       totalScore *= 1.05;
     }
@@ -219,10 +219,10 @@ const calculatePlayerRankings = (match: RiotMatch): Map<string, number> => {
     };
   });
 
-  // Trier par score décroissant
+  // Sort by score descending
   finalScores.sort((a, b) => b.totalScore - a.totalScore);
 
-  // Créer la map avec les rangs (1 = meilleur, 10 = pire)
+  // Create map with ranks (1 = best, 10 = worst)
   const rankings = new Map<string, number>();
   finalScores.forEach((player, index) => {
     rankings.set(player.puuid, index + 1);
@@ -237,13 +237,13 @@ export async function GET(request: NextRequest) {
   const tagLine = searchParams.get('tagLine');
   const platformRegion = searchParams.get('region') || 'euw1';
   const region = getRoutingValue(platformRegion);
-  const providedPuuid = searchParams.get('puuid'); // Nouveau: accepter le PUUID directement
-  const start = parseInt(searchParams.get('start') || '0', 10); // Position de départ
-  const count = parseInt(searchParams.get('count') || '20', 10); // Nombre de matchs à récupérer
+  const providedPuuid = searchParams.get('puuid'); // Accept PUUID directly
+  const start = parseInt(searchParams.get('start') || '0', 10); // Starting position
+  const count = parseInt(searchParams.get('count') || '20', 10); // Number of matches to fetch
 
   if (!RIOT_API_KEY) {
     return NextResponse.json(
-      { error: 'API key Riot non configurée' },
+      { error: 'Riot API key not configured' },
       { status: 500 }
     );
   }
@@ -251,16 +251,16 @@ export async function GET(request: NextRequest) {
   try {
     let puuid = providedPuuid;
 
-    // Si le PUUID n'est pas fourni, le récupérer via gameName/tagLine
+    // If PUUID is not provided, fetch it via gameName/tagLine
     if (!puuid) {
       if (!gameName || !tagLine) {
         return NextResponse.json(
-          { error: 'gameName et tagLine (ou puuid) sont requis' },
+          { error: 'gameName and tagLine (or puuid) are required' },
           { status: 400 }
         );
       }
 
-      // 1. Récupérer le PUUID du joueur
+      // 1. Get the player's PUUID
       const accountResponse = await fetch(
         `https://${region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`,
         {
@@ -273,19 +273,19 @@ export async function GET(request: NextRequest) {
       if (!accountResponse.ok) {
         if (accountResponse.status === 404) {
           return NextResponse.json(
-            { error: 'Compte Riot non trouvé' },
+            { error: 'Riot account not found' },
             { status: 404 }
           );
         }
         if (accountResponse.status === 429) {
           return NextResponse.json(
-            { error: 'Limite de requêtes atteinte. Veuillez réessayer dans quelques secondes.' },
+            { error: 'Rate limit reached. Please try again in a few seconds.' },
             { status: 429 }
           );
         }
-        console.error(`Erreur API Riot Account: ${accountResponse.status} - ${accountResponse.statusText}`);
+        console.error(`Riot API Account Error: ${accountResponse.status} - ${accountResponse.statusText}`);
         return NextResponse.json(
-          { error: `Erreur API Riot (${accountResponse.status})` },
+          { error: `Riot API Error (${accountResponse.status})` },
           { status: accountResponse.status }
         );
       }
@@ -294,7 +294,7 @@ export async function GET(request: NextRequest) {
       puuid = accountData.puuid;
     }
 
-    // 2. Récupérer les IDs des parties avec pagination
+    // 2. Fetch match IDs with pagination
     const matchlistResponse = await fetch(
       `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=${start}&count=${count}`,
       {
@@ -341,7 +341,7 @@ export async function GET(request: NextRequest) {
 
     const matchIds: string[] = await matchlistResponse.json();
 
-    // 3. Récupérer les détails de chaque match en batch (parallélisation optimisée)
+    // 3. Fetch match details in batches (optimized parallelization)
     const matchDetails: (RiotMatch | null)[] = [];
 
     // Helper function to fetch a single match
@@ -357,13 +357,13 @@ export async function GET(request: NextRequest) {
         );
 
         if (!matchResponse.ok) {
-          console.error(`Erreur pour le match ${matchId}: ${matchResponse.status}`);
+          console.error(`Error for match ${matchId}: ${matchResponse.status}`);
           return null;
         }
 
         return await matchResponse.json();
       } catch (error) {
-        console.error(`Erreur lors de la récupération du match ${matchId}:`, error);
+        console.error(`Error fetching match ${matchId}:`, error);
         return null;
       }
     };
@@ -385,7 +385,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Formater les données pour le frontend
+    // 4. Format data for the frontend
     const formattedMatches = matchDetails
       .filter((match): match is RiotMatch => match !== null)
       .map((match) => {
@@ -395,13 +395,13 @@ export async function GET(request: NextRequest) {
 
         if (!participantData) return null;
 
-        // Calculer les rangs de tous les joueurs
+        // Calculate rankings for all players
         const rankings = calculatePlayerRankings(match);
 
-        // Trouver la team du joueur
+        // Find the player's team
         const playerTeamId = participantData.teamId;
 
-        // Récupérer les coéquipiers (même team, sans le joueur lui-même)
+        // Get teammates (same team, excluding the player)
         const teammates = match.info.participants
           .filter((p) => p.teamId === playerTeamId && p.puuid !== puuid)
           .map((p: any) => ({
@@ -430,7 +430,7 @@ export async function GET(request: NextRequest) {
             wardsKilled: p.wardsKilled,
           }));
 
-        // Récupérer les ennemis (team adverse)
+        // Get enemies (opposing team)
         const enemies = match.info.participants
           .filter((p) => p.teamId !== playerTeamId)
           .map((p: any) => ({
@@ -472,9 +472,9 @@ export async function GET(request: NextRequest) {
           timestamp: match.info.gameCreation,
           teammates,
           enemies,
-          // Stats détaillées du joueur
-          participantId: participantData.participantId, // Ajout du participantId pour le joueur principal
-          summonerName: participantData.summonerName || participantData.riotIdGameName || 'You', // Ajout du summonerName pour le joueur principal
+          // Detailed player stats
+          participantId: participantData.participantId,
+          summonerName: participantData.summonerName || participantData.riotIdGameName || 'You',
           items: [
             participantData.item0 || 0,
             participantData.item1 || 0,
@@ -489,8 +489,8 @@ export async function GET(request: NextRequest) {
           totalMinionsKilled: participantData.totalMinionsKilled,
           visionScore: participantData.visionScore,
           champLevel: participantData.champLevel,
-          rank: rankings.get(puuid!) || 10, // Rang du joueur (1 = MVP, 10 = pire)
-          // Nouvelles stats détaillées
+          rank: rankings.get(puuid!) || 10, // Player rank (1 = MVP, 10 = worst)
+          // Additional detailed stats
           summoner1Id: participantData.summoner1Id,
           summoner2Id: participantData.summoner2Id,
           perks: participantData.perks,
@@ -532,10 +532,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(formattedMatches);
   } catch (error) {
-    console.error('Erreur lors de la récupération des matches:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    console.error('Error fetching matches:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: `Erreur lors de la récupération des matches: ${errorMessage}` },
+      { error: `Error fetching matches: ${errorMessage}` },
       { status: 500 }
     );
   }

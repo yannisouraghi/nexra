@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         let retryCount = 0;
         const maxRetries = 3;
 
-        // Retry logic pour les erreurs 429
+        // Retry logic for 429 errors
         while (retryCount < maxRetries) {
           matchResponse = await fetch(
             `https://${region}.api.riotgames.com/lol/match/v5/matches/${matchId}`,
@@ -204,7 +204,7 @@ export async function GET(request: NextRequest) {
           consecutiveErrors++;
           console.error(`Failed to fetch match ${matchId}, status: ${matchResponse?.status}`);
 
-          // Si trop d'erreurs consécutives, on arrête
+          // If too many consecutive errors, stop
           if (consecutiveErrors >= 3) {
             console.error('Too many consecutive errors, stopping match fetching');
             break;

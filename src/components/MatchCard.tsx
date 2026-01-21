@@ -62,18 +62,18 @@ interface Match {
   timestamp: number;
   teammates?: Participant[];
   enemies?: Participant[];
-  // Détails supplémentaires pour le joueur
-  puuid?: string; // PUUID du joueur principal
-  participantId?: number; // ID du participant pour le joueur principal
-  summonerName?: string; // Nom du joueur principal
+  // Additional player details
+  puuid?: string; // Main player's PUUID
+  participantId?: number; // Participant ID for the main player
+  summonerName?: string; // Main player's name
   items?: number[];
   totalDamageDealtToChampions?: number;
   goldEarned?: number;
   totalMinionsKilled?: number;
   visionScore?: number;
   champLevel?: number;
-  rank?: number; // 1 = MVP, 10 = pire
-  // Nouvelles stats détaillées
+  rank?: number; // 1 = MVP, 10 = worst
+  // Additional detailed stats
   summoner1Id?: number;
   summoner2Id?: number;
   perks?: {
@@ -473,13 +473,13 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
         setTimeline(data.frames);
       }
     } catch (error) {
-      console.error('Erreur lors du chargement de la timeline:', error);
+      console.error('Error loading timeline:', error);
     } finally {
       setLoadingTimeline(false);
     }
   };
 
-  // Calculer la probabilité de victoire avec enrichissement des données
+  // Calculate win probability with enriched data
   const calculateProbability = async () => {
     if (probabilityResult || isCalculatingProbability) return;
 
@@ -728,8 +728,8 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
       setProbabilityResult(result);
 
     } catch (error) {
-      console.error('Erreur lors du calcul de probabilité:', error);
-      setLoadingMessage('Erreur lors du calcul');
+      console.error('Error calculating probability:', error);
+      setLoadingMessage('Error calculating');
     } finally {
       setTimeout(() => {
         setIsCalculatingProbability(false);

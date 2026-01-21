@@ -70,7 +70,7 @@ interface Participant {
   totalMinionsKilled?: number;
   visionScore?: number;
   champLevel?: number;
-  rank?: number; // 1 = MVP, 10 = pire
+  rank?: number; // 1 = MVP, 10 = worst
 }
 
 interface Match {
@@ -92,7 +92,7 @@ interface Match {
   totalMinionsKilled?: number;
   visionScore?: number;
   champLevel?: number;
-  rank?: number; // 1 = MVP, 10 = pire
+  rank?: number; // 1 = MVP, 10 = worst
 }
 
 interface RecentGamesProps {
@@ -224,7 +224,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
     setIsLoadingMore(true);
 
     try {
-      // Récupérer 20 matchs supplémentaires
+      // Fetch 20 additional matches
       const matchesResponse = await fetch(
         `/api/riot/matches?puuid=${encodeURIComponent(summonerData.puuid)}&region=${encodeURIComponent(riotAccount.region)}&start=${currentCount}&count=20`
       );
@@ -266,7 +266,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         setHasMoreMatches(false);
       }
     } catch (err) {
-      console.error('Erreur lors du chargement de matchs supplémentaires:', err);
+      console.error('Error loading more matches:', err);
       setHasMoreMatches(false);
     } finally {
       setIsLoadingMore(false);
@@ -635,7 +635,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
 
   return (
     <div className="dashboard-page">
-      {/* Fond animé avec étoiles */}
+      {/* Animated background with stars */}
       <AnimatedBackground />
 
       {/* Top Bar - Fixed at top right */}
@@ -720,7 +720,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
         </button>
       </div>
 
-      {/* Contenu principal */}
+      {/* Main content */}
       <div className="relative z-10 flex justify-center" style={{ paddingTop: '3rem' }}>
         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 pb-16 sm:pb-20" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           {/* Player Header */}
@@ -740,12 +740,12 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
             </div>
           </div>
 
-          {/* Main content avec sidebar */}
+          {/* Main content with sidebar */}
           <div className="flex justify-center">
             <div className="w-full max-w-6xl">
           {activeTab === 'summary' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {/* Stats Section avec Menu Vertical */}
+              {/* Stats Section with Vertical Menu */}
               <div style={{ display: 'flex', gap: '2rem' }} className="animate-fadeIn">
                 {/* Sidebar Navigation - Desktop only */}
                 <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0 }}>
@@ -826,7 +826,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 <GameModeFilter selectedMode={selectedMode} onModeChange={setSelectedMode} />
               </div>
 
-              {/* Match List - Pleine largeur */}
+              {/* Match List - Full width */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {filteredMatches.map((match, index) => (
                   <div
@@ -994,7 +994,7 @@ export default function RecentGames({ riotAccount }: RecentGamesProps) {
                 </div>
               </div>
 
-              {/* Champion List - Pleine largeur comme les match cards */}
+              {/* Champion List - Full width like match cards */}
               {summonerData?.puuid && (
                 <ChampionsStats
                   puuid={summonerData.puuid}

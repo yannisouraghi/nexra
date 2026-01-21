@@ -12,14 +12,14 @@ export async function GET(request: NextRequest) {
 
   if (!RIOT_API_KEY) {
     return NextResponse.json(
-      { error: 'API key Riot non configurée' },
+      { error: 'Riot API key not configured' },
       { status: 500 }
     );
   }
 
   if (!summonerId) {
     return NextResponse.json(
-      { error: 'summonerId requis' },
+      { error: 'summonerId required' },
       { status: 400 }
     );
   }
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      console.error(`Erreur API Riot Rank: ${response.status}`);
+      console.error(`Riot API Rank Error: ${response.status}`);
       return NextResponse.json(
         { tier: 'UNRANKED', rank: '', leaguePoints: 0 },
         { status: 200 }
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     const leagues = await response.json();
 
-    // Trouver le rang RANKED_SOLO_5x5
+    // Find RANKED_SOLO_5x5 rank
     const soloQueue = leagues.find((league: any) => league.queueType === 'RANKED_SOLO_5x5');
 
     if (soloQueue) {
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
       leaguePoints: 0,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération du rang:', error);
+    console.error('Error retrieving rank:', error);
     return NextResponse.json(
       { tier: 'UNRANKED', rank: '', leaguePoints: 0 },
       { status: 200 }

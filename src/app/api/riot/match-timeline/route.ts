@@ -36,21 +36,21 @@ export async function GET(request: NextRequest) {
 
     if (!matchId || !region) {
       return NextResponse.json(
-        { error: 'Match ID et région requis' },
+        { error: 'Match ID and region required' },
         { status: 400 }
       );
     }
 
     if (!RIOT_API_KEY) {
       return NextResponse.json(
-        { error: 'Clé API Riot non configurée' },
+        { error: 'Riot API key not configured' },
         { status: 500 }
       );
     }
 
     const routingRegion = getRoutingValue(region);
 
-    // Récupérer la timeline du match
+    // Fetch match timeline
     const timelineResponse = await fetch(
       `https://${routingRegion}.api.riotgames.com/lol/match/v5/matches/${matchId}/timeline`,
       {
@@ -62,19 +62,19 @@ export async function GET(request: NextRequest) {
 
     if (!timelineResponse.ok) {
       return NextResponse.json(
-        { error: `Erreur lors de la récupération de la timeline (${timelineResponse.status})` },
+        { error: `Error retrieving timeline (${timelineResponse.status})` },
         { status: timelineResponse.status }
       );
     }
 
     const timelineData = await timelineResponse.json();
 
-    // Extraire les données pertinentes de chaque frame
+    // Extract relevant data from each frame
     const frames = timelineData.info.frames.map((frame: any) => {
       const timestamp = frame.timestamp;
       const participantFrames = frame.participantFrames;
 
-      // Convertir les frames des participants en tableau
+      // Convert participant frames to array
       const players = Object.keys(participantFrames).map((key) => {
         const pf = participantFrames[key];
         return {
@@ -97,9 +97,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ frames });
   } catch (error) {
-    console.error('Erreur lors de la récupération de la timeline:', error);
+    console.error('Error retrieving timeline:', error);
     return NextResponse.json(
-      { error: 'Erreur serveur lors de la récupération de la timeline' },
+      { error: 'Server error while retrieving timeline' },
       { status: 500 }
     );
   }

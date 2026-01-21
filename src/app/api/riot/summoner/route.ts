@@ -37,20 +37,20 @@ export async function GET(request: NextRequest) {
 
   if (!gameName || !tagLine) {
     return NextResponse.json(
-      { error: 'gameName et tagLine sont requis' },
+      { error: 'gameName and tagLine are required' },
       { status: 400 }
     );
   }
 
   if (!RIOT_API_KEY) {
     return NextResponse.json(
-      { error: 'API key Riot non configurée' },
+      { error: 'Riot API key not configured' },
       { status: 500 }
     );
   }
 
   try {
-    // 1. Récupérer le PUUID du joueur
+    // 1. Get the player's PUUID
     const accountResponse = await fetch(
       `https://${region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(gameName)}/${encodeURIComponent(tagLine)}`,
       {
@@ -63,19 +63,19 @@ export async function GET(request: NextRequest) {
     if (!accountResponse.ok) {
       if (accountResponse.status === 404) {
         return NextResponse.json(
-          { error: 'Compte Riot non trouvé' },
+          { error: 'Riot account not found' },
           { status: 404 }
         );
       }
       if (accountResponse.status === 429) {
         return NextResponse.json(
-          { error: 'Limite de requêtes atteinte. Veuillez réessayer dans quelques secondes.' },
+          { error: 'Rate limit reached. Please try again in a few seconds.' },
           { status: 429 }
         );
       }
-      console.error(`Erreur API Riot Account: ${accountResponse.status} - ${accountResponse.statusText}`);
+      console.error(`Riot API Account Error: ${accountResponse.status} - ${accountResponse.statusText}`);
       return NextResponse.json(
-        { error: `Erreur API Riot (${accountResponse.status})` },
+        { error: `Riot API Error (${accountResponse.status})` },
         { status: accountResponse.status }
       );
     }
@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (!summonerResponse.ok) {
-      throw new Error(`Erreur API Riot Summoner: ${summonerResponse.status}`);
+      throw new Error(`Riot API Summoner Error: ${summonerResponse.status}`);
     }
 
     const summonerData = await summonerResponse.json();
@@ -141,9 +141,9 @@ export async function GET(request: NextRequest) {
       rank: rankedData,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération du summoner:', error);
+    console.error('Error fetching summoner:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la récupération du summoner' },
+      { error: 'Error fetching summoner' },
       { status: 500 }
     );
   }

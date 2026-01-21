@@ -1,6 +1,6 @@
 /**
- * Détection intelligente du rôle d'un joueur dans un match
- * Basé sur la position dans l'équipe et le champion
+ * Intelligent role detection for a player in a match
+ * Based on team position and champion
  */
 
 import { PlayerData } from './winProbabilityCalculator';
@@ -15,8 +15,8 @@ interface TeamParticipant {
 }
 
 /**
- * Détecte le rôle réel d'un joueur en analysant sa position dans l'équipe
- * et ses stats par rapport aux coéquipiers
+ * Detects the actual role of a player by analyzing their position in the team
+ * and their stats compared to teammates
  */
 export function detectPlayerRole(
   player: TeamParticipant,
@@ -24,12 +24,12 @@ export function detectPlayerRole(
 ): PlayerData['role'] {
   const allPlayers = [player, ...teammates];
 
-  // Si on a les participantIds, on peut utiliser la position (1-5 = team, 6-10 = enemy team)
+  // If we have participantIds, we can use the position (1-5 = team, 6-10 = enemy team)
   if (player.participantId) {
     const teamStartId = player.participantId <= 5 ? 1 : 6;
     const positionInTeam = player.participantId - teamStartId;
 
-    // Les positions suivent généralement: TOP, JUNGLE, MID, ADC, SUPPORT
+    // Positions generally follow: TOP, JUNGLE, MID, ADC, SUPPORT
     switch (positionInTeam) {
       case 0:
         return 'TOP';
@@ -44,12 +44,12 @@ export function detectPlayerRole(
     }
   }
 
-  // Sinon, on utilise une détection basée sur les stats
+  // Otherwise, use stats-based detection
   return detectRoleByStats(player, allPlayers);
 }
 
 /**
- * Détecte le rôle basé sur les statistiques du joueur
+ * Detects role based on player statistics
  */
 function detectRoleByStats(
   player: TeamParticipant,
@@ -59,7 +59,7 @@ function detectRoleByStats(
   const neutralCs = (player.neutralMinionsKilled || 0);
   const visionScore = player.visionScore || 0;
 
-  // Trier les joueurs par CS
+  // Sort players by CS
   const playersByCsRank = allPlayers
     .map(p => ({
       player: p,
@@ -70,43 +70,43 @@ function detectRoleByStats(
 
   const playerCsRank = playersByCsRank.findIndex(p => p.player === player);
 
-  // Jungle: Beaucoup de neutral minions, CS moyen-faible
+  // Jungle: High neutral minions, low-medium CS
   if (neutralCs > 50 && neutralCs > cs * 0.4) {
     return 'JUNGLE';
   }
 
-  // Support: Faible CS, vision score élevé
+  // Support: Low CS, high vision score
   if (cs < 50 && visionScore > 30) {
     return 'SUPPORT';
   }
 
-  // ADC/MID/TOP: Tous ont beaucoup de CS, on utilise le champion pour départager
+  // ADC/MID/TOP: All have high CS, use champion to differentiate
   const championRole = inferRoleFromChampion(player.championName);
 
-  // Si le joueur a beaucoup de CS et que le champion match, on garde le rôle du champion
+  // If player has high CS and champion matches, keep champion role
   if (cs > 100) {
     return championRole;
   }
 
-  // Sinon on utilise le rang de CS comme indicateur
+  // Otherwise use CS rank as indicator
   if (playerCsRank === 0) {
-    // Le plus de CS -> probablement MID ou ADC
+    // Highest CS -> probably MID or ADC
     return championRole === 'ADC' || championRole === 'MID' ? championRole : 'MID';
   }
 
   if (playerCsRank === 1) {
-    // Deuxième plus de CS -> TOP ou MID/ADC
+    // Second highest CS -> TOP or MID/ADC
     return championRole === 'TOP' || championRole === 'MID' || championRole === 'ADC'
       ? championRole
       : 'TOP';
   }
 
-  // Fallback sur le champion
+  // Fallback to champion
   return championRole;
 }
 
 /**
- * Inférence du rôle basé sur le champion (fallback)
+ * Role inference based on champion (fallback)
  */
 function inferRoleFromChampion(championName: string): PlayerData['role'] {
   const roleMap: { [key: string]: PlayerData['role'] } = {
@@ -152,8 +152,8 @@ function inferRoleFromChampion(championName: string): PlayerData['role'] {
 }
 
 /**
- * Détecte si un joueur est en autofill (pas sur son rôle principal)
- * En se basant sur son historique de matchs
+ * Detects if a player is autofilled (not on their main role)
+ * Based on their match history
  */
 export function isPlayerAutofilled(
   currentRole: PlayerData['role'],
@@ -161,15 +161,15 @@ export function isPlayerAutofilled(
 ): boolean {
   if (recentMatchRoles.length === 0) return false;
 
-  // Compter les fois où le joueur a joué chaque rôle
+  // Count how many times the player played each role
   const roleCounts: { [key: string]: number } = {};
   recentMatchRoles.forEach(role => {
     roleCounts[role] = (roleCounts[role] || 0) + 1;
   });
 
-  // Trouver le rôle le plus joué
+  // Find the most played role
   const mainRole = Object.entries(roleCounts).sort((a, b) => b[1] - a[1])[0][0];
 
-  // Si le rôle actuel est différent du rôle le plus joué et qu'il a joué au moins 5 games sur son main role
+  // If current role is different from most played role and they have at least 5 games on main role
   return currentRole !== mainRole && roleCounts[mainRole] >= 5;
 }
