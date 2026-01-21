@@ -299,35 +299,22 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
     const cachedData = analyzedCacheRef.current.get(match.matchId);
     const hasCompleteData = cachedData?.stats?.performanceSummary;
 
-    console.log('[Analysis] Card clicked:', {
-      matchId: match.matchId,
-      analysisId: match.analysisId,
-      status: match.analysisStatus,
-      hasCache: !!cachedData,
-      hasCompleteData: !!hasCompleteData,
-      cachedStats: cachedData?.stats,
-    });
-
     // If completed but cache is incomplete, fetch full analysis
     if (match.analysisStatus === 'completed' && !hasCompleteData) {
       const fetchId = match.analysisId || cachedData?.id;
-      console.log('[Analysis] Fetching full data with ID:', fetchId);
 
       if (fetchId) {
         try {
           const response = await fetch(`/api/analysis/${fetchId}`);
           const data = await response.json();
-          console.log('[Analysis] API response:', data);
 
           if (response.ok && data.success && data.data) {
             analyzedCacheRef.current.set(match.matchId, data.data);
             setAnalyzedCache(prev => new Map(prev).set(match.matchId, data.data));
           }
         } catch (error) {
-          console.error('[Analysis] Error fetching:', error);
+          console.error('Error fetching full analysis:', error);
         }
-      } else {
-        console.warn('[Analysis] No analysisId available to fetch');
       }
     }
   }, []);
