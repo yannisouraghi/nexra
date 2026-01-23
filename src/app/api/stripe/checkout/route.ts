@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://nexra-jet.vercel.app'}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://nexra-jet.vercel.app'}/pricing`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://nexra-ai.app'}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://nexra-ai.app'}/pricing`,
       customer_email: userEmail,
       metadata: {
         userId,
