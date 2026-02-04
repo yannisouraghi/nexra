@@ -471,9 +471,9 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
       </div>
 
       {/* Ready games limit notice */}
-      {statusCounts.ready >= 10 && (
+      {statusCounts.ready > 0 && (
         <p style={styles.readyLimitNotice}>
-          Showing your 10 most recent unanalyzed games. Analyze or play more to refresh the list.
+          Only your 10 most recent unanalyzed games are shown. All analyzed games are saved to your account.
         </p>
       )}
 
