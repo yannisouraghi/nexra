@@ -2931,7 +2931,7 @@ export default function MatchCard({ match, region = 'euw1' }: MatchCardProps) {
                             />
                           </div>
                           <p className="text-xs text-center text-gray-400">
-                            Fetching real-time data from Riot Games API
+                            Analyzing match data...
                           </p>
                         </div>
                       </div>

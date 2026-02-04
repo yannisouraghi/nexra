@@ -141,7 +141,47 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
         errorsCount: cache.get(match.matchId)?.errors?.length || 0,
       }));
 
-      setMatches(transformedMatches);
+      // Add previously analyzed games that are no longer in the recent matches
+      const recentMatchIds = new Set(transformedMatches.map(m => m.matchId));
+      cache.forEach((analysis, matchId) => {
+        if (!recentMatchIds.has(matchId) && analysis.status === 'completed') {
+          transformedMatches.push({
+            matchId,
+            puuid,
+            region,
+            champion: analysis.champion || 'Unknown',
+            result: (analysis.result as 'win' | 'loss') || 'loss',
+            gameDuration: analysis.duration || 0,
+            gameMode: analysis.gameMode || 'CLASSIC',
+            queueId: 420,
+            kills: analysis.kills || 0,
+            deaths: analysis.deaths || 0,
+            assists: analysis.assists || 0,
+            role: analysis.role || 'UNKNOWN',
+            timestamp: analysis.createdAt ? new Date(analysis.createdAt).getTime() : 0,
+            analysisId: analysis.id,
+            analysisStatus: 'completed',
+            overallScore: analysis.stats?.overallScore || 0,
+            errorsCount: analysis.errors?.length || 0,
+          });
+        }
+      });
+
+      // Sort by timestamp descending (most recent first)
+      transformedMatches.sort((a, b) => b.timestamp - a.timestamp);
+
+      // Limit "ready to analyze" games to the 10 most recent
+      const MAX_READY_GAMES = 10;
+      let readyCount = 0;
+      const finalMatches = transformedMatches.filter(m => {
+        if (m.analysisStatus === 'not_started') {
+          readyCount++;
+          return readyCount <= MAX_READY_GAMES;
+        }
+        return true; // always keep analyzed/processing games
+      });
+
+      setMatches(finalMatches);
     } catch (error) {
       console.error('Failed to load matches:', error);
       setMatches([]);
@@ -429,6 +469,13 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
           </p>
         </div>
       </div>
+
+      {/* Ready games limit notice */}
+      {statusCounts.ready >= 10 && (
+        <p style={styles.readyLimitNotice}>
+          Showing your 10 most recent unanalyzed games. Analyze or play more to refresh the list.
+        </p>
+      )}
 
       {/* Overview Section - Always show */}
       <AnalysisOverview stats={overallStats} />
@@ -758,5 +805,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
     gap: 20,
     paddingBottom: 60,
+  },
+  readyLimitNotice: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.4)',
+    textAlign: 'center' as const,
+    margin: '-8px 0 0 0',
+    padding: '0 16px',
+    fontStyle: 'italic',
   },
 };

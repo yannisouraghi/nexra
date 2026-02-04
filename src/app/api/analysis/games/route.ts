@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
           deaths: analysis.deaths || 0,
           assists: analysis.assists || 0,
           role: analysis.role,
+          gameMode: analysis.gameMode || 'CLASSIC',
           // Include full analysis data for caching
           stats: analysis.stats || null,
           errors: analysis.errors || [],
