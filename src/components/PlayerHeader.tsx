@@ -55,6 +55,15 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   const [currentSeason, setCurrentSeason] = useState<{ year: number; split: number } | null>(null);
   const [unlinkingAccount, setUnlinkingAccount] = useState(false);
   const [ddragonVersion, setDdragonVersion] = useState(DDRAGON_CONFIG.FALLBACK_VERSION);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    setIsSmallScreen(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsSmallScreen(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const fetchCurrentSeason = async () => {
@@ -406,69 +415,130 @@ export default function PlayerHeader({ gameName, tagLine, region, profileIconId,
   return (
     <div className="glass-card" style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Settings & Logout Buttons - Top left corner */}
-      <div className="absolute top-3 left-3 sm:top-4 sm:left-6 flex items-center gap-1.5 sm:gap-2 z-10">
+      <div style={{
+        position: 'absolute',
+        top: isSmallScreen ? '0.75rem' : '1rem',
+        left: isSmallScreen ? '0.75rem' : '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: isSmallScreen ? '0.375rem' : '0.5rem',
+        zIndex: 10,
+      }}>
         {onOpenSettings && (
           <button
             onClick={onOpenSettings}
-            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-[#c084fc] text-[0.8125rem] font-semibold cursor-pointer transition-all duration-200 hover:bg-[rgba(168,85,247,0.25)]"
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: isSmallScreen ? '0.375rem' : '0.5rem 0.875rem',
+              borderRadius: '0.5rem',
               border: '1px solid rgba(168, 85, 247, 0.4)',
               backgroundColor: 'rgba(168, 85, 247, 0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              color: '#c084fc',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.25)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(168, 85, 247, 0.15)'; }}
           >
-            <svg className="w-3.5 h-3.5 sm:w-[14px] sm:h-[14px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            <span className="hidden sm:inline">Settings</span>
+            {!isSmallScreen && 'Settings'}
           </button>
         )}
         {onLogout && (
           <button
             onClick={onLogout}
-            className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-[#f87171] text-[0.8125rem] font-semibold cursor-pointer transition-all duration-200 hover:bg-[rgba(239,68,68,0.25)]"
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              padding: isSmallScreen ? '0.375rem' : '0.5rem 0.875rem',
+              borderRadius: '0.5rem',
               border: '1px solid rgba(239, 68, 68, 0.4)',
               backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              color: '#f87171',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.25)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.15)'; }}
           >
-            <svg className="w-3.5 h-3.5 sm:w-[14px] sm:h-[14px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span className="hidden sm:inline">Logout</span>
+            {!isSmallScreen && 'Logout'}
           </button>
         )}
       </div>
 
       {/* Action Buttons - Top right corner */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-6 flex items-center gap-1.5 sm:gap-2 z-10">
+      <div style={{
+        position: 'absolute',
+        top: isSmallScreen ? '0.75rem' : '1rem',
+        right: isSmallScreen ? '0.75rem' : '1.5rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: isSmallScreen ? '0.375rem' : '0.5rem',
+        zIndex: 10,
+      }}>
         <button
           onClick={onRefresh}
-          className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-[#22d3ee] text-[0.8125rem] font-semibold cursor-pointer transition-all duration-200 hover:bg-[rgba(6,182,212,0.2)]"
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            padding: isSmallScreen ? '0.375rem' : '0.5rem 0.875rem',
+            borderRadius: '0.5rem',
             border: '1px solid rgba(6, 182, 212, 0.4)',
             backgroundColor: 'rgba(6, 182, 212, 0.1)',
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            color: '#22d3ee',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(6, 182, 212, 0.2)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(6, 182, 212, 0.1)'; }}
         >
-          <svg className="w-3.5 h-3.5 sm:w-[14px] sm:h-[14px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          <span className="hidden sm:inline">Refresh</span>
+          {!isSmallScreen && 'Refresh'}
         </button>
 
         <button
           onClick={handleUnlinkRiot}
           disabled={unlinkingAccount}
-          className="flex items-center gap-1.5 px-2 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-[#fb923c] text-[0.8125rem] font-semibold cursor-pointer transition-all duration-200 hover:bg-[rgba(249,115,22,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            padding: isSmallScreen ? '0.375rem' : '0.5rem 0.875rem',
+            borderRadius: '0.5rem',
             border: '1px solid rgba(249, 115, 22, 0.4)',
             backgroundColor: 'rgba(249, 115, 22, 0.1)',
+            cursor: unlinkingAccount ? 'not-allowed' : 'pointer',
+            opacity: unlinkingAccount ? 0.5 : 1,
+            transition: 'all 0.2s',
+            color: '#fb923c',
+            fontSize: '0.8125rem',
+            fontWeight: 600,
           }}
+          onMouseEnter={(e) => { if (!unlinkingAccount) e.currentTarget.style.backgroundColor = 'rgba(249, 115, 22, 0.2)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'rgba(249, 115, 22, 0.1)'; }}
         >
-          <svg className="w-3.5 h-3.5 sm:w-[14px] sm:h-[14px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg style={{ width: '14px', height: '14px', flexShrink: 0 }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
           </svg>
-          <span className="hidden sm:inline">Change</span>
+          {!isSmallScreen && 'Change'}
         </button>
       </div>
 
