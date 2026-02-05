@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { getMockAnalysisById } from '@/utils/mockAnalysisData';
 import { NEXRA_API_URL } from '@/config/api';
 
@@ -7,6 +8,11 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   const { id } = await params;
 
   try {
@@ -16,6 +22,7 @@ export async function GET(
       {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}:${session.user.email || ''}`,
         },
         cache: 'no-store',
       }
@@ -27,8 +34,12 @@ export async function GET(
       if (data.success && data.data) {
         const analysis = data.data;
 
-        // Transform API response to match frontend expected format
-        // Wrap in { success, data } format for consistency with other endpoints
+        // Verify ownership
+        const sessionUser = session.user as { riotPuuid?: string };
+        if (sessionUser.riotPuuid && analysis.puuid && sessionUser.riotPuuid !== analysis.puuid) {
+          return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+        }
+
         return NextResponse.json({
           success: true,
           data: {
@@ -36,6 +47,8 @@ export async function GET(
             matchId: analysis.match_id || analysis.matchId,
             puuid: analysis.puuid,
             status: analysis.status,
+            progress: analysis.progress ?? null,
+            progressMessage: analysis.progressMessage ?? null,
             createdAt: analysis.created_at || analysis.createdAt,
             completedAt: analysis.completed_at || analysis.completedAt,
 
@@ -64,7 +77,6 @@ export async function GET(
 
     // If API returns 404
     if (response.status === 404) {
-      // Only use mock data in development
       if (process.env.NODE_ENV === 'development') {
         const mockAnalysis = getMockAnalysisById(id);
         if (mockAnalysis) {
@@ -86,7 +98,6 @@ export async function GET(
   } catch (error) {
     console.error('Failed to fetch from API:', error);
 
-    // Only use mock data in development
     if (process.env.NODE_ENV === 'development') {
       const mockAnalysis = getMockAnalysisById(id);
       if (mockAnalysis) {

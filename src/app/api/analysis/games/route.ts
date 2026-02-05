@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { mockAnalyzedGames } from '@/utils/mockAnalysisData';
 import { NEXRA_API_URL } from '@/config/api';
 
-// GET: Return list of analyzed games
+// GET: Return list of analyzed games (including processing ones)
 export async function GET(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+  }
+
   const searchParams = request.nextUrl.searchParams;
   const puuid = searchParams.get('puuid');
   const limit = parseInt(searchParams.get('limit') || '10');
@@ -16,6 +22,12 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Verify ownership
+  const sessionUser = session.user as { riotPuuid?: string };
+  if (sessionUser.riotPuuid && sessionUser.riotPuuid !== puuid) {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+  }
+
   try {
     // Try to fetch from real API
     const response = await fetch(
@@ -23,6 +35,7 @@ export async function GET(request: NextRequest) {
       {
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.user.id}:${session.user.email || ''}`,
         },
         cache: 'no-store',
       }
@@ -32,8 +45,7 @@ export async function GET(request: NextRequest) {
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Transform API response to match frontend expected format
-        // Include full stats, errors, tips for caching in the frontend
+        // Include completed AND processing analyses
         const games = data.data.map((analysis: any) => ({
           id: analysis.id,
           matchId: analysis.match_id || analysis.matchId,
@@ -43,17 +55,19 @@ export async function GET(request: NextRequest) {
           overallScore: analysis.stats?.overallScore || 0,
           errorsCount: analysis.errors?.length || analysis.stats?.errorsFound || 0,
           status: analysis.status,
+          progress: analysis.progress ?? null,
+          progressMessage: analysis.progressMessage ?? analysis.progress_message ?? null,
           createdAt: analysis.created_at || analysis.createdAt,
           kills: analysis.kills || 0,
           deaths: analysis.deaths || 0,
           assists: analysis.assists || 0,
           role: analysis.role,
           gameMode: analysis.gameMode || 'CLASSIC',
-          // Include full analysis data for caching
-          stats: analysis.stats || null,
-          errors: analysis.errors || [],
-          tips: analysis.tips || [],
-          clips: analysis.clips || [],
+          // Include full analysis data for caching (only for completed)
+          stats: analysis.status === 'completed' ? (analysis.stats || null) : null,
+          errors: analysis.status === 'completed' ? (analysis.errors || []) : [],
+          tips: analysis.status === 'completed' ? (analysis.tips || []) : [],
+          clips: analysis.status === 'completed' ? (analysis.clips || []) : [],
         }));
 
         return NextResponse.json({
@@ -84,7 +98,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Failed to fetch from API:', error);
 
-    // Only use mock data in development
     if (process.env.NODE_ENV === 'development') {
       const paginatedGames = mockAnalyzedGames.slice(offset, offset + limit);
       return NextResponse.json({

@@ -2,10 +2,16 @@
 // Proxies to the backend API for analysis
 
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
 import { NEXRA_API_URL } from '@/config/api';
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { matchId, puuid, region, language } = body;
 
@@ -17,11 +23,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Verify ownership: the puuid must match the session user's puuid
+    const sessionUser = session.user as { riotPuuid?: string };
+    if (sessionUser.riotPuuid && sessionUser.riotPuuid !== puuid) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
     // Call the backend API for analysis
     const response = await fetch(`${NEXRA_API_URL}/analysis/analyze`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.user.id}:${session.user.email || ''}`,
       },
       body: JSON.stringify({
         matchId,
@@ -35,7 +48,6 @@ export async function POST(request: NextRequest) {
     const result = await response.json();
 
     if (!response.ok) {
-      // Handle rate limiting
       if (response.status === 429) {
         return NextResponse.json(
           { error: 'Rate limited by Riot API. Please try again in a few seconds.' },

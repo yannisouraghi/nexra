@@ -56,6 +56,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
   // Ref for cache to avoid stale closures in callbacks, state for re-renders
   const analyzedCacheRef = useRef<Map<string, any>>(new Map());
   const hasLoadedRef = useRef(false);
+  const pollingIntervalsRef = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   // Fetch user registration date (only once on mount)
   const userCreatedAtFetchedRef = useRef(false);
@@ -121,25 +122,37 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
 
       // Transform to MatchForAnalysis format (use ref to avoid re-renders)
       const cache = analyzedCacheRef.current;
-      const transformedMatches: MatchForAnalysis[] = rankedMatches.map(match => ({
-        matchId: match.matchId,
-        puuid,
-        region,
-        champion: match.champion,
-        result: match.win ? 'win' : 'loss',
-        gameDuration: match.gameDuration,
-        gameMode: match.gameMode,
-        queueId: match.queueId,
-        kills: match.kills,
-        deaths: match.deaths,
-        assists: match.assists,
-        role: match.teamPosition || match.role || 'UNKNOWN',
-        timestamp: match.timestamp,
-        analysisId: cache.get(match.matchId)?.id || null,
-        analysisStatus: cache.get(match.matchId) ? 'completed' : 'not_started',
-        overallScore: cache.get(match.matchId)?.stats?.overallScore || 0,
-        errorsCount: cache.get(match.matchId)?.errors?.length || 0,
-      }));
+      const transformedMatches: MatchForAnalysis[] = rankedMatches.map(match => {
+        const cached = cache.get(match.matchId);
+        const cachedStatus = cached?.status;
+        let analysisStatus: AnalysisStatus = 'not_started';
+        if (cachedStatus === 'completed') analysisStatus = 'completed';
+        else if (cachedStatus === 'processing') analysisStatus = 'processing';
+        else if (cachedStatus === 'failed') analysisStatus = 'failed';
+        else if (cached) analysisStatus = 'completed';
+
+        return {
+          matchId: match.matchId,
+          puuid,
+          region,
+          champion: match.champion,
+          result: match.win ? 'win' : 'loss',
+          gameDuration: match.gameDuration,
+          gameMode: match.gameMode,
+          queueId: match.queueId,
+          kills: match.kills,
+          deaths: match.deaths,
+          assists: match.assists,
+          role: match.teamPosition || match.role || 'UNKNOWN',
+          timestamp: match.timestamp,
+          analysisId: cached?.id || null,
+          analysisStatus,
+          overallScore: cached?.stats?.overallScore || 0,
+          errorsCount: cached?.errors?.length || 0,
+          progress: cached?.progress ?? undefined,
+          progressMessage: cached?.progressMessage ?? undefined,
+        };
+      });
 
       // Add previously analyzed games that are no longer in the recent matches
       const recentMatchIds = new Set(transformedMatches.map(m => m.matchId));
@@ -189,6 +202,96 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
     setLoading(false);
   }, [puuid, region, gameName, tagLine, userCreatedAt]);
 
+  // Poll a specific analysis for progress updates
+  const startPolling = useCallback((analysisId: string, matchId: string) => {
+    // Don't create duplicate intervals
+    if (pollingIntervalsRef.current.has(matchId)) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/analysis/${analysisId}`);
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (!data.success || !data.data) return;
+
+        const analysis = data.data;
+        const serverProgress = analysis.progress ?? 0;
+        const serverMessage = analysis.progressMessage ?? '';
+
+        if (analysis.status === 'completed') {
+          // Stop polling
+          clearInterval(interval);
+          pollingIntervalsRef.current.delete(matchId);
+
+          // Cache the completed analysis
+          analyzedCacheRef.current.set(matchId, analysis);
+          setAnalyzedCache(prev => new Map(prev).set(matchId, analysis));
+
+          // Update match state
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? {
+                  ...m,
+                  analysisStatus: 'completed' as AnalysisStatus,
+                  analysisId: analysis.id,
+                  overallScore: analysis.stats?.overallScore || 0,
+                  errorsCount: analysis.errors?.length || 0,
+                  progress: 100,
+                  progressMessage: 'Analysis complete',
+                }
+              : m
+          ));
+
+          setAnalyzingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchId);
+            return newSet;
+          });
+        } else if (analysis.status === 'failed') {
+          // Stop polling
+          clearInterval(interval);
+          pollingIntervalsRef.current.delete(matchId);
+
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? { ...m, analysisStatus: 'failed' as AnalysisStatus, progress: 0, progressMessage: 'Analysis failed' }
+              : m
+          ));
+
+          setAnalyzingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchId);
+            return newSet;
+          });
+        } else {
+          // Update progress (only forward - never backwards)
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? {
+                  ...m,
+                  progress: Math.max(m.progress || 0, serverProgress),
+                  progressMessage: serverMessage || m.progressMessage,
+                }
+              : m
+          ));
+        }
+      } catch (error) {
+        console.error('Polling error for', matchId, error);
+      }
+    }, 2500);
+
+    pollingIntervalsRef.current.set(matchId, interval);
+  }, []);
+
+  // Cleanup all polling intervals on unmount
+  useEffect(() => {
+    return () => {
+      pollingIntervalsRef.current.forEach(interval => clearInterval(interval));
+      pollingIntervalsRef.current.clear();
+    };
+  }, []);
+
   // Fetch existing analyses from backend
   const fetchExistingAnalyses = useCallback(async () => {
     try {
@@ -196,20 +299,29 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
       if (response.ok) {
         const data = await response.json();
         if (data.games && Array.isArray(data.games)) {
-          // Cache all existing analyses
+          // Cache analyses and track processing ones
+          const processingGames: Array<{ id: string; matchId: string }> = [];
+
           data.games.forEach((game: any) => {
             if (game.matchId && game.status === 'completed') {
               analyzedCacheRef.current.set(game.matchId, game);
+            } else if (game.matchId && game.status === 'processing' && game.id) {
+              processingGames.push({ id: game.id, matchId: game.matchId });
             }
           });
           // Also update the state cache
           setAnalyzedCache(new Map(analyzedCacheRef.current));
+
+          // Auto-start polling for any in-progress analyses (refresh resilience)
+          processingGames.forEach(({ id, matchId }) => {
+            startPolling(id, matchId);
+          });
         }
       }
     } catch (error) {
       console.error('Error fetching existing analyses:', error);
     }
-  }, [puuid]);
+  }, [puuid, startPolling]);
 
   // Initial load - wait for userCreatedAt to be fetched first
   useEffect(() => {
@@ -286,7 +398,7 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
         throw new Error(creditData.error || 'Failed to use credit');
       }
 
-      // Now start the analysis (don't update session here to avoid page reload)
+      // Now start the analysis (returns 202 with analysis ID for async processing)
       const response = await fetch('/api/analysis/analyze', {
         method: 'POST',
         headers: {
@@ -298,41 +410,67 @@ export default function AnalysisTab({ puuid, region, gameName, tagLine, onInsuff
       const data = await response.json();
 
       if (data.success && data.data) {
-        // Cache the analysis result (both ref and state)
-        analyzedCacheRef.current.set(matchId, data.data);
-        setAnalyzedCache(prev => new Map(prev).set(matchId, data.data));
+        const analysisData = data.data;
 
-        // Update match with analysis results
-        setMatches(prev => prev.map(m =>
-          m.matchId === matchId
-            ? {
-                ...m,
-                analysisStatus: 'completed' as AnalysisStatus,
-                analysisId: data.data.id,
-                overallScore: data.data.stats?.overallScore || 0,
-                errorsCount: data.data.errors?.length || 0,
-              }
-            : m
-        ));
+        if (analysisData.status === 'completed' || analysisData.existing) {
+          // Analysis already existed and is complete
+          analyzedCacheRef.current.set(matchId, analysisData);
+          setAnalyzedCache(prev => new Map(prev).set(matchId, analysisData));
+
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? {
+                  ...m,
+                  analysisStatus: 'completed' as AnalysisStatus,
+                  analysisId: analysisData.id,
+                  overallScore: analysisData.stats?.overallScore || 0,
+                  errorsCount: analysisData.errors?.length || 0,
+                  progress: 100,
+                }
+              : m
+          ));
+
+          setAnalyzingIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(matchId);
+            return newSet;
+          });
+        } else {
+          // 202 - Analysis started in background, start polling
+          setMatches(prev => prev.map(m =>
+            m.matchId === matchId
+              ? {
+                  ...m,
+                  analysisStatus: 'processing' as AnalysisStatus,
+                  analysisId: analysisData.id,
+                  progress: analysisData.progress || 10,
+                  progressMessage: analysisData.progressMessage || 'Starting analysis...',
+                }
+              : m
+          ));
+
+          // Start polling for progress
+          if (analysisData.id) {
+            startPolling(analysisData.id, matchId);
+          }
+        }
       } else {
         throw new Error(data.error || 'Analysis failed');
       }
     } catch (error) {
       console.error('Failed to analyze match:', error);
-      // Update match status to failed
       setMatches(prev => prev.map(m =>
         m.matchId === matchId
-          ? { ...m, analysisStatus: 'failed' as AnalysisStatus }
+          ? { ...m, analysisStatus: 'failed' as AnalysisStatus, progress: 0 }
           : m
       ));
-    } finally {
       setAnalyzingIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(matchId);
         return newSet;
       });
     }
-  }, [puuid, region, session, onInsufficientCredits]);
+  }, [puuid, region, session, onInsufficientCredits, startPolling]);
 
   // Handle card click - open modal and fetch full analysis if cache is incomplete
   const handleCardClick = useCallback(async (match: MatchForAnalysis) => {
