@@ -105,9 +105,7 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
   const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
 
-  // Server-driven progress with smooth client-side interpolation
-  // The AI step is the longest but has no intermediate updates, so we
-  // slowly animate toward 95% between server polls to avoid looking stuck.
+  // Server-driven progress: only goes forward, smooth CSS transition handles animation
   useEffect(() => {
     if (isCompleted) {
       setDisplayProgress(100);
@@ -118,20 +116,6 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
       setDisplayProgress(0);
     }
   }, [isProcessing, isCompleted, match.progress]);
-
-  useEffect(() => {
-    if (!isProcessing || displayProgress >= 95) return;
-    const timer = setInterval(() => {
-      setDisplayProgress(prev => {
-        if (prev >= 95) return prev;
-        // Decelerate as we approach 95% — feels natural
-        const remaining = 95 - prev;
-        const increment = Math.max(0.15, remaining * 0.018);
-        return Math.min(95, prev + increment);
-      });
-    }, 800);
-    return () => clearInterval(timer);
-  }, [isProcessing, displayProgress >= 95]);
 
   const borderColor = isCompleted
     ? (isWin ? 'rgba(0,255,136,0.5)' : 'rgba(255,51,102,0.5)')
