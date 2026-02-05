@@ -196,6 +196,9 @@ export interface MatchForAnalysis {
   analysisStatus: AnalysisStatus;
   overallScore: number;
   errorsCount: number;
+  // Server-driven progress (only during processing)
+  progress?: number;
+  progressMessage?: string;
 }
 
 // Status display helpers
