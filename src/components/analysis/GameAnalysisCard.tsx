@@ -89,7 +89,7 @@ function RoleIcon({ role }: { role: Role }) {
 export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, isStarting }: GameAnalysisCardProps) {
   const [imgErr, setImgErr] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
   const [lang, setLang] = useState<AnalysisLanguage>('en');
 
   const status = match.analysisStatus;
@@ -105,27 +105,33 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
   const scoreColor = isCompleted ? getScoreColor(match.overallScore) : getStatusColor(status);
   const kda = match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : '∞';
 
-  // Smooth progress animation
+  // Server-driven progress with smooth client-side interpolation
+  // The AI step is the longest but has no intermediate updates, so we
+  // slowly animate toward 95% between server polls to avoid looking stuck.
   useEffect(() => {
-    if (isProcessing) {
-      setProgress(0);
-      const iv = setInterval(() => {
-        setProgress(p => {
-          // Phase 1: Quick start (0-40%)
-          if (p < 40) return p + 2;
-          // Phase 2: Slower middle (40-70%)
-          if (p < 70) return p + 0.8;
-          // Phase 3: Even slower (70-90%)
-          if (p < 90) return p + 0.3;
-          // Phase 4: Very slow crawl to 95% then stay there
-          if (p < 95) return p + 0.1;
-          return 95; // Stay at 95% until complete
-        });
-      }, 150);
-      return () => clearInterval(iv);
+    if (isCompleted) {
+      setDisplayProgress(100);
+    } else if (isProcessing) {
+      const serverProgress = match.progress || 0;
+      setDisplayProgress(prev => Math.max(prev, serverProgress));
+    } else {
+      setDisplayProgress(0);
     }
-    setProgress(isCompleted ? 100 : 0);
-  }, [isProcessing, isCompleted]);
+  }, [isProcessing, isCompleted, match.progress]);
+
+  useEffect(() => {
+    if (!isProcessing || displayProgress >= 95) return;
+    const timer = setInterval(() => {
+      setDisplayProgress(prev => {
+        if (prev >= 95) return prev;
+        // Decelerate as we approach 95% — feels natural
+        const remaining = 95 - prev;
+        const increment = Math.max(0.15, remaining * 0.018);
+        return Math.min(95, prev + increment);
+      });
+    }, 800);
+    return () => clearInterval(timer);
+  }, [isProcessing, displayProgress >= 95]);
 
   const borderColor = isCompleted
     ? (isWin ? 'rgba(0,255,136,0.5)' : 'rgba(255,51,102,0.5)')
@@ -268,8 +274,8 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
                   <circle
                     cx="35" cy="35" r="30" fill="none" stroke="#00d4ff" strokeWidth="5" strokeLinecap="round"
                     strokeDasharray={2 * Math.PI * 30}
-                    strokeDashoffset={2 * Math.PI * 30 * (1 - progress / 100)}
-                    style={{ transition: 'stroke-dashoffset 0.4s ease' }}
+                    strokeDashoffset={2 * Math.PI * 30 * (1 - displayProgress / 100)}
+                    style={{ transition: 'stroke-dashoffset 0.8s ease' }}
                   />
                 </svg>
                 <span style={{
@@ -282,10 +288,19 @@ export default function GameAnalysisCard({ match, onStartAnalysis, onCardClick, 
                   fontWeight: 700,
                   color: '#00d4ff',
                 }}>
-                  {Math.round(progress)}%
+                  {Math.round(displayProgress)}%
                 </span>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#00d4ff' }}>Analyzing...</span>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: '#00d4ff',
+                textAlign: 'center',
+                maxWidth: 160,
+                lineHeight: 1.3,
+              }}>
+                {match.progressMessage || 'Analyzing...'}
+              </span>
             </div>
           ) : isReady ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
