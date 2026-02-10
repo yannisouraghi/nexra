@@ -1982,578 +1982,486 @@ body {
 }
 
 /* =============================================
-   AUTH PAGES (Login, Link Riot)
+   LINK RIOT PAGE — Glass Design System
    ============================================= */
 
-.auth-page {
-  min-height: 100vh;
-  background: var(--color-void);
-  color: var(--text-primary);
+.nexra-link-page {
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
   position: relative;
+  overflow: hidden;
 }
 
-.auth-page .animated-background {
+/* Ambient background */
+.nexra-link-bg {
   position: fixed;
   inset: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(0, 60, 120, 0.15) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 20% 100%, rgba(100, 50, 255, 0.06) 0%, transparent 50%),
+              #050510;
   z-index: 0;
 }
 
-.auth-container {
+/* Container */
+.nexra-link-container {
   position: relative;
-  z-index: 10;
+  z-index: 1;
   width: 100%;
-  max-width: 420px;
-  animation: authFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  animation: nexraLinkFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes authFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes nexraLinkFadeIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.auth-logo {
+/* Logo */
+.nexra-link-logo {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
+  gap: 0.625rem;
   text-decoration: none;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.auth-logo-mark {
-  width: 48px;
-  height: 48px;
-  filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.4));
-  transition: filter 0.3s ease;
+.nexra-link-logo:hover {
+  transform: translateY(-2px);
 }
 
-.auth-logo:hover .auth-logo-mark {
-  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.6));
+.nexra-link-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(0, 220, 255, 0.35));
 }
 
-.auth-logo-mark svg {
-  width: 100%;
-  height: 100%;
-}
-
-.auth-logo-text {
+.nexra-link-logo-text {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+  letter-spacing: 0.14em;
+  background: linear-gradient(135deg, #00dcff 0%, #0066ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.auth-card {
+/* Glass card */
+.nexra-link-card {
   position: relative;
-  padding: 2.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
+  width: 100%;
+  border-radius: 24px;
+  background: rgba(8, 8, 20, 0.92);
+  box-shadow:
+    0 50px 120px rgba(0, 0, 0, 0.6),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06);
   overflow: hidden;
 }
 
-.auth-card-glow {
+/* Ambient glow */
+.nexra-link-card-glow {
   position: absolute;
-  top: -100px;
+  top: -80px;
   left: 50%;
   transform: translateX(-50%);
-  width: 300px;
-  height: 200px;
-  background: radial-gradient(ellipse, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+  width: 280px;
+  height: 180px;
+  background: radial-gradient(ellipse, rgba(0, 160, 255, 0.12) 0%, transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
 
-.auth-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.auth-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.auth-subtitle {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.auth-google-btn {
-  position: relative;
-  width: 100%;
-  padding: 1rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.auth-google-bg {
+/* Prismatic border */
+.nexra-link-card-border {
   position: absolute;
   inset: 0;
-  background: white;
-  transition: background 0.3s ease;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(
+    170deg,
+    rgba(0, 200, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.04) 15%,
+    transparent 35%,
+    transparent 65%,
+    rgba(255, 255, 255, 0.03) 85%,
+    rgba(100, 80, 255, 0.12) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
 }
 
-.auth-google-btn:hover .auth-google-bg {
-  background: #f3f4f6;
-}
-
-.auth-google-content {
+/* Card inner */
+.nexra-link-card-inner {
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  font-family: 'Archivo', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+  z-index: 2;
+  padding: 2.25rem 2rem 2rem;
 }
 
-.auth-google-content svg {
-  width: 20px;
-  height: 20px;
-}
-
-.auth-google-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.auth-terms {
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  text-align: center;
-  color: var(--text-quaternary);
-  line-height: 1.5;
-}
-
-.auth-back {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
-  font-size: 0.875rem;
-  color: var(--text-tertiary);
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.auth-back svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.3s ease;
-}
-
-.auth-back:hover {
-  color: var(--text-primary);
-}
-
-.auth-back:hover svg {
-  transform: translateX(-3px);
-}
-
-/* Auth Form Elements */
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.auth-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.02em;
-}
-
-.auth-input {
-  padding: 0.875rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.auth-input::placeholder {
-  color: var(--text-quaternary);
-}
-
-.auth-input:focus {
-  border-color: rgba(0, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
-}
-
-.auth-input-row {
-  display: flex;
-  gap: 0.75rem;
-  align-items: center;
-}
-
-.auth-input-row .auth-input {
-  flex: 1;
-}
-
-.auth-input-divider {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-tertiary);
-}
-
-.auth-input-tag {
-  width: 100px;
-}
-
-.auth-select {
-  padding: 0.875rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: var(--text-primary);
-  font-family: 'Archivo', sans-serif;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-  outline: none;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-}
-
-.auth-select:focus {
-  border-color: rgba(0, 255, 255, 0.4);
-  background-color: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.1);
-}
-
-.auth-select option {
-  background: var(--color-elevated);
-  color: var(--text-primary);
-}
-
-.auth-submit {
-  position: relative;
-  width: 100%;
-  padding: 1rem 1.5rem;
-  margin-top: 0.5rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.auth-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.auth-submit-bg {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #00ffff 0%, #0066ff 100%);
-}
-
-.auth-submit-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #00fff2 0%, #00aaff 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.auth-submit:not(:disabled):hover .auth-submit-bg::before {
-  opacity: 1;
-}
-
-.auth-submit-content {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: 'Archivo', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-}
-
-.auth-submit-content svg {
-  width: 20px;
-  height: 20px;
-}
-
-.auth-submit:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3);
-}
-
-.auth-error {
-  padding: 1rem;
-  background: rgba(255, 51, 102, 0.1);
-  border: 1px solid rgba(255, 51, 102, 0.2);
-  border-radius: 10px;
-  color: #ff6b8a;
-  font-size: 0.875rem;
-}
-
-.auth-tip {
-  padding: 1rem;
-  background: rgba(0, 255, 255, 0.05);
-  border: 1px solid rgba(0, 255, 255, 0.1);
-  border-radius: 10px;
-  margin-top: 1.5rem;
-}
-
-.auth-tip-label {
-  display: inline;
-  font-weight: 600;
-  color: #00ffff;
-  margin-right: 0.25rem;
-}
-
-.auth-tip-text {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.auth-user-info {
+/* User info bar */
+.nexra-link-user {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
+  padding: 0.625rem 0.75rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-bottom: 1.75rem;
 }
 
-.auth-user-details {
+.nexra-link-user-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.625rem;
+  min-width: 0;
 }
 
-.auth-user-avatar {
-  width: 36px;
-  height: 36px;
+.nexra-link-user-avatar {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.auth-user-email {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+.nexra-link-user-email {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.auth-signout {
-  padding: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
+.nexra-link-signout {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
-  color: var(--text-tertiary);
+  color: rgba(255, 255, 255, 0.25);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.auth-signout:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+.nexra-link-signout svg {
+  width: 15px;
+  height: 15px;
 }
 
-.auth-signout svg {
-  width: 18px;
-  height: 18px;
+.nexra-link-signout:hover {
+  background: rgba(255, 59, 48, 0.1);
+  border-color: rgba(255, 59, 48, 0.18);
+  color: #ff6b6b;
 }
 
-.auth-icon-wrap {
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 1.5rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 102, 255, 0.1));
-  border: 1px solid rgba(0, 255, 255, 0.2);
-  border-radius: 16px;
-  color: #00ffff;
+/* Header */
+.nexra-link-header {
+  text-align: center;
+  margin-bottom: 1.75rem;
 }
 
-.auth-icon-wrap svg {
+.nexra-link-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(0, 180, 255, 0.08) 0%, transparent 70%);
+  border-radius: 14px;
+}
+
+.nexra-link-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #00dcff;
+  filter: drop-shadow(0 0 8px rgba(0, 220, 255, 0.3));
+}
+
+.nexra-link-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.375rem;
+  letter-spacing: -0.01em;
+}
+
+.nexra-link-subtitle {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.5;
+}
+
+/* Form */
+.nexra-link-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.nexra-link-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.nexra-link-field label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-left: 0.125rem;
+}
+
+/* Riot ID row */
+.nexra-link-riot-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nexra-link-riot-name {
+  flex: 1;
+}
+
+.nexra-link-riot-hash {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.15);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.nexra-link-riot-tag {
+  width: 90px;
+  flex-shrink: 0;
+}
+
+/* Region select */
+.nexra-link-select {
   width: 100%;
-  height: 100%;
+  padding: 0.75rem 2.25rem 0.75rem 0.875rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.875rem;
+  color: #fff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  box-sizing: border-box;
 }
 
-/* Loading spinner */
-.auth-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+.nexra-link-select:focus {
+  border-color: rgba(0, 180, 255, 0.3);
+  background-color: rgba(0, 140, 255, 0.03);
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.05);
+}
+
+.nexra-link-select option {
+  background: #0a0a1a;
+  color: #fff;
+}
+
+/* Error */
+.nexra-link-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 59, 48, 0.06);
+  border: 1px solid rgba(255, 59, 48, 0.12);
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  color: #ff6b6b;
+  line-height: 1.4;
+}
+
+.nexra-link-error svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Spinner */
+.nexra-link-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid rgba(0, 180, 255, 0.12);
+  border-top-color: #00dcff;
   border-radius: 50%;
-  animation: authSpin 0.8s linear infinite;
+  animation: nexraLinkSpin 0.7s linear infinite;
 }
 
-@keyframes authSpin {
+.nexra-link-spinner-sm {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: nexraLinkSpin 0.7s linear infinite;
+}
+
+@keyframes nexraLinkSpin {
   to { transform: rotate(360deg); }
 }
 
-/* Auth Pages - Responsive */
+/* Tip */
+.nexra-link-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+  padding: 0.75rem 0.875rem;
+  background: rgba(0, 180, 255, 0.03);
+  border: 1px solid rgba(0, 180, 255, 0.07);
+  border-radius: 10px;
+}
+
+.nexra-link-tip span {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.3);
+  line-height: 1.5;
+}
+
+/* Noise texture overlay (shared with landing) */
+.nexra-link-card .nexra-glass-card-noise {
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  border-radius: 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---- Link Riot — Responsive ---- */
+@media (max-width: 768px) {
+  .nexra-link-card {
+    border-radius: 20px;
+  }
+
+  .nexra-link-card-border {
+    border-radius: 20px;
+  }
+
+  .nexra-link-card .nexra-glass-card-noise {
+    border-radius: 20px;
+  }
+
+  .nexra-link-card-inner {
+    padding: 1.75rem 1.5rem 1.5rem;
+  }
+
+  .nexra-link-title {
+    font-size: 1.375rem;
+  }
+}
+
 @media (max-width: 480px) {
-  .auth-page {
-    padding: 1rem;
+  .nexra-link-page {
+    padding: 1rem 0.75rem;
+    align-items: flex-start;
+    padding-top: 3rem;
   }
 
-  .auth-container {
-    max-width: 100%;
+  .nexra-link-container {
+    gap: 1.25rem;
   }
 
-  .auth-card {
-    padding: 1.5rem;
-    border-radius: 16px;
+  .nexra-link-card {
+    border-radius: 18px;
   }
 
-  .auth-logo {
-    margin-bottom: 1.5rem;
+  .nexra-link-card-border,
+  .nexra-link-card .nexra-glass-card-noise {
+    border-radius: 18px;
   }
 
-  .auth-logo-mark {
-    width: 40px;
-    height: 40px;
+  .nexra-link-card-inner {
+    padding: 1.5rem 1.25rem 1.25rem;
   }
 
-  .auth-logo-text {
-    font-size: 1.5rem;
-  }
-
-  .auth-title {
+  .nexra-link-title {
     font-size: 1.25rem;
   }
 
-  .auth-subtitle {
-    font-size: 0.8125rem;
-  }
-
-  .auth-input {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.9375rem;
-  }
-
-  .auth-select {
-    padding: 0.75rem 0.875rem;
-    font-size: 0.9375rem;
-  }
-
-  .auth-submit {
-    padding: 0.875rem 1.25rem;
-  }
-
-  .auth-submit-content {
-    font-size: 0.9375rem;
-  }
-
-  .auth-tip {
+  .nexra-link-subtitle {
     font-size: 0.75rem;
-    flex-direction: column;
-    align-items: flex-start;
   }
 
-  .auth-user-info {
-    flex-direction: column;
-    gap: 0.75rem;
-    text-align: center;
+  .nexra-link-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1rem;
   }
 
-  .auth-user-email {
-    font-size: 0.75rem;
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .nexra-link-icon svg {
+    width: 20px;
+    height: 20px;
   }
 
-  .auth-icon-wrap {
-    width: 48px;
-    height: 48px;
+  .nexra-link-riot-row {
+    gap: 0.375rem;
   }
 
-  .auth-icon-wrap svg {
-    width: 22px;
-    height: 22px;
+  .nexra-link-riot-tag {
+    width: 80px;
   }
 
-  .auth-back {
-    font-size: 0.8125rem;
-  }
-
-  .auth-terms {
-    font-size: 0.6875rem;
-  }
-
-  .auth-google-btn {
-    padding: 0.875rem;
-  }
-
-  .auth-google-content {
-    font-size: 0.875rem;
+  .nexra-link-user-email {
+    max-width: 140px;
   }
 }
 
 /* =============================================
-   NEXRA LANDING PAGE v2 - PREMIUM GAMER SAAS
-   Liquid Glass / Apple-like Design System
-   ============================================= */
-
-/* =============================================
-   LANDING PAGE BASE
+   NEXRA LANDING PAGE v3 - MODERN SAAS
+   Premium Dark Theme
    ============================================= */
 
 .nexra-lp {
   min-height: 100vh;
-  background: #030308;
+  background: #050508;
   color: #fff;
   overflow-x: hidden;
-  font-family: 'Outfit', 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Archivo', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .nexra-container {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1.25rem, 4vw, 3rem);
 }
 
 /* =============================================
@@ -2563,6 +2471,7 @@ body {
 .nexra-hero {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -2572,79 +2481,41 @@ body {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #030308;
+  background: #050508;
   overflow: hidden;
 }
 
-/* Video Background */
 .nexra-hero-video {
   position: absolute;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.6) saturate(1.1);
+  filter: brightness(0.45) saturate(1.1) contrast(1.1);
 }
 
-/* Dark Overlay on Video */
 .nexra-hero-overlay {
   position: absolute;
   inset: 0;
   background:
+    radial-gradient(ellipse 70% 50% at 50% 45%, transparent 0%, rgba(5, 5, 8, 0.6) 100%),
     linear-gradient(180deg,
-      rgba(3, 3, 8, 0.4) 0%,
-      rgba(3, 3, 8, 0.3) 30%,
-      rgba(3, 3, 8, 0.5) 60%,
-      rgba(3, 3, 8, 0.95) 100%
-    ),
-    linear-gradient(135deg,
-      rgba(0, 100, 255, 0.1) 0%,
-      transparent 50%
+      rgba(5, 5, 8, 0.4) 0%,
+      rgba(5, 5, 8, 0.1) 20%,
+      rgba(5, 5, 8, 0.2) 50%,
+      rgba(5, 5, 8, 0.95) 100%
     );
   pointer-events: none;
 }
 
-/* Particles */
-.nexra-particles {
+.nexra-hero-noise {
   position: absolute;
   inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
   pointer-events: none;
-  z-index: 1;
-}
-
-.nexra-particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: rgba(0, 220, 255, 0.8);
-  border-radius: 50%;
-  box-shadow: 0 0 6px rgba(0, 220, 255, 0.6), 0 0 12px rgba(0, 220, 255, 0.3);
-  bottom: 5%;
-  animation: particleRise 8s ease-out infinite;
-  opacity: 0;
-}
-
-.nexra-particle-slow {
-  width: 4px;
-  height: 4px;
-  animation-duration: 12s;
-  box-shadow: 0 0 8px rgba(100, 150, 255, 0.6), 0 0 16px rgba(100, 150, 255, 0.3);
-}
-
-@keyframes particleRise {
-  0% {
-    opacity: 0;
-    transform: translateY(0) translateX(0);
-  }
-  5% {
-    opacity: 0.8;
-  }
-  95% {
-    opacity: 0.2;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-500px) translateX(30px);
-  }
+  mix-blend-mode: overlay;
 }
 
 /* =============================================
@@ -2660,90 +2531,79 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 2rem;
-  background: rgba(3, 3, 8, 0.6);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.75rem 2rem;
+  background: rgba(5, 5, 8, 0.6);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .nexra-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   text-decoration: none;
 }
 
 .nexra-logo-img {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: drop-shadow(0 0 8px rgba(0, 220, 255, 0.4));
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 6px rgba(0, 220, 255, 0.25));
 }
 
 .nexra-logo:hover .nexra-logo-img {
-  transform: scale(1.05);
-  filter: drop-shadow(0 0 12px rgba(0, 220, 255, 0.6));
+  transform: scale(1.06);
 }
 
 .nexra-logo-text {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  background: linear-gradient(135deg, #00f0ff 0%, #0070ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: 0.2em;
+  color: #fff;
 }
 
 .nexra-nav-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .nexra-nav-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.625rem 1.25rem;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nexra-nav-btn svg {
-  width: 16px;
-  height: 16px;
+  transition: all 0.2s ease;
 }
 
 .nexra-nav-btn-ghost {
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .nexra-nav-btn-ghost:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .nexra-nav-btn-primary {
-  background: linear-gradient(135deg, rgba(0, 220, 255, 0.2), rgba(0, 100, 255, 0.2));
-  border: 1px solid rgba(0, 220, 255, 0.3);
-  color: #00dcff;
+  background: #00dcff;
+  color: #050508;
+  font-weight: 600;
+  border: none;
 }
 
 .nexra-nav-btn-primary:hover {
-  background: linear-gradient(135deg, rgba(0, 220, 255, 0.3), rgba(0, 100, 255, 0.3));
-  border-color: rgba(0, 220, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 180, 255, 0.2);
+  background: #33e4ff;
+  box-shadow: 0 2px 16px rgba(0, 220, 255, 0.3);
 }
 
 /* =============================================
@@ -2757,87 +2617,118 @@ body {
   justify-content: center;
   position: relative;
   z-index: 10;
-  padding: 8rem 2rem 4rem;
+  padding: 7rem 2rem 4rem;
 }
 
 .nexra-hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
+  width: 100%;
 }
 
+/* Badge */
 .nexra-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.5rem 1.125rem;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
   margin-bottom: 1.75rem;
-  background: rgba(0, 180, 255, 0.08);
-  border: 1px solid rgba(0, 180, 255, 0.2);
+  background: rgba(0, 220, 255, 0.06);
+  border: 1px solid rgba(0, 220, 255, 0.12);
   border-radius: 100px;
-  backdrop-filter: blur(10px);
 }
 
 .nexra-badge-pulse {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   background: #00dcff;
   border-radius: 50%;
-  box-shadow: 0 0 12px #00dcff;
+  box-shadow: 0 0 8px #00dcff;
   animation: nexraPulse 2s ease-in-out infinite;
 }
 
 @keyframes nexraPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
+  50% { opacity: 0.4; transform: scale(1.2); }
 }
 
 .nexra-badge-text {
-  font-size: 0.8125rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   color: #00dcff;
   text-transform: uppercase;
 }
 
+/* Headline */
 .nexra-headline {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(3rem, 8vw, 5.5rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
+  line-height: 1;
+}
+
+.nexra-headline-sub {
+  display: block;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 300;
+  font-size: clamp(0.875rem, 1.8vw, 1.125rem);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.75rem;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+}
+
+.nexra-headline-main {
+  display: block;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(4.5rem, 12vw, 9rem);
+  font-weight: 700;
+  line-height: 0.88;
+  letter-spacing: -0.02em;
+}
+
+.nexra-headline-white {
+  display: block;
   color: #fff;
+  text-shadow:
+    0 2px 40px rgba(0, 0, 0, 0.8),
+    0 0 80px rgba(0, 0, 0, 0.4),
+    0 4px 8px rgba(0, 0, 0, 0.9);
 }
 
 .nexra-headline-accent {
   display: block;
-  background: linear-gradient(135deg, #00f0ff 0%, #0066ff 50%, #a855f7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: drop-shadow(0 0 30px rgba(0, 200, 255, 0.3));
+  color: #00dcff;
+  text-shadow:
+    0 0 60px rgba(0, 220, 255, 0.4),
+    0 0 120px rgba(0, 220, 255, 0.15),
+    0 2px 40px rgba(0, 0, 0, 0.8);
 }
 
+/* Subheadline */
 .nexra-subheadline {
-  font-size: 1.125rem;
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
   font-weight: 400;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.45);
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.6);
   margin-bottom: 2.5rem;
-  max-width: 560px;
+  max-width: 480px;
   margin-left: auto;
   margin-right: auto;
 }
 
-/* =============================================
-   CTA BUTTONS
-   ============================================= */
-
+/* CTA Buttons */
 .nexra-hero-ctas {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
   margin-bottom: 3rem;
 }
@@ -2845,136 +2736,177 @@ body {
 .nexra-cta {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0.9375rem 1.75rem;
+  gap: 0.5rem;
+  padding: 0.8125rem 1.5rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-family: 'Outfit', sans-serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
 }
 
 .nexra-cta-icon {
-  width: 20px;
-  height: 20px;
-}
-
-.nexra-cta svg {
   width: 18px;
   height: 18px;
 }
 
+.nexra-cta svg {
+  width: 16px;
+  height: 16px;
+}
+
 .nexra-cta-primary {
-  background: #fff;
-  color: #0a0a0f;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+  background: #00dcff;
+  color: #050508;
+  box-shadow: 0 4px 24px rgba(0, 220, 255, 0.25);
 }
 
 .nexra-cta-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 6px 32px rgba(0, 220, 255, 0.4);
 }
 
 .nexra-cta-secondary {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
-  backdrop-filter: blur(10px);
+}
+
+.nexra-cta-secondary svg {
+  transition: transform 0.25s ease;
 }
 
 .nexra-cta-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-}
-
-.nexra-cta-secondary svg {
-  transition: transform 0.3s ease;
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
 .nexra-cta-secondary:hover svg {
-  transform: translateX(4px);
+  transform: translateX(3px);
 }
 
-/* =============================================
-   HERO STATS
-   ============================================= */
-
+/* Stats */
 .nexra-hero-stats {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 2.5rem;
+  gap: 0;
+  padding: 0.75rem 1.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 100px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
-.nexra-stat {
+.nexra-stat-glass {
   text-align: center;
+  padding: 0 1.125rem;
+  white-space: nowrap;
 }
 
 .nexra-stat-value {
   display: block;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 2rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: #00dcff;
-  text-shadow: 0 0 20px rgba(0, 220, 255, 0.3);
+  line-height: 1;
 }
 
 .nexra-stat-label {
-  font-size: 0.75rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.5625rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  margin-top: 0.1875rem;
 }
 
-.nexra-stat-divider {
+.nexra-stat-sep {
   width: 1px;
-  height: 40px;
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
-/* =============================================
-   SCROLL INDICATOR
-   ============================================= */
-
+/* Scroll Indicator */
 .nexra-scroll-indicator {
   position: absolute;
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  width: 1px;
+  height: 40px;
+  overflow: hidden;
 }
 
-.nexra-scroll-arrow {
-  width: 24px;
-  height: 24px;
-}
-
-.nexra-scroll-arrow svg {
+.nexra-scroll-line {
   width: 100%;
   height: 100%;
-  stroke: rgba(255, 255, 255, 0.4);
+  background: linear-gradient(180deg, rgba(0, 220, 255, 0.5), transparent);
+  transform-origin: top center;
 }
 
 /* =============================================
-   SECTIONS
+   MARQUEE TICKER
+   ============================================= */
+
+.nexra-marquee {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 5;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.nexra-marquee-track {
+  display: flex;
+  width: max-content;
+}
+
+.nexra-marquee-set {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 0 1.25rem;
+}
+
+.nexra-marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.25);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.nexra-marquee-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(0, 220, 255, 0.6);
+  flex-shrink: 0;
+}
+
+/* =============================================
+   SECTIONS BASE
    ============================================= */
 
 .nexra-section {
   position: relative;
-  padding: 6rem 0;
+  padding: clamp(5rem, 8vw, 8rem) 0;
 }
 
 .nexra-section-bg {
@@ -2987,114 +2919,218 @@ body {
 .nexra-section-glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(140px);
 }
 
 .nexra-section-glow-1 {
   width: 600px;
   height: 600px;
-  background: rgba(0, 180, 255, 0.06);
-  top: -20%;
-  left: -10%;
+  background: rgba(0, 140, 255, 0.04);
+  top: -30%;
+  left: -15%;
 }
 
 .nexra-section-glow-2 {
-  width: 500px;
-  height: 500px;
-  background: rgba(100, 50, 255, 0.05);
-  bottom: -10%;
-  right: -5%;
+  width: 400px;
+  height: 400px;
+  background: rgba(100, 50, 255, 0.03);
+  bottom: -15%;
+  right: -8%;
 }
 
 .nexra-grid-bg {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0, 180, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 180, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    linear-gradient(rgba(0, 180, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 180, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 60%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 60%);
 }
 
+/* Section Headers */
 .nexra-section-header {
   text-align: center;
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
 }
 
 .nexra-section-tag {
   display: inline-block;
-  font-size: 0.75rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #00dcff;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .nexra-section-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
   font-weight: 700;
   color: #fff;
-  margin-bottom: 1rem;
+  line-height: 1.05;
+  margin-bottom: 0.875rem;
 }
 
 .nexra-section-subtitle {
-  font-size: 1.0625rem;
-  color: rgba(255, 255, 255, 0.5);
-  max-width: 560px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 480px;
   margin: 0 auto;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
 .nexra-text-gradient {
-  background: linear-gradient(135deg, #00f0ff 0%, #0066ff 100%);
+  background: linear-gradient(135deg, #00dcff 0%, #0066ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 /* =============================================
-   FEATURES SECTION
+   GLASS CARD SYSTEM
+   ============================================= */
+
+.nexra-glass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  cursor: default;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+}
+
+.nexra-glass-card-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: radial-gradient(
+    280px circle at var(--mouse-x) var(--mouse-y),
+    color-mix(in srgb, var(--accent, #00dcff) 10%, transparent),
+    transparent 60%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.nexra-glass-card:hover .nexra-glass-card-glow {
+  opacity: 1;
+}
+
+.nexra-glass-card-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+  pointer-events: none;
+  z-index: 2;
+  mix-blend-mode: overlay;
+}
+
+.nexra-glass-card-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
+  transition: background 0.3s ease;
+}
+
+.nexra-glass-card:hover .nexra-glass-card-border {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    color-mix(in srgb, var(--accent, #00dcff) 12%, transparent) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
+
+.nexra-glass-card-content {
+  position: relative;
+  z-index: 4;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.015);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 16px;
+  height: 100%;
+  transition: background 0.3s ease;
+}
+
+.nexra-glass-card:hover .nexra-glass-card-content {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* =============================================
+   FEATURES — Bento Grid
    ============================================= */
 
 .nexra-features-section {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.15);
 }
 
-.nexra-features-grid {
+.nexra-bento-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  gap: 1rem;
+}
+
+.nexra-bento-0 {
+  grid-column: span 2;
+}
+
+.nexra-bento-0 .nexra-glass-card-content {
+  display: flex;
   gap: 1.5rem;
+  align-items: center;
 }
 
-.nexra-feature-card {
-  position: relative;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+.nexra-bento-0 .nexra-feature-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  padding: 0.875rem;
 }
 
-.nexra-feature-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--accent, rgba(0, 180, 255, 0.3));
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+.nexra-bento-0 .nexra-feature-desc {
+  max-width: 340px;
 }
 
 .nexra-feature-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1.25rem;
-  padding: 0.75rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 1rem;
+  padding: 0.625rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
   color: var(--accent, #00dcff);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.nexra-glass-card:hover .nexra-feature-icon {
+  transform: scale(1.08);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--accent, #00dcff) 20%, transparent);
+  border-color: color-mix(in srgb, var(--accent, #00dcff) 25%, transparent);
 }
 
 .nexra-feature-icon svg {
@@ -3104,380 +3140,192 @@ body {
 
 .nexra-feature-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: #fff;
-  margin-bottom: 0.5rem;
-}
-
-.nexra-feature-desc {
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.nexra-feature-glow {
-  position: absolute;
-  bottom: -50%;
-  right: -50%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, var(--accent, rgba(0, 180, 255, 0.1)), transparent 70%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-.nexra-feature-card:hover .nexra-feature-glow {
-  opacity: 1;
-}
-
-/* =============================================
-   NEXRA VISION SECTION
-   ============================================= */
-
-.nexra-vision-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-}
-
-.nexra-vision-info {
-  max-width: 480px;
-}
-
-.nexra-vision-info .nexra-section-title {
-  text-align: left;
-  margin-bottom: 1.5rem;
-}
-
-.nexra-vision-desc {
-  font-size: 1.0625rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 2rem;
-}
-
-.nexra-vision-features {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 2rem 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.nexra-vision-features li {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.nexra-vision-features li svg {
-  width: 20px;
-  height: 20px;
-  color: #00ff88;
-  flex-shrink: 0;
-}
-
-.nexra-vision-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #00dcff 0%, #0066ff 100%);
-  border-radius: 12px;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: 0 4px 20px rgba(0, 180, 255, 0.3);
-  transition: all 0.3s ease;
-}
-
-.nexra-vision-cta:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 180, 255, 0.4);
-}
-
-.nexra-vision-cta svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* Vision Preview Card */
-.nexra-vision-preview {
-  position: relative;
-  perspective: 1000px;
-}
-
-.nexra-vision-card {
-  background: rgba(10, 10, 20, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  overflow: hidden;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-}
-
-.nexra-vision-card-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.nexra-vision-dots {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.nexra-vision-dots span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.nexra-vision-dots span:first-child {
-  background: #ff5f57;
-}
-
-.nexra-vision-dots span:nth-child(2) {
-  background: #febc2e;
-}
-
-.nexra-vision-dots span:last-child {
-  background: #28c840;
-}
-
-.nexra-vision-card-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.05em;
-}
-
-.nexra-vision-card-body {
-  padding: 2rem;
-}
-
-.nexra-vision-status {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.nexra-vision-eye {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nexra-vision-eye svg {
-  width: 40px;
-  height: 40px;
-  color: #00dcff;
-}
-
-.nexra-vision-eye-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(0, 220, 255, 0.3), transparent 70%);
-  border-radius: 50%;
-}
-
-.nexra-vision-status-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.nexra-vision-status-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.nexra-vision-status-value {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.nexra-vision-status-dot {
-  width: 8px;
-  height: 8px;
-  background: #00ff88;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #00ff88;
-  animation: nexraPulse 2s ease-in-out infinite;
-}
-
-.nexra-vision-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-.nexra-vision-stat {
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 10px;
-  text-align: center;
-}
-
-.nexra-vision-stat-value {
-  display: block;
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #00dcff;
   margin-bottom: 0.25rem;
 }
 
-.nexra-vision-stat-label {
-  font-size: 0.75rem;
+.nexra-feature-desc {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.6;
   color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Floating Elements */
-.nexra-vision-float {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  padding: 0.75rem;
-  background: rgba(10, 10, 20, 0.9);
-  border: 1px solid rgba(0, 220, 255, 0.2);
-  border-radius: 12px;
-  color: #00dcff;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.nexra-vision-float svg {
-  width: 100%;
-  height: 100%;
-}
-
-.nexra-vision-float-1 {
-  top: -20px;
-  right: -20px;
-}
-
-.nexra-vision-float-2 {
-  bottom: 40px;
-  left: -30px;
 }
 
 /* =============================================
-   STEPS SECTION
+   STEPS — Vertical Timeline
    ============================================= */
 
-.nexra-steps-timeline {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
-}
-
-.nexra-step {
+.nexra-timeline {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  max-width: 540px;
+  margin: 0 auto;
+  padding-left: 68px;
 }
 
-.nexra-step-connector {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.nexra-step-line {
+/* Background track */
+.nexra-timeline-track {
+  position: absolute;
+  left: 23px;
+  top: 0;
+  bottom: 0;
   width: 2px;
-  height: 0;
-  background: linear-gradient(180deg, #00dcff, rgba(0, 220, 255, 0.2));
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
-.nexra-step-number {
+/* Scroll-driven fill */
+.nexra-timeline-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #00dcff 0%, rgba(0, 100, 255, 0.5) 100%);
+  transform-origin: top center;
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(0, 220, 255, 0.35), 0 0 30px rgba(0, 220, 255, 0.1);
+}
+
+/* Each step row */
+.nexra-timeline-step {
+  position: relative;
+  padding-bottom: 2.75rem;
+}
+
+.nexra-timeline-step:last-child {
+  padding-bottom: 0;
+}
+
+/* Numbered node on the line */
+.nexra-timeline-node {
+  position: absolute;
+  left: -44px;
+  top: 0.5rem;
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(0, 220, 255, 0.15), rgba(0, 100, 255, 0.15));
-  border: 1px solid rgba(0, 220, 255, 0.3);
+  background: #0a0a14;
+  border: 1.5px solid rgba(0, 220, 255, 0.2);
   border-radius: 50%;
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: #00dcff;
-  transition: all 0.3s ease;
+  z-index: 2;
+  box-shadow: 0 0 0 6px #0a0a14;
+  transition: border-color 0.4s ease, box-shadow 0.6s ease;
 }
 
-.nexra-step:hover .nexra-step-number {
-  background: linear-gradient(135deg, rgba(0, 220, 255, 0.25), rgba(0, 100, 255, 0.25));
-  box-shadow: 0 0 30px rgba(0, 180, 255, 0.3);
+.nexra-timeline-step:hover .nexra-timeline-node {
+  border-color: rgba(0, 220, 255, 0.45);
+  box-shadow: 0 0 0 6px #0a0a14, 0 0 20px rgba(0, 220, 255, 0.15);
 }
 
-.nexra-step-content {
-  max-width: 240px;
+/* Step card */
+.nexra-timeline-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-.nexra-step-icon {
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+.nexra-timeline-step:hover .nexra-timeline-card {
+  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(0, 220, 255, 0.1);
+}
+
+.nexra-timeline-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  background: rgba(0, 220, 255, 0.04);
+  border: 1px solid rgba(0, 220, 255, 0.08);
+  border-radius: 10px;
   color: #00dcff;
+  transition: transform 0.3s ease;
 }
 
-.nexra-step-icon svg {
+.nexra-timeline-step:hover .nexra-timeline-icon {
+  transform: scale(1.06);
+}
+
+.nexra-timeline-icon svg {
   width: 100%;
   height: 100%;
 }
 
-.nexra-step-title {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.5rem;
+.nexra-timeline-text {
+  flex: 1;
+  min-width: 0;
 }
 
-.nexra-step-desc {
-  font-size: 0.875rem;
+.nexra-timeline-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.nexra-timeline-desc {
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.8125rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* Animated arrow between steps */
+.nexra-timeline-arrow {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0;
+  padding-left: 0;
+  margin-left: -44px;
+  width: 48px;
+}
+
+.nexra-timeline-arrow svg {
+  width: 20px;
+  height: 20px;
+  opacity: 0.4;
+}
+
+/* Section divider */
+.nexra-steps-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 220, 255, 0.2), transparent);
+}
+
+.nexra-cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 220, 255, 0.15), transparent);
 }
 
 /* =============================================
-   FINAL CTA SECTION
+   FINAL CTA
    ============================================= */
 
 .nexra-cta-section {
-  padding: 8rem 0;
+  padding: clamp(5rem, 10vw, 9rem) 0;
 }
 
 .nexra-cta-bg {
@@ -3489,73 +3337,83 @@ body {
 .nexra-cta-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(120px);
 }
 
 .nexra-cta-orb-1 {
-  width: 400px;
-  height: 400px;
-  background: rgba(0, 180, 255, 0.1);
-  top: -20%;
-  left: 20%;
+  width: 450px;
+  height: 450px;
+  background: rgba(0, 140, 255, 0.06);
+  top: -30%;
+  left: 15%;
 }
 
 .nexra-cta-orb-2 {
   width: 300px;
   height: 300px;
-  background: rgba(100, 50, 255, 0.08);
-  bottom: -10%;
-  right: 20%;
+  background: rgba(100, 50, 255, 0.05);
+  bottom: -15%;
+  right: 15%;
 }
 
 .nexra-cta-card {
   position: relative;
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 4rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
   border-radius: 24px;
-  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.nexra-cta-card-inner {
+  position: relative;
+  z-index: 4;
+  padding: clamp(2.5rem, 5vw, 4rem);
+  text-align: center;
 }
 
 .nexra-cta-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
   font-weight: 700;
   color: #fff;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
+  line-height: 1.05;
 }
 
 .nexra-cta-desc {
-  font-size: 1.0625rem;
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.9375rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.4);
   margin-bottom: 2rem;
-  max-width: 420px;
+  max-width: 380px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .nexra-cta-final {
-  background: linear-gradient(135deg, #00dcff 0%, #0066ff 100%);
-  color: #fff;
-  padding: 1rem 2rem;
-  font-size: 1.0625rem;
-  box-shadow: 0 4px 30px rgba(0, 180, 255, 0.35);
-}
-
-.nexra-cta-final:hover {
-  box-shadow: 0 8px 40px rgba(0, 180, 255, 0.5);
+  background: #00dcff;
+  color: #050508;
+  padding: 0.875rem 2rem;
+  font-size: 0.9375rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 24px rgba(0, 220, 255, 0.25);
 }
 
 .nexra-cta-final svg {
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
 .nexra-cta-final:hover svg {
-  transform: translateX(4px);
+  transform: translateX(3px);
+}
+
+.nexra-cta-final:hover {
+  box-shadow: 0 6px 32px rgba(0, 220, 255, 0.4);
 }
 
 /* =============================================
@@ -3564,77 +3422,82 @@ body {
 
 .nexra-footer {
   position: relative;
-  padding: 3rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 2.5rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .nexra-footer-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .nexra-footer-brand {
   text-align: center;
-  max-width: 480px;
+  max-width: 460px;
 }
 
 .nexra-footer-logo {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  margin-bottom: 1rem;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
   color: rgba(255, 255, 255, 0.3);
   text-decoration: none;
 }
 
-.nexra-footer-logo svg {
-  width: 24px;
-  height: 24px;
+.nexra-footer-logo-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  opacity: 0.4;
 }
 
 .nexra-footer-logo span {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.15em;
 }
 
 .nexra-footer-disclaimer {
-  font-size: 0.6875rem;
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.625rem;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.18);
 }
 
 .nexra-footer-bottom {
   text-align: center;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.3);
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.625rem;
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .nexra-footer-links {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  margin-top: 1.5rem;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .nexra-footer-link {
-  font-size: 0.8125rem;
-  color: rgba(255, 255, 255, 0.4);
+  font-family: 'Archivo', sans-serif;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.3);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 .nexra-footer-link:hover {
-  color: rgba(0, 212, 255, 0.8);
+  color: #00dcff;
 }
 
 /* =============================================
-   AUTH MODAL
+   AUTH MODAL — Complete Redesign
    ============================================= */
 
 .nexra-auth-overlay {
@@ -3644,146 +3507,254 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 1rem;
+  background: rgba(2, 2, 8, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 }
 
 .nexra-auth-modal {
   position: relative;
   width: 100%;
   max-width: 420px;
-  padding: 2.5rem;
-  background: rgba(10, 10, 20, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  overflow-x: hidden;
   border-radius: 24px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+  background: rgba(8, 8, 20, 0.95);
+  box-shadow:
+    0 50px 120px rgba(0, 0, 0, 0.7),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.nexra-auth-modal::-webkit-scrollbar { display: none; }
+
+/* Ambient glow — top */
+.nexra-auth-glow-top {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 280px;
+  height: 180px;
+  background: radial-gradient(ellipse, rgba(0, 160, 255, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ambient glow — bottom */
+.nexra-auth-glow-bottom {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  height: 140px;
+  background: radial-gradient(ellipse, rgba(100, 50, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Prismatic border with gradient sweep */
+.nexra-auth-border-line {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(
+    170deg,
+    rgba(0, 200, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.04) 15%,
+    transparent 35%,
+    transparent 65%,
+    rgba(255, 255, 255, 0.03) 85%,
+    rgba(100, 80, 255, 0.15) 100%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 3;
 }
 
 .nexra-auth-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 10;
 }
 
 .nexra-auth-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 59, 48, 0.12);
+  border-color: rgba(255, 59, 48, 0.2);
+  color: #ff6b6b;
+  transform: scale(1.05);
 }
 
-.nexra-auth-close svg {
-  width: 18px;
-  height: 18px;
+.nexra-auth-close svg { width: 13px; height: 13px; }
+
+/* Inner content wrapper */
+.nexra-auth-content {
+  position: relative;
+  z-index: 4;
+  padding: 2.5rem 2.25rem 2rem;
+  overflow: hidden;
 }
 
+/* Header */
 .nexra-auth-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
-.nexra-auth-logo {
-  width: 56px;
-  height: 56px;
+.nexra-auth-logo-wrap {
+  width: 52px;
+  height: 52px;
   margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(0, 180, 255, 0.08) 0%, transparent 70%);
+  border-radius: 16px;
 }
 
-.nexra-auth-logo svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 20px rgba(0, 220, 255, 0.4));
+.nexra-auth-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px rgba(0, 220, 255, 0.35));
 }
 
 .nexra-auth-title {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 1.75rem;
+  font-size: 1.625rem;
   font-weight: 700;
   color: #fff;
   margin-bottom: 0.375rem;
+  letter-spacing: -0.01em;
 }
 
 .nexra-auth-subtitle {
-  font-size: 0.9375rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.5;
 }
 
+/* Tabs */
 .nexra-auth-tabs {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.375rem;
+  gap: 0.25rem;
+  padding: 3px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
   margin-bottom: 1.5rem;
 }
 
 .nexra-auth-tab {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.75rem;
   background: transparent;
-  border: none;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  border-radius: 11px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.nexra-auth-tab:hover {
-  color: rgba(255, 255, 255, 0.8);
-}
+.nexra-auth-tab:hover { color: rgba(255, 255, 255, 0.6); }
 
 .nexra-auth-tab.active {
-  background: rgba(0, 220, 255, 0.15);
+  background: rgba(0, 180, 255, 0.08);
+  border-color: rgba(0, 180, 255, 0.12);
   color: #00dcff;
+  box-shadow: 0 2px 10px rgba(0, 180, 255, 0.08);
 }
 
+/* Alerts */
+.nexra-auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.nexra-auth-alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.nexra-auth-alert-error {
+  background: rgba(255, 59, 48, 0.06);
+  border: 1px solid rgba(255, 59, 48, 0.12);
+  color: #ff6b6b;
+}
+
+.nexra-auth-alert-success {
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  color: #4ade80;
+}
+
+/* Google button */
 .nexra-auth-google {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 1rem;
-  background: #fff;
-  border: none;
+  padding: 0.8125rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   font-family: 'Outfit', sans-serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #1f2937;
+  color: rgba(255, 255, 255, 0.85);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .nexra-auth-google:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.nexra-auth-google svg {
-  width: 20px;
-  height: 20px;
+.nexra-auth-google-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+.nexra-auth-google:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none !important;
 }
 
+/* Divider */
 .nexra-auth-divider {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin: 1.5rem 0;
+  margin: 1.25rem 0;
 }
 
 .nexra-auth-divider::before,
@@ -3791,182 +3762,249 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .nexra-auth-divider span {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
 }
 
+/* Form */
 .nexra-auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.875rem;
 }
 
 .nexra-auth-field {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem;
 }
 
 .nexra-auth-field label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding-left: 0.125rem;
 }
 
-.nexra-auth-field input {
+/* Input wrapper with icon */
+.nexra-auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nexra-auth-input-icon {
+  position: absolute;
+  left: 0.875rem;
+  width: 16px;
+  height: 16px;
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.nexra-auth-input-wrap:focus-within .nexra-auth-input-icon {
+  color: rgba(0, 200, 255, 0.5);
+}
+
+.nexra-auth-input-wrap input {
   width: 100%;
-  padding: 0.875rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
   font-family: 'Outfit', sans-serif;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   color: #fff;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
 }
 
-.nexra-auth-field .relative input {
-  padding-right: 3rem;
+.nexra-auth-input-wrap input::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+  font-weight: 400;
 }
 
-.nexra-auth-field .relative button {
-  color: #666;
-  filter: drop-shadow(0 0 1px rgba(255,255,255,0.5));
+.nexra-auth-input-wrap input:focus {
+  border-color: rgba(0, 180, 255, 0.3);
+  background: rgba(0, 140, 255, 0.03);
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.05);
 }
 
-.nexra-auth-field .relative button:hover {
-  color: #00d4ff;
+/* Toggle password visibility */
+.nexra-auth-input-toggle {
+  position: absolute;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: color 0.25s ease;
+  z-index: 2;
 }
 
-.nexra-auth-field input::placeholder {
-  color: rgba(255, 255, 255, 0.25);
+.nexra-auth-input-toggle svg { width: 17px; height: 17px; }
+
+.nexra-auth-input-toggle:hover { color: #00dcff; }
+
+/* Verification code input */
+.nexra-auth-code-input {
+  width: 100%;
+  padding: 1rem 1.125rem;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #00dcff;
+  text-align: center;
+  letter-spacing: 0.5em;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
 }
 
-.nexra-auth-field input:focus {
-  border-color: rgba(0, 220, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 0 0 3px rgba(0, 220, 255, 0.1);
+.nexra-auth-code-input::placeholder {
+  color: rgba(255, 255, 255, 0.1);
+  letter-spacing: 0.4em;
+  font-size: 1.25rem;
 }
 
+.nexra-auth-code-input:focus {
+  border-color: rgba(0, 180, 255, 0.3);
+  background: rgba(0, 140, 255, 0.03);
+  box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.05);
+}
+
+/* Verify actions */
+.nexra-auth-verify-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.nexra-auth-link {
+  background: none;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(0, 220, 255, 0.6);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0;
+}
+
+.nexra-auth-link:hover { color: #00dcff; }
+.nexra-auth-link:disabled { color: rgba(255, 255, 255, 0.25); cursor: not-allowed; }
+
+.nexra-auth-link-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Submit button */
 .nexra-auth-submit {
-  margin-top: 0.5rem;
-  padding: 1rem;
-  background: linear-gradient(135deg, #00dcff 0%, #0066ff 100%);
+  position: relative;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.8125rem;
+  background: linear-gradient(135deg, #00dcff 0%, #0060ff 100%);
   border: none;
   border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 4px 20px rgba(0, 150, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.nexra-auth-submit-text {
+  position: relative;
+  z-index: 1;
   font-family: 'Outfit', sans-serif;
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #fff;
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.nexra-auth-submit:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 180, 255, 0.3);
+.nexra-auth-submit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
-.nexra-auth-terms {
-  margin-top: 1.5rem;
-  font-size: 0.6875rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.3);
-  line-height: 1.5;
+.nexra-auth-submit:hover::after { left: 120%; }
+
+.nexra-auth-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(0, 150, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.nexra-auth-error {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  background: rgba(255, 51, 102, 0.1);
-  border: 1px solid rgba(255, 51, 102, 0.3);
-  border-radius: 10px;
-  color: #ff3366;
-  font-size: 0.875rem;
-}
-
-.nexra-auth-error svg {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
-.nexra-auth-success {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  background: rgba(0, 255, 136, 0.1);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-  border-radius: 10px;
-  color: #00ff88;
-  font-size: 0.875rem;
-}
-
-.nexra-auth-success svg {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
-.nexra-auth-submit:disabled,
-.nexra-auth-google:disabled {
+.nexra-auth-submit:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  opacity: 0.7;
+  transform: none !important;
 }
+
+/* Terms */
+.nexra-auth-terms {
+  margin-top: 1.25rem;
+  font-size: 0.625rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.18);
+  line-height: 1.6;
+}
+
+.nexra-auth-terms a {
+  color: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nexra-auth-terms a:hover { color: rgba(0, 220, 255, 0.6); }
 
 /* =============================================
-   RESPONSIVE - LANDING PAGE
+   RESPONSIVE — Landing Page
    ============================================= */
 
 @media (max-width: 1024px) {
-  .nexra-features-grid {
+  .nexra-bento-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .nexra-vision-content {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .nexra-vision-info {
-    max-width: 100%;
-    text-align: center;
-  }
-
-  .nexra-vision-info .nexra-section-title {
-    text-align: center;
-  }
-
-  .nexra-vision-features {
-    align-items: center;
-  }
-
-  .nexra-vision-cta {
-    justify-content: center;
-  }
-
-  .nexra-steps-timeline {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 3rem;
+  .nexra-bento-0 {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 768px) {
   .nexra-nav {
-    padding: 1rem 1.25rem;
+    padding: 0.625rem 1rem;
   }
 
   .nexra-nav-btn-ghost {
@@ -3974,124 +4012,122 @@ body {
   }
 
   .nexra-hero-content {
-    padding: 7rem 1.5rem 3rem;
+    padding: 6.5rem 1.25rem 3rem;
   }
 
-  .nexra-headline {
-    font-size: clamp(2.5rem, 10vw, 4rem);
-  }
-
-  .nexra-subheadline {
-    font-size: 1rem;
+  .nexra-headline-main {
+    font-size: clamp(3.5rem, 16vw, 6rem);
   }
 
   .nexra-hero-ctas {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .nexra-cta {
-    width: 100%;
     justify-content: center;
   }
 
   .nexra-hero-stats {
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 0;
+    border-radius: 14px;
+    padding: 0.875rem;
   }
 
-  .nexra-stat-divider {
-    width: 60px;
+  .nexra-stat-glass {
+    padding: 0.625rem 0;
+  }
+
+  .nexra-stat-sep {
+    width: 48px;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .nexra-section {
-    padding: 4rem 0;
-  }
-
-  .nexra-features-grid {
+  .nexra-bento-grid {
     grid-template-columns: 1fr;
     max-width: 400px;
     margin: 0 auto;
   }
 
-  .nexra-steps-timeline {
-    grid-template-columns: 1fr;
-    max-width: 320px;
-    margin: 0 auto;
+  .nexra-bento-0 {
+    grid-column: span 1;
   }
 
-  .nexra-cta-card {
-    padding: 2.5rem 1.5rem;
+  .nexra-bento-0 .nexra-glass-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nexra-timeline {
+    padding-left: 56px;
+  }
+
+  .nexra-timeline-node {
+    width: 40px;
+    height: 40px;
+    left: -36px;
+    font-size: 0.8125rem;
+    box-shadow: 0 0 0 5px #0a0a14;
+  }
+
+  .nexra-timeline-track {
+    left: 19px;
+  }
+
+  .nexra-timeline-arrow {
+    margin-left: -36px;
+    width: 40px;
+  }
+
+  .nexra-cta-card-inner {
+    padding: 2rem 1.25rem;
   }
 
   .nexra-auth-modal {
-    padding: 2rem 1.5rem;
-    margin: 1rem;
+    max-width: 100%;
+    border-radius: 20px;
+  }
+
+  .nexra-auth-border-line {
+    border-radius: 20px;
+  }
+
+  .nexra-auth-content {
+    padding: 2rem 1.5rem 1.5rem;
+  }
+
+  .nexra-auth-title {
+    font-size: 1.375rem;
   }
 }
 
 @media (max-width: 480px) {
   .nexra-logo-text {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 
   .nexra-nav-btn-primary {
-    padding: 0.5rem 1rem;
-    font-size: 0.8125rem;
+    padding: 0.4375rem 0.75rem;
+    font-size: 0.75rem;
   }
 
-  .nexra-badge {
-    padding: 0.375rem 0.875rem;
+  .nexra-headline-sub {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+  }
+
+  .nexra-headline-main {
+    font-size: clamp(3rem, 18vw, 4.5rem);
   }
 
   .nexra-badge-text {
-    font-size: 0.6875rem;
+    font-size: 0.5625rem;
   }
 
-  .nexra-stat-value {
-    font-size: 1.5rem;
-  }
-
-  .nexra-section-header {
-    margin-bottom: 2.5rem;
-  }
-
-  .nexra-section-subtitle {
-    font-size: 0.9375rem;
-    padding: 0 0.5rem;
-  }
-
-  .nexra-feature-card {
+  .nexra-glass-card-content {
     padding: 1.25rem;
-  }
-
-  .nexra-feature-title {
-    font-size: 1rem;
-  }
-
-  .nexra-feature-desc {
-    font-size: 0.8125rem;
-  }
-
-  .nexra-step-title {
-    font-size: 1rem;
-  }
-
-  .nexra-step-desc {
-    font-size: 0.8125rem;
-  }
-
-  .nexra-cta-title {
-    font-size: 1.5rem;
-  }
-
-  .nexra-cta-desc {
-    font-size: 0.875rem;
-  }
-
-  .nexra-footer-disclaimer {
-    font-size: 0.6875rem;
   }
 
   .nexra-scroll-indicator {

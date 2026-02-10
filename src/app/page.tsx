@@ -20,6 +20,7 @@ export default function LandingPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const stepsRef = useRef<HTMLDivElement>(null);
 
   // Auth form state
   const [email, setEmail] = useState('');
@@ -45,6 +46,12 @@ export default function LandingPage() {
   const heroOpacity = useTransform(scrollY, [0, 400], [1, 0]);
   const heroScale = useTransform(scrollY, [0, 400], [1, 1.1]);
   const heroY = useTransform(scrollY, [0, 400], [0, 100]);
+
+  // Timeline scroll-driven fill
+  const { scrollYProgress: stepsProgress } = useScroll({
+    target: stepsRef,
+    offset: ["start 0.8", "end 0.45"]
+  });
 
   useEffect(() => {
     setIsLoaded(true);
@@ -262,7 +269,11 @@ export default function LandingPage() {
     setConfirmPassword('');
   };
 
-  // Animation variants
+  // ---- Parallax transforms ----
+  const parallaxSlow = useTransform(scrollY, [0, 1000], [0, -80]);
+  const parallaxMed = useTransform(scrollY, [0, 1000], [0, -160]);
+
+  // ---- Animation variants ----
   const fadeInUp = {
     initial: { opacity: 0, y: 40 },
     animate: { opacity: 1, y: 0 },
@@ -272,10 +283,25 @@ export default function LandingPage() {
   const staggerContainer = {
     animate: {
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3
+        staggerChildren: 0.12,
+        delayChildren: 0.2
       }
     }
+  };
+
+  const scaleIn = {
+    initial: { opacity: 0, scale: 0.92 },
+    animate: { opacity: 1, scale: 1 },
+    transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
+  };
+
+  // ---- Cursor glow for glass cards ----
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+    e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
   };
 
   const features = [
@@ -399,12 +425,11 @@ export default function LandingPage() {
           HERO SECTION
           ============================================ */}
       <section ref={heroRef} className="nexra-hero">
-        {/* Video Background - LoL Cinematic */}
+        {/* Video Background */}
         <motion.div
           className="nexra-hero-bg"
           style={{ scale: heroScale, y: heroY }}
         >
-          {/* Video Background - Place your cinematic in /public/hero-cinematic.mp4 */}
           <video
             ref={videoRef}
             autoPlay
@@ -416,19 +441,8 @@ export default function LandingPage() {
           >
             <source src="/hero-cinematic.mp4" type="video/mp4" />
           </video>
-
-          {/* Dark Overlay */}
           <div className="nexra-hero-overlay" />
-
-          {/* Subtle Particles on top */}
-          <div className="nexra-particles">
-            <div className="nexra-particle" style={{ left: '15%', animationDelay: '0s' }} />
-            <div className="nexra-particle" style={{ left: '35%', animationDelay: '1.5s' }} />
-            <div className="nexra-particle" style={{ left: '55%', animationDelay: '3s' }} />
-            <div className="nexra-particle" style={{ left: '75%', animationDelay: '4.5s' }} />
-            <div className="nexra-particle" style={{ left: '25%', animationDelay: '2s' }} />
-            <div className="nexra-particle" style={{ left: '65%', animationDelay: '3.5s' }} />
-          </div>
+          <div className="nexra-hero-noise" />
         </motion.div>
 
         {/* Navigation */}
@@ -436,35 +450,25 @@ export default function LandingPage() {
           className="nexra-nav"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         >
           <Link href="/" className="nexra-logo">
-            <Image
-              src="/nexra-logo.png"
-              alt="Nexra"
-              width={40}
-              height={40}
-              className="nexra-logo-img"
-            />
+            <Image src="/nexra-logo.png" alt="Nexra" width={32} height={32} className="nexra-logo-img" />
             <span className="nexra-logo-text">NEXRA</span>
           </Link>
-
           <div className="nexra-nav-actions">
-            <button
-              onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }}
-              className="nexra-nav-btn nexra-nav-btn-ghost"
-            >
+            <button onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }} className="nexra-nav-btn nexra-nav-btn-ghost">
               Sign In
             </button>
-            <button
+            <motion.button
               onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}
               className="nexra-nav-btn nexra-nav-btn-primary"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               Get Started
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: 13, height: 13 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </motion.button>
           </div>
         </motion.nav>
 
@@ -477,41 +481,34 @@ export default function LandingPage() {
             variants={staggerContainer}
           >
             {/* Badge */}
-            <motion.div
-              className="nexra-badge"
-              variants={fadeInUp}
-            >
+            <motion.div className="nexra-badge" variants={fadeInUp}>
               <span className="nexra-badge-pulse" />
               <span className="nexra-badge-text">AI-Powered Coaching</span>
             </motion.div>
 
-            {/* Headline */}
-            <motion.h1
-              className="nexra-headline"
-              variants={fadeInUp}
-            >
-              Your Personal
-              <br />
-              <span className="nexra-headline-accent">League Coach</span>
+            {/* Headline — Solid colors for visibility over video */}
+            <motion.h1 className="nexra-headline" variants={fadeInUp}>
+              <span className="nexra-headline-sub">Your Personal</span>
+              <span className="nexra-headline-main">
+                <span className="nexra-headline-white">LEAGUE</span>
+                <span className="nexra-headline-accent">COACH</span>
+              </span>
             </motion.h1>
 
             {/* Subheadline */}
-            <motion.p
-              className="nexra-subheadline"
-              variants={fadeInUp}
-            >
+            <motion.p className="nexra-subheadline" variants={fadeInUp}>
               Advanced AI analyzes every game, identifies your mistakes,
               and delivers personalized coaching to help you climb.
             </motion.p>
 
             {/* CTA Buttons */}
-            <motion.div
-              className="nexra-hero-ctas"
-              variants={fadeInUp}
-            >
-              <button
-                onClick={() => { setAuthMode('login'); setIsAuthOpen(true); }}
+            <motion.div className="nexra-hero-ctas" variants={fadeInUp}>
+              <motion.button
+                onClick={handleGoogleSignIn}
                 className="nexra-cta nexra-cta-primary"
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <svg viewBox="0 0 24 24" fill="currentColor" className="nexra-cta-icon">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -520,36 +517,34 @@ export default function LandingPage() {
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
                 <span>Continue with Google</span>
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}
                 className="nexra-cta nexra-cta-secondary"
+                whileHover={{ scale: 1.04, y: -2 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
                 <span>Create Account</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </motion.button>
             </motion.div>
 
             {/* Stats */}
-            <motion.div
-              className="nexra-hero-stats"
-              variants={fadeInUp}
-            >
-              <div className="nexra-stat">
-                <span className="nexra-stat-value">AI</span>
-                <span className="nexra-stat-label">Powered Analysis</span>
+            <motion.div className="nexra-hero-stats" variants={scaleIn}>
+              <div className="nexra-stat-glass">
+                <span className="nexra-stat-value">Deep</span>
+                <span className="nexra-stat-label">AI Analysis</span>
               </div>
-              <div className="nexra-stat-divider" />
-              <div className="nexra-stat">
+              <div className="nexra-stat-sep" />
+              <div className="nexra-stat-glass">
                 <span className="nexra-stat-value">100+</span>
-                <span className="nexra-stat-label">Error Types Detected</span>
+                <span className="nexra-stat-label">Error Types</span>
               </div>
-              <div className="nexra-stat-divider" />
-              <div className="nexra-stat">
+              <div className="nexra-stat-sep" />
+              <div className="nexra-stat-glass">
                 <span className="nexra-stat-value">24/7</span>
-                <span className="nexra-stat-label">Always Available</span>
+                <span className="nexra-stat-label">Available</span>
               </div>
             </motion.div>
           </motion.div>
@@ -560,29 +555,46 @@ export default function LandingPage() {
           className="nexra-scroll-indicator"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
+          transition={{ delay: 2 }}
           style={{ opacity: heroOpacity }}
         >
-          <span>Scroll to explore</span>
           <motion.div
-            className="nexra-scroll-arrow"
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12l7 7 7-7"/>
-            </svg>
-          </motion.div>
+            className="nexra-scroll-line"
+            animate={{ scaleY: [0, 1, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          />
         </motion.div>
       </section>
 
       {/* ============================================
-          FEATURES SECTION
+          MARQUEE TICKER
+          ============================================ */}
+      <div className="nexra-marquee">
+        <motion.div
+          className="nexra-marquee-track"
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        >
+          {[0, 1].map((setIndex) => (
+            <div key={setIndex} className="nexra-marquee-set">
+              {['Death Analysis', 'Real-time Stats', 'AI Coaching', 'Progress Tracking', 'Timeline Analysis', 'Matchup Intel', 'Riot API Data', 'Personalized Tips'].map((item, i) => (
+                <span key={i} className="nexra-marquee-item">
+                  <span className="nexra-marquee-dot" />
+                  {item}
+                </span>
+              ))}
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* ============================================
+          FEATURES — Bento Grid
           ============================================ */}
       <section className="nexra-section nexra-features-section">
         <div className="nexra-section-bg">
-          <div className="nexra-section-glow nexra-section-glow-1" />
-          <div className="nexra-section-glow nexra-section-glow-2" />
+          <motion.div className="nexra-section-glow nexra-section-glow-1" style={{ y: parallaxSlow }} />
+          <motion.div className="nexra-section-glow nexra-section-glow-2" style={{ y: parallaxMed }} />
         </div>
 
         <div className="nexra-container">
@@ -591,35 +603,36 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             <span className="nexra-section-tag">Features</span>
             <h2 className="nexra-section-title">
-              Everything you need to <span className="nexra-text-gradient">dominate</span>
+              Everything you need to<br /><span className="nexra-text-gradient">dominate</span>
             </h2>
-            <p className="nexra-section-subtitle">
-              Powerful AI tools designed specifically for League of Legends players who want to improve.
-            </p>
+            <p className="nexra-section-subtitle">Powered by Riot API data and advanced AI to give you insights no other tool can.</p>
           </motion.div>
 
-          <div className="nexra-features-grid">
+          <div className="nexra-bento-grid">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                className="nexra-feature-card"
-                initial={{ opacity: 0, y: 30 }}
+                className={`nexra-glass-card nexra-bento-${index}`}
+                initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.7, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -6, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+                onMouseMove={handleCardMouseMove}
                 style={{ '--accent': feature.color } as React.CSSProperties}
               >
-                <div className="nexra-feature-icon">
-                  {feature.icon}
+                <div className="nexra-glass-card-glow" />
+                <div className="nexra-glass-card-noise" />
+                <div className="nexra-glass-card-border" />
+                <div className="nexra-glass-card-content">
+                  <div className="nexra-feature-icon">{feature.icon}</div>
+                  <h3 className="nexra-feature-title">{feature.title}</h3>
+                  <p className="nexra-feature-desc">{feature.description}</p>
                 </div>
-                <h3 className="nexra-feature-title">{feature.title}</h3>
-                <p className="nexra-feature-desc">{feature.description}</p>
-                <div className="nexra-feature-glow" />
               </motion.div>
             ))}
           </div>
@@ -627,7 +640,7 @@ export default function LandingPage() {
       </section>
 
       {/* ============================================
-          HOW IT WORKS SECTION
+          HOW IT WORKS — Vertical Timeline
           ============================================ */}
       <section className="nexra-section nexra-steps-section">
         <div className="nexra-section-bg">
@@ -640,7 +653,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <span className="nexra-section-tag">How It Works</span>
             <h2 className="nexra-section-title">
@@ -648,32 +661,68 @@ export default function LandingPage() {
             </h2>
           </motion.div>
 
-          <div className="nexra-steps-timeline">
+          <div className="nexra-timeline" ref={stepsRef}>
+            {/* Scroll-driven progress line */}
+            <div className="nexra-timeline-track">
+              <motion.div
+                className="nexra-timeline-fill"
+                style={{ scaleY: stepsProgress }}
+              />
+            </div>
+
             {steps.map((step, index) => (
               <motion.div
                 key={step.number}
-                className="nexra-step"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
+                className="nexra-timeline-step"
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.6, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div className="nexra-step-connector">
-                  <div className="nexra-step-line" />
-                  <motion.div
-                    className="nexra-step-number"
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    {step.number}
-                  </motion.div>
-                </div>
-                <div className="nexra-step-content">
-                  <div className="nexra-step-icon">
-                    {step.icon}
+                {/* Node on timeline */}
+                <motion.div
+                  className="nexra-timeline-node"
+                  initial={{ scale: 0.7, opacity: 0.3 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <span>{step.number}</span>
+                </motion.div>
+
+                {/* Step card */}
+                <div className="nexra-timeline-card">
+                  <div className="nexra-timeline-icon">{step.icon}</div>
+                  <div className="nexra-timeline-text">
+                    <h3 className="nexra-timeline-title">{step.title}</h3>
+                    <p className="nexra-timeline-desc">{step.description}</p>
                   </div>
-                  <h3 className="nexra-step-title">{step.title}</h3>
-                  <p className="nexra-step-desc">{step.description}</p>
                 </div>
+
+                {/* Animated arrow connector */}
+                {index < steps.length - 1 && (
+                  <motion.div
+                    className="nexra-timeline-arrow"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true, margin: "-20px" }}
+                    transition={{ duration: 0.4, delay: 0.2 }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <motion.path
+                        d="M12 4v12M7 12l5 5 5-5"
+                        stroke="#00dcff"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        initial={{ pathLength: 0 }}
+                        whileInView={{ pathLength: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    </svg>
+                  </motion.div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -681,52 +730,50 @@ export default function LandingPage() {
       </section>
 
       {/* ============================================
-          FINAL CTA SECTION
+          FINAL CTA
           ============================================ */}
       <section className="nexra-section nexra-cta-section">
         <div className="nexra-cta-bg">
           <motion.div
             className="nexra-cta-orb nexra-cta-orb-1"
-            animate={{
-              x: [0, 30, 0],
-              y: [0, -20, 0]
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
             className="nexra-cta-orb nexra-cta-orb-2"
-            animate={{
-              x: [0, -30, 0],
-              y: [0, 20, 0]
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ x: [0, -40, 0], y: [0, 30, 0], scale: [1, 0.9, 1] }}
+            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
 
         <div className="nexra-container">
           <motion.div
             className="nexra-cta-card"
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="nexra-cta-title">Ready to climb?</h2>
-            <p className="nexra-cta-desc">
-              Join players who are using AI to improve their game.
-              Start analyzing your matches today.
-            </p>
-            <motion.button
-              onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}
-              className="nexra-cta nexra-cta-final"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <span>Start Free Now</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </motion.button>
+            <div className="nexra-glass-card-noise" />
+            <div className="nexra-cta-card-inner">
+              <h2 className="nexra-cta-title">
+                Ready to <span className="nexra-text-gradient">climb?</span>
+              </h2>
+              <p className="nexra-cta-desc">
+                Join players who are using AI to improve their game.
+                Start analyzing your matches today.
+              </p>
+              <motion.button
+                onClick={() => { setAuthMode('register'); setIsAuthOpen(true); }}
+                className="nexra-cta nexra-cta-final"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <span>Start Free Now</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </motion.button>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -739,16 +786,7 @@ export default function LandingPage() {
           <div className="nexra-footer-content">
             <div className="nexra-footer-brand">
               <Link href="/" className="nexra-footer-logo">
-                <svg viewBox="0 0 40 40" fill="none">
-                  <path
-                    d="M20 4L6 12v16l14 8 14-8V12L20 4z"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    fill="none"
-                    opacity="0.4"
-                  />
-                  <circle cx="20" cy="20" r="3" fill="currentColor" opacity="0.4"/>
-                </svg>
+                <Image src="/nexra-logo.png" alt="Nexra" width={22} height={22} className="nexra-footer-logo-img" />
                 <span>NEXRA</span>
               </Link>
               <p className="nexra-footer-disclaimer">
@@ -770,7 +808,7 @@ export default function LandingPage() {
       </footer>
 
       {/* ============================================
-          AUTH MODAL
+          AUTH MODAL — Identical functionality
           ============================================ */}
       <AnimatePresence>
         {isAuthOpen && (
@@ -779,254 +817,204 @@ export default function LandingPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             onClick={() => setIsAuthOpen(false)}
           >
             <motion.div
               className="nexra-auth-modal"
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.88, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              exit={{ opacity: 0, scale: 0.88, y: 50 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button
-                className="nexra-auth-close"
-                onClick={() => setIsAuthOpen(false)}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
+              <div className="nexra-auth-glow-top" />
+              <div className="nexra-auth-glow-bottom" />
+              <div className="nexra-glass-card-noise" />
+              <div className="nexra-auth-border-line" />
+
+              <button className="nexra-auth-close" onClick={() => setIsAuthOpen(false)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
 
-              <div className="nexra-auth-header">
-                <div className="nexra-auth-logo">
-                  <svg viewBox="0 0 40 40" fill="none">
-                    <defs>
-                      <linearGradient id="authLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#00f0ff" />
-                        <stop offset="100%" stopColor="#0066ff" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M20 4L6 12v16l14 8 14-8V12L20 4z"
-                      stroke="url(#authLogoGrad)"
-                      strokeWidth="2"
-                      fill="none"
-                    />
-                    <circle cx="20" cy="20" r="4" fill="url(#authLogoGrad)"/>
-                  </svg>
-                </div>
-                <h2 className="nexra-auth-title">
-                  {authMode === 'verify' ? 'Verify your email' : authMode === 'login' ? 'Welcome back' : 'Create account'}
-                </h2>
-                <p className="nexra-auth-subtitle">
-                  {authMode === 'verify'
-                    ? `Enter the 6-digit code sent to ${verificationEmail}`
-                    : authMode === 'login'
-                    ? 'Sign in to access your dashboard'
-                    : 'Start your journey to improvement'
-                  }
-                </p>
-              </div>
-
-              {/* Auth Tabs - hide during verification */}
-              {authMode !== 'verify' && (
-                <div className="nexra-auth-tabs">
-                  <button
-                    className={`nexra-auth-tab ${authMode === 'login' ? 'active' : ''}`}
-                    onClick={() => switchAuthMode('login')}
-                  >
-                    Sign In
-                  </button>
-                  <button
-                    className={`nexra-auth-tab ${authMode === 'register' ? 'active' : ''}`}
-                    onClick={() => switchAuthMode('register')}
-                  >
-                    Create Account
-                  </button>
-                </div>
-              )}
-
-              {/* Error/Success Messages */}
-              {authError && (
-                <div className="nexra-auth-error">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
-                  </svg>
-                  {authError}
-                </div>
-              )}
-              {authSuccess && (
-                <div className="nexra-auth-success">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  {authSuccess}
-                </div>
-              )}
-
-              {/* Verification Form */}
-              {authMode === 'verify' ? (
-                <form className="nexra-auth-form" onSubmit={handleVerifySubmit}>
-                  <div className="nexra-auth-field">
-                    <label>Verification Code</label>
-                    <input
-                      type="text"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder="Enter 6-digit code"
-                      required
-                      maxLength={6}
-                      disabled={authLoading}
-                      className="!text-center !text-lg !tracking-[4px] !font-mono placeholder:!text-sm placeholder:!tracking-normal"
-                    />
+              <div className="nexra-auth-content">
+                {/* Logo + Title */}
+                <div className="nexra-auth-header">
+                  <div className="nexra-auth-logo-wrap">
+                    <Image src="/nexra-logo.png" alt="Nexra" width={44} height={44} className="nexra-auth-logo-img" />
                   </div>
-                  <button
-                    type="submit"
-                    className="nexra-auth-submit"
-                    disabled={authLoading || verificationCode.length !== 6}
-                    style={{ opacity: authLoading || verificationCode.length !== 6 ? 0.7 : 1 }}
-                  >
-                    {authLoading ? 'Verifying...' : 'Verify Email'}
-                  </button>
-                  <div className="flex flex-col items-center gap-2 mt-4">
-                    <button
-                      type="button"
-                      onClick={handleResendCode}
-                      disabled={resendCooldown > 0 || authLoading}
-                      className="text-sm text-cyan-400 hover:text-cyan-300 disabled:text-white/40 disabled:cursor-not-allowed"
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={authMode}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                     >
-                      {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : "Didn't receive a code? Resend"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccess(''); }}
-                      className="text-xs text-white/50 hover:text-white/70"
-                    >
-                      Back to Sign In
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <>
-                  {/* Google Sign In */}
-                  <button
-                    onClick={handleGoogleSignIn}
-                    className="nexra-auth-google"
-                    disabled={authLoading}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    <span>Continue with Google</span>
-                  </button>
-
-                  <div className="nexra-auth-divider">
-                    <span>or</span>
-                  </div>
-
-                  {/* Email Form */}
-                  <form className="nexra-auth-form" onSubmit={handleCredentialsSubmit}>
-                <div className="nexra-auth-field">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={authLoading}
-                  />
+                      <h2 className="nexra-auth-title">
+                        {authMode === 'verify' ? 'Check your inbox' : authMode === 'login' ? 'Welcome back' : 'Get started'}
+                      </h2>
+                      <p className="nexra-auth-subtitle">
+                        {authMode === 'verify'
+                          ? `We sent a 6-digit code to ${verificationEmail}`
+                          : authMode === 'login'
+                          ? 'Sign in to continue to your dashboard'
+                          : 'Create your account to start improving'
+                        }
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-                <div className="nexra-auth-field">
-                  <label>Password</label>
-                  <div className="relative w-full">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder={authMode === 'register' ? 'Min. 8 characters' : 'Enter your password'}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={authMode === 'register' ? 8 : undefined}
-                      disabled={authLoading}
-                                          />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      tabIndex={-1}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-cyan-400 transition-colors"
-                    >
-                      {showPassword ? (
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                          <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                          <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                {authMode === 'register' && (
-                  <div className="nexra-auth-field">
-                    <label>Confirm Password</label>
-                    <div className="relative w-full">
-                      <input
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        placeholder="Confirm your password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        disabled={authLoading}
-                                              />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        tabIndex={-1}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/50 hover:text-cyan-400 transition-colors"
-                      >
-                        {showConfirmPassword ? (
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                            <line x1="1" y1="1" x2="23" y2="23"/>
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                          </svg>
-                        )}
-                      </button>
-                    </div>
+
+                {/* Tabs */}
+                {authMode !== 'verify' && (
+                  <div className="nexra-auth-tabs">
+                    <button className={`nexra-auth-tab ${authMode === 'login' ? 'active' : ''}`} onClick={() => switchAuthMode('login')}>Sign In</button>
+                    <button className={`nexra-auth-tab ${authMode === 'register' ? 'active' : ''}`} onClick={() => switchAuthMode('register')}>Register</button>
                   </div>
                 )}
-                    <button
-                      type="submit"
-                      className="nexra-auth-submit"
-                      disabled={authLoading}
-                      style={{ opacity: authLoading ? 0.7 : 1 }}
-                    >
-                      {authLoading
-                        ? (authMode === 'login' ? 'Signing in...' : 'Creating account...')
-                        : (authMode === 'login' ? 'Sign In' : 'Create Account')
-                      }
-                    </button>
-                  </form>
-                </>
-              )}
 
-              <p className="nexra-auth-terms">
-                By continuing, you agree to our Terms of Service and Privacy Policy
-              </p>
+                {/* Alerts */}
+                <AnimatePresence mode="wait">
+                  {authError && (
+                    <motion.div className="nexra-auth-alert nexra-auth-alert-error" initial={{ opacity: 0, y: -8, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }} exit={{ opacity: 0, y: -8, height: 0 }} transition={{ duration: 0.25 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      <span>{authError}</span>
+                    </motion.div>
+                  )}
+                  {authSuccess && (
+                    <motion.div className="nexra-auth-alert nexra-auth-alert-success" initial={{ opacity: 0, y: -8, height: 0 }} animate={{ opacity: 1, y: 0, height: 'auto' }} exit={{ opacity: 0, y: -8, height: 0 }} transition={{ duration: 0.25 }}>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>{authSuccess}</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Form body */}
+                <AnimatePresence mode="wait" initial={false}>
+                  {authMode === 'verify' ? (
+                    <motion.div
+                      key="verify"
+                      initial={{ opacity: 0, x: 30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -30 }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <form className="nexra-auth-form" onSubmit={handleVerifySubmit}>
+                        <div className="nexra-auth-field">
+                          <label>Verification Code</label>
+                          <input
+                            type="text"
+                            value={verificationCode}
+                            onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="000000"
+                            required
+                            maxLength={6}
+                            disabled={authLoading}
+                            className="nexra-auth-code-input"
+                          />
+                        </div>
+                        <button type="submit" className="nexra-auth-submit" disabled={authLoading || verificationCode.length !== 6}>
+                          <span className="nexra-auth-submit-text">{authLoading ? 'Verifying...' : 'Verify Email'}</span>
+                        </button>
+                        <div className="nexra-auth-verify-actions">
+                          <button type="button" onClick={handleResendCode} disabled={resendCooldown > 0 || authLoading} className="nexra-auth-link">
+                            {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                          </button>
+                          <span className="nexra-auth-link-sep" />
+                          <button type="button" onClick={() => { setAuthMode('login'); setAuthError(''); setAuthSuccess(''); }} className="nexra-auth-link">
+                            Back to sign in
+                          </button>
+                        </div>
+                      </form>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="auth-form"
+                      initial={{ opacity: 0, x: -30 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 30 }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      {/* Google */}
+                      <button onClick={handleGoogleSignIn} className="nexra-auth-google" disabled={authLoading}>
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="nexra-auth-google-icon">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                      </button>
+
+                      <div className="nexra-auth-divider"><span>or continue with email</span></div>
+
+                      {/* Email Form */}
+                      <form className="nexra-auth-form" onSubmit={handleCredentialsSubmit}>
+                        <div className="nexra-auth-field">
+                          <label>Email address</label>
+                          <div className="nexra-auth-input-wrap">
+                            <svg className="nexra-auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={authLoading} />
+                          </div>
+                        </div>
+                        <div className="nexra-auth-field">
+                          <label>Password</label>
+                          <div className="nexra-auth-input-wrap">
+                            <svg className="nexra-auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <input type={showPassword ? 'text' : 'password'} placeholder={authMode === 'register' ? 'Min. 8 characters' : 'Enter password'} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={authMode === 'register' ? 8 : undefined} disabled={authLoading} />
+                            <button type="button" onClick={() => setShowPassword(!showPassword)} tabIndex={-1} className="nexra-auth-input-toggle">
+                              {showPassword ? (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                              ) : (
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <AnimatePresence initial={false}>
+                          {authMode === 'register' && (
+                            <motion.div
+                              key="confirm-pw"
+                              className="nexra-auth-field"
+                              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                              animate={{ opacity: 1, height: 'auto', marginTop: 0 }}
+                              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                              style={{ overflow: 'hidden' }}
+                            >
+                              <label>Confirm password</label>
+                              <div className="nexra-auth-input-wrap">
+                                <svg className="nexra-auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .56-.9l7-3.5a1 1 0 0 1 .88 0l7 3.5a1 1 0 0 1 .56.9z"/><path d="m9 12 2 2 4-4"/></svg>
+                                <input type={showConfirmPassword ? 'text' : 'password'} placeholder="Repeat password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required disabled={authLoading} />
+                                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} tabIndex={-1} className="nexra-auth-input-toggle">
+                                  {showConfirmPassword ? (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                  ) : (
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                  )}
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                        <button type="submit" className="nexra-auth-submit" disabled={authLoading}>
+                          <span className="nexra-auth-submit-text">
+                            {authLoading
+                              ? (authMode === 'login' ? 'Signing in...' : 'Creating account...')
+                              : (authMode === 'login' ? 'Sign In' : 'Create Account')
+                            }
+                          </span>
+                        </button>
+                      </form>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <p className="nexra-auth-terms">
+                  By continuing, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>
+                </p>
+              </div>
             </motion.div>
           </motion.div>
         )}
